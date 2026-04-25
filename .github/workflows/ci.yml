@@ -8,16 +8,25 @@ on:
 jobs:
   test-build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-test-access-secret-not-for-production
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-not-for-production
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/erp_test
+      BOOTSTRAP_ADMIN_EMAIL: admin@erp.local
+      BOOTSTRAP_ADMIN_PASSWORD: Admin#1234CI
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      - name: Install build tools for native addons
+        run: sudo apt-get install -y python3 make g++
       - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test
-      - run: npm run build
+      - run: npm run lint --workspaces --if-present
+      - run: npm run typecheck --workspaces --if-present
+      - run: npm run test --workspaces --if-present
+      - run: npm run build --workspaces --if-present
       - name: Security audit (high+)
         run: npm audit --audit-level=high
