@@ -1,0 +1,137 @@
+.module-shell {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 24px 16px 36px;
+}
+
+.module-nav {
+  position: sticky;
+  top: 10px;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  transition: all 0.24s ease;
+}
+
+.module-nav.shrink {
+  top: 6px;
+  padding: 9px 12px;
+  border-radius: 14px;
+}
+
+.module-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.module-brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.module-brand-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.module-nav-list {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.module-nav-link {
+  color: var(--color-muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.module-nav-link.active,
+.module-nav-link:hover {
+  color: var(--color-text);
+  border-color: var(--glass-border);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.module-menu-btn {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  cursor: pointer;
+}
+
+.module-hero-card {
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.module-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  letter-spacing: -0.3px;
+}
+
+.module-subtitle {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.module-list {
+  margin: 16px 0 0;
+  padding-left: 18px;
+}
+
+.module-list li {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 860px) {
+  .module-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .module-nav-list {
+    display: none;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .module-nav.open {
+    flex-wrap: wrap;
+  }
+
+  .module-nav.open .module-nav-list {
+    display: flex;
+  }
+}

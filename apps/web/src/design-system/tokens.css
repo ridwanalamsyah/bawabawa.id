@@ -1,0 +1,58 @@
+:root {
+  color-scheme: dark;
+  --color-bg: #0b0b0f;
+  --color-surface: rgba(21, 21, 29, 0.72);
+  --color-surface-solid: #15151d;
+  --color-text: #f5f5f7;
+  --color-muted: #b5bfd6;
+
+  --glass-bg: rgba(18, 24, 38, 0.56);
+  --glass-bg-strong: rgba(18, 24, 38, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.16);
+
+  --brand-name: "bawabawa.id";
+  /* Brand: indigo / violet palette */
+  --brand-accent: #6366f1;
+  --brand-accent-2: #8b5cf6;
+  --brand-accent-soft: rgba(99, 102, 241, 0.18);
+  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --font-base: Inter, Segoe UI, Arial, sans-serif;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #f6f7fb;
+  --color-surface: rgba(255, 255, 255, 0.72);
+  --color-surface-solid: #ffffff;
+  --color-text: #0b1220;
+  --color-muted: #42526b;
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(10, 20, 40, 0.12);
+
+  --brand-accent: #4f46e5;
+  --brand-accent-2: #7c3aed;
+  --brand-accent-soft: rgba(79, 70, 229, 0.15);
+  --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: var(--font-base);
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  background-image: radial-gradient(circle at 20% 10%, rgba(148, 163, 184, 0.10) 0%, transparent 44%),
+    radial-gradient(circle at 85% 0%, rgba(148, 163, 184, 0.08) 0%, transparent 40%);
+  min-height: 100vh;
+}
