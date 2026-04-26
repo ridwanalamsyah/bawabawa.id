@@ -42,7 +42,8 @@ demoUsers.set("admin@erp.com", {
     "orders:approve",
     "finance:manage_finance",
     "users:manage_users",
-    "reports:export"
+    "reports:export",
+    "cms:manage"
   ]
 });
 
@@ -87,7 +88,8 @@ export class AuthService {
           "orders:approve",
           "finance:manage_finance",
           "users:manage_users",
-          "reports:export"
+          "reports:export",
+    "cms:manage"
         ]
       };
     } catch (error) {
@@ -204,7 +206,8 @@ export class AuthService {
           "orders:approve",
           "finance:manage_finance",
           "users:manage_users",
-          "reports:export"
+          "reports:export",
+    "cms:manage"
         ]
       };
     } catch (error) {
@@ -283,7 +286,8 @@ export class AuthService {
         roles: [userRole],
         permissions: userRole === "admin" ? [
           "orders:create", "orders:read", "orders:update", "orders:approve",
-          "finance:manage_finance", "users:manage_users", "reports:export"
+          "finance:manage_finance", "users:manage_users", "reports:export",
+    "cms:manage"
         ] : [
           "orders:create", "orders:read"
         ]

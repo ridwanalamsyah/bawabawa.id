@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { brand } from "../../../design-system/brand";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { clearSession } from "../../../features/auth/auth.slice";
 import { api } from "../../api/client";
 import { usePermission } from "../../hooks/usePermission";
+import { useBrand, useNavItems } from "../../../features/cms/CmsContext";
 import { Button, Sheet, ThemeToggle } from "../primitives";
 import { cn } from "../../lib/cn";
 import "./app-shell.css";
@@ -18,44 +18,48 @@ export interface NavLinkDef {
   role?: string;
 }
 
-const DEFAULT_NAV: NavLinkDef[] = [
-  { to: "/", label: "Dashboard" },
-  { to: "/sales", label: "Sales" },
-  { to: "/orders", label: "Orders", permission: "orders:read" },
-  { to: "/inventory", label: "Inventory" },
-  { to: "/procurement", label: "Procurement" },
-  { to: "/finance", label: "Finance", permission: "finance:manage_finance" },
-  { to: "/crm", label: "CRM" },
-  { to: "/hr", label: "HR" },
-  { to: "/admin", label: "Admin", permission: "users:manage_users" }
-];
-
 export interface AppShellProps {
-  /** Override the default navigation list. */
+  /** When omitted, the navbar reads the live tree from CmsContext. */
   navLinks?: NavLinkDef[];
   children: ReactNode;
 }
 
-export function AppShell({ navLinks = DEFAULT_NAV, children }: AppShellProps) {
+export function AppShell({ navLinks, children }: AppShellProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const refreshToken = useAppSelector((state) => state.auth.refreshToken);
   const user = useAppSelector((state) => state.auth.user);
 
+  const brand = useBrand();
+  const cmsNav = useNavItems();
+
   const [shrink, setShrink] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const permission = usePermission();
 
+  // Resolve the active nav source: explicit prop wins, otherwise live CMS tree.
+  const links = useMemo<NavLinkDef[]>(() => {
+    if (navLinks && navLinks.length > 0) return navLinks;
+    return cmsNav
+      .filter((item) => item.isActive && !item.parentId)
+      .map((item) => ({
+        to: item.href,
+        label: item.label,
+        permission: item.requiredPermission ?? undefined,
+        role: item.requiredRole ?? undefined
+      }));
+  }, [navLinks, cmsNav]);
+
   // Filter nav based on permissions/roles.
   const visibleLinks = useMemo(
     () =>
-      navLinks.filter((link) => {
+      links.filter((link) => {
         if (link.permission && !permission.has(link.permission)) return false;
         if (link.role && !permission.hasRole(link.role)) return false;
         return true;
       }),
-    [navLinks, permission]
+    [links, permission]
   );
 
   // Close mobile menu whenever navigation changes.
