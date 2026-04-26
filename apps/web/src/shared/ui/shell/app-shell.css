@@ -1,0 +1,290 @@
+/* ───────────────────────────────────────────────
+   AppShell — sticky glass navbar + responsive layout
+   ─────────────────────────────────────────────── */
+
+.bb-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bb-shell-main {
+  flex: 1;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 32px);
+  padding-top: clamp(96px, 12vw, 120px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 3vw, 24px);
+}
+
+/* ── Navbar ────────────────────────────────────────────────────── */
+.bb-navbar {
+  position: sticky;
+  top: 12px;
+  z-index: 40;
+  width: min(1180px, calc(100% - 24px));
+  margin: 12px auto 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  transition: padding var(--motion-base), top var(--motion-base);
+}
+
+.bb-navbar[data-shrink="true"] {
+  top: 6px;
+  padding: 6px 12px;
+}
+
+.bb-navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--color-text-strong);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.bb-navbar-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--brand-gradient);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 6px 18px var(--brand-accent-soft);
+}
+
+.bb-navbar-links {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.bb-navbar-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: var(--tap-target);
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: color var(--motion-fast), background var(--motion-base);
+}
+
+.bb-navbar-link:hover,
+.bb-navbar-link[data-active="true"] {
+  color: var(--color-text-strong);
+  background: var(--glass-bg);
+}
+
+.bb-navbar-link[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--brand-gradient);
+}
+
+.bb-navbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: end;
+}
+
+.bb-navbar-burger {
+  display: none;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--color-text);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--motion-base);
+}
+
+.bb-navbar-burger:hover {
+  background: var(--glass-bg-strong);
+}
+
+.bb-burger-icon {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  display: inline-block;
+}
+
+.bb-burger-icon span {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform var(--motion-base), top var(--motion-base),
+    opacity var(--motion-fast);
+}
+
+.bb-burger-icon span:nth-child(1) {
+  top: 5px;
+}
+.bb-burger-icon span:nth-child(2) {
+  top: 10px;
+}
+.bb-burger-icon span:nth-child(3) {
+  top: 15px;
+}
+
+[data-burger-open="true"] .bb-burger-icon span:nth-child(1) {
+  top: 10px;
+  transform: rotate(45deg);
+}
+[data-burger-open="true"] .bb-burger-icon span:nth-child(2) {
+  opacity: 0;
+}
+[data-burger-open="true"] .bb-burger-icon span:nth-child(3) {
+  top: 10px;
+  transform: rotate(-45deg);
+}
+
+/* ── Mobile sheet content ─────────────────────────────────────── */
+.bb-mobile-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bb-mobile-menu-list > li {
+  list-style: none;
+}
+
+.bb-mobile-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 18px;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  transition: background var(--motion-base), transform var(--motion-fast),
+    border-color var(--motion-base);
+}
+
+.bb-mobile-menu-item:hover,
+.bb-mobile-menu-item[data-active="true"] {
+  background: var(--brand-accent-soft);
+  border-color: var(--brand-accent-ring);
+  color: var(--color-text-strong);
+}
+
+.bb-mobile-menu-item:active {
+  transform: scale(0.98);
+}
+
+.bb-mobile-menu-item[data-active="true"]::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+}
+
+.bb-mobile-menu-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--glass-border);
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.bb-mobile-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.bb-mobile-menu-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .bb-navbar {
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .bb-navbar-links {
+    display: none;
+  }
+
+  .bb-navbar-burger {
+    display: inline-flex;
+  }
+
+  .bb-navbar-logout-desktop {
+    display: none;
+  }
+}
+
+/* Keep main padding sane on phones. */
+@media (max-width: 480px) {
+  .bb-shell-main {
+    padding-top: 96px;
+  }
+}

@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { brand } from "../../design-system/brand";
-import "./enterprise-shell.css";
+import { motion } from "framer-motion";
+import { GlassCard } from "./primitives";
+import { AppShell } from "./shell/AppShell";
 
 type EnterpriseModulePageProps = {
   title: string;
@@ -9,66 +8,27 @@ type EnterpriseModulePageProps = {
   points: string[];
 };
 
-export function EnterpriseModulePage({
-  title,
-  subtitle,
-  points
-}: EnterpriseModulePageProps) {
-  const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [shrink, setShrink] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setShrink(window.scrollY > 18);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const links = [
-    { path: "/", label: "Dashboard" },
-    { path: "/orders", label: "Orders" },
-    { path: "/procurement", label: "PO" },
-    { path: "/finance", label: "Finance" },
-    { path: "/admin", label: "Admin" }
-  ];
-
+export function EnterpriseModulePage({ title, subtitle, points }: EnterpriseModulePageProps) {
   return (
-    <main className="module-shell">
-      <nav className={`module-nav ${menuOpen ? "open" : ""} ${shrink ? "shrink" : ""}`}>
-        <div className="module-brand">
-          <div className="module-brand-logo">{brand.monogram}</div>
-          <div className="module-brand-name">{brand.name}</div>
-        </div>
-        <button
-          type="button"
-          className="module-menu-btn"
-          onClick={() => setMenuOpen((state) => !state)}
-          aria-label="Toggle menu"
-        >
-          ☰
-        </button>
-        <div className="module-nav-list">
-          {links.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`module-nav-link ${location.pathname === link.path ? "active" : ""}`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
-      <section className="module-hero-card">
-        <h1 className="module-title">{title}</h1>
-        <p className="module-subtitle">{subtitle}</p>
-        <strong>Scope aktif</strong>
-        <ul className="module-list">
-          {points.map((point) => (
-            <li key={point}>{point}</li>
-          ))}
-        </ul>
-      </section>
-    </main>
+    <AppShell>
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.36, ease: [0.32, 0.72, 0, 1] }}
+      >
+        <GlassCard elevated>
+          <h1>{title}</h1>
+          <p style={{ marginTop: 8, color: "var(--color-muted)", fontSize: 16 }}>{subtitle}</p>
+          <p style={{ margin: "20px 0 8px", fontWeight: 700, color: "var(--color-text-strong)" }}>
+            Scope aktif
+          </p>
+          <ul style={{ margin: 0, paddingLeft: 20, color: "var(--color-text)", lineHeight: 1.8 }}>
+            {points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        </GlassCard>
+      </motion.section>
+    </AppShell>
   );
 }

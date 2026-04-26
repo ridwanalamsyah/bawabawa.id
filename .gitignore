@@ -5,3 +5,6 @@ coverage
 .env.*
 *.log
 apps/api/uploads
+
+# tsc build cache (handled by Vite, not committed)
+*.tsbuildinfo
