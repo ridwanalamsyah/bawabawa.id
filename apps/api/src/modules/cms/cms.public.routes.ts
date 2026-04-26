@@ -37,6 +37,39 @@ function escapeXml(value: string): string {
   });
 }
 
+/**
+ * Path prefixes that are behind authentication via `ProtectedRoute` on the
+ * frontend or are otherwise not safe to index. Kept in lock-step with the
+ * `Disallow` list emitted in /robots.txt below — the two MUST agree, otherwise
+ * we'd be telling crawlers "don't visit X" while also listing X in the sitemap.
+ *
+ * `requiredPermission` / `requiredRole` on a nav row only describes coarse RBAC
+ * gating; many internal modules (sales, inventory, procurement, crm, hr) have
+ * NULL gating in the seed but are still authenticated-only because the SPA
+ * route is wrapped in ProtectedRoute. So we filter by path prefix, not by RBAC.
+ */
+const DISALLOWED_PREFIXES: readonly string[] = [
+  "/admin",
+  "/api",
+  "/login",
+  "/dashboard",
+  "/orders",
+  "/sales",
+  "/inventory",
+  "/procurement",
+  "/finance",
+  "/crm",
+  "/hr"
+] as const;
+
+function isPublicPath(href: string): boolean {
+  if (!href.startsWith("/")) return false;
+  for (const prefix of DISALLOWED_PREFIXES) {
+    if (href === prefix || href.startsWith(prefix + "/")) return false;
+  }
+  return true;
+}
+
 cmsPublicRouter.get("/sitemap.xml", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const svc = new CmsService();
@@ -44,22 +77,30 @@ cmsPublicRouter.get("/sitemap.xml", async (req: Request, res: Response, next: Ne
     const pages = await svc.listPages();
     const navItems = await svc.listNavItems();
 
-    const urls: { loc: string; lastmod?: string; changefreq?: string; priority?: string }[] = [
-      { loc: origin + "/", changefreq: "weekly", priority: "1.0" }
-    ];
+    const urls: { loc: string; lastmod?: string; changefreq?: string; priority?: string }[] = [];
+    const seen = new Set<string>();
+    const push = (entry: { loc: string; lastmod?: string; changefreq?: string; priority?: string }) => {
+      if (seen.has(entry.loc)) return;
+      seen.add(entry.loc);
+      urls.push(entry);
+    };
+
+    push({ loc: origin + "/", changefreq: "weekly", priority: "1.0" });
 
     for (const item of navItems) {
       if (!item.isActive || item.isExternal) continue;
-      if (!item.href.startsWith("/")) continue;
-      // Don't index admin / dashboard / authenticated routes.
+      // Don't index authenticated or admin/api routes (see DISALLOWED_PREFIXES).
       if (item.requiredPermission || item.requiredRole) continue;
-      urls.push({ loc: origin + item.href, changefreq: "weekly", priority: "0.7" });
+      if (!isPublicPath(item.href)) continue;
+      push({ loc: origin + item.href, changefreq: "weekly", priority: "0.7" });
     }
 
     for (const page of pages) {
       if (!page.isPublished) continue;
-      urls.push({
-        loc: origin + "/" + page.slug.replace(/^\//, ""),
+      const path = "/" + page.slug.replace(/^\//, "");
+      if (!isPublicPath(path)) continue;
+      push({
+        loc: origin + path,
         lastmod: page.updatedAt ? new Date(page.updatedAt).toISOString() : undefined,
         changefreq: "monthly",
         priority: "0.6"
@@ -92,18 +133,7 @@ cmsPublicRouter.get("/robots.txt", (req: Request, res: Response) => {
   const lines = [
     "User-agent: *",
     "Allow: /",
-    "Disallow: /admin",
-    "Disallow: /admin/",
-    "Disallow: /api/",
-    "Disallow: /login",
-    "Disallow: /dashboard",
-    "Disallow: /orders",
-    "Disallow: /sales",
-    "Disallow: /inventory",
-    "Disallow: /procurement",
-    "Disallow: /finance",
-    "Disallow: /crm",
-    "Disallow: /hr",
+    ...DISALLOWED_PREFIXES.map((prefix) => `Disallow: ${prefix}`),
     "",
     `Sitemap: ${origin}/sitemap.xml`,
     ""
