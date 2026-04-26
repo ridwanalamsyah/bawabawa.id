@@ -8,6 +8,7 @@ import { rateLimitMiddleware } from "./common/security/rate-limit";
 import { errorHandler } from "./common/errors/error-handler";
 import { apiRouter } from "./routes";
 import { metricsMiddleware } from "./common/observability/metrics";
+import { cmsPublicRouter } from "./modules/cms/cms.public.routes";
 
 function buildAllowedOrigins() {
   const list = process.env.CORS_ALLOWED_ORIGINS ?? "";
@@ -54,6 +55,9 @@ export function createApp() {
 
   // ── API routes ──
   app.use("/api/v1", apiRouter);
+
+  // ── SEO well-known files (sitemap.xml, robots.txt) ──
+  app.use("/", cmsPublicRouter);
 
   // ── Serve frontend static files ──
   const webPublicDir = path.resolve(__dirname, "../../web/public");

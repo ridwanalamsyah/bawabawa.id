@@ -1,3 +1,4 @@
+import { type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAppSelector } from "../../app/hooks";
 import { ForbiddenPage } from "../errors/ForbiddenPage";
@@ -6,7 +7,7 @@ type ProtectedRouteProps = {
   requiredPermission?: string;
   /** Optional list of acceptable roles (e.g. `["admin", "superadmin"]`). */
   requiredRoles?: string[];
-  children: JSX.Element;
+  children: ReactNode;
 };
 
 const SUPER_ROLES = new Set(["superadmin", "super_admin", "owner", "root"]);
@@ -33,5 +34,5 @@ export function ProtectedRoute({ requiredPermission, requiredRoles, children }: 
     return <ForbiddenPage requiredPermission={requiredPermission} />;
   }
 
-  return children;
+  return <>{children}</>;
 }
