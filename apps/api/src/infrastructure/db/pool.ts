@@ -191,8 +191,8 @@ async function seedCmsDefaults(db: any) {
         tagline: 'Sistem Manajemen Bisnis Terpadu',
         monogram: 'BW',
         logoUrl: null,
-        primaryColor: '#6366f1',
-        accentColor: '#8b5cf6'
+        primaryColor: '#7c9885',
+        accentColor: '#d4a373'
       },
       description: 'Brand identity (name, monogram, colors).'
     },

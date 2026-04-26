@@ -10,12 +10,25 @@ import { CmsService } from "./cms.service";
  */
 export const cmsPublicRouter = Router();
 
-function resolveOrigin(req: Request): string {
+/**
+ * Resolves the absolute origin for use in sitemap.xml and robots.txt.
+ *
+ * Returns `{ origin, trusted }`. When `trusted=false` (i.e. derived from the
+ * request because PUBLIC_SITE_URL was not configured), callers MUST emit
+ * `Cache-Control: no-store` so a poisoned Host header cannot be persisted in
+ * a shared cache.
+ *
+ * `x-forwarded-*` headers are intentionally NOT read directly here — those
+ * are spoofable by any client unless `trust proxy` has been configured on the
+ * Express app. We rely on `req.protocol` / `req.get("host")` which respect
+ * Express's `trust proxy` setting when set by the deployer.
+ */
+function resolveOrigin(req: Request): { origin: string; trusted: boolean } {
   const explicit = process.env.PUBLIC_SITE_URL?.replace(/\/$/, "");
-  if (explicit) return explicit;
-  const proto = (req.headers["x-forwarded-proto"] as string | undefined) || req.protocol || "https";
-  const host = (req.headers["x-forwarded-host"] as string | undefined) || req.get("host") || "bawabawa.id";
-  return `${proto}://${host}`;
+  if (explicit) return { origin: explicit, trusted: true };
+  const proto = req.protocol || "https";
+  const host = req.get("host") || "bawabawa.id";
+  return { origin: `${proto}://${host}`, trusted: false };
 }
 
 function escapeXml(value: string): string {
@@ -62,10 +75,16 @@ const DISALLOWED_PREFIXES: readonly string[] = [
   "/hr"
 ] as const;
 
+/**
+ * A path is public iff it does NOT match any disallowed prefix per RFC 9309
+ * robots.txt semantics, i.e. `Disallow: /orders` blocks every URL whose path
+ * starts with `/orders` (including `/orders-overview`, not just `/orders`
+ * and `/orders/...`).
+ */
 function isPublicPath(href: string): boolean {
   if (!href.startsWith("/")) return false;
   for (const prefix of DISALLOWED_PREFIXES) {
-    if (href === prefix || href.startsWith(prefix + "/")) return false;
+    if (href.startsWith(prefix)) return false;
   }
   return true;
 }
@@ -73,7 +92,7 @@ function isPublicPath(href: string): boolean {
 cmsPublicRouter.get("/sitemap.xml", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const svc = new CmsService();
-    const origin = resolveOrigin(req);
+    const { origin, trusted } = resolveOrigin(req);
     const pages = await svc.listPages();
     const navItems = await svc.listNavItems();
 
@@ -121,7 +140,10 @@ cmsPublicRouter.get("/sitemap.xml", async (req: Request, res: Response, next: Ne
       `\n</urlset>\n`;
 
     res.set("Content-Type", "application/xml; charset=utf-8");
-    res.set("Cache-Control", "public, max-age=600");
+    // Only cache when origin came from a trusted source (PUBLIC_SITE_URL).
+    // When derived from request headers, set no-store so a poisoned Host
+    // header cannot be persisted in a shared cache (CDN / reverse proxy).
+    res.set("Cache-Control", trusted ? "public, max-age=600" : "no-store");
     res.send(body);
   } catch (error) {
     next(error);
@@ -129,7 +151,7 @@ cmsPublicRouter.get("/sitemap.xml", async (req: Request, res: Response, next: Ne
 });
 
 cmsPublicRouter.get("/robots.txt", (req: Request, res: Response) => {
-  const origin = resolveOrigin(req);
+  const { origin, trusted } = resolveOrigin(req);
   const lines = [
     "User-agent: *",
     "Allow: /",
@@ -139,6 +161,7 @@ cmsPublicRouter.get("/robots.txt", (req: Request, res: Response) => {
     ""
   ];
   res.set("Content-Type", "text/plain; charset=utf-8");
-  res.set("Cache-Control", "public, max-age=3600");
+  // Same caching policy as sitemap.xml: only persist when origin is trusted.
+  res.set("Cache-Control", trusted ? "public, max-age=3600" : "no-store");
   res.send(lines.join("\n"));
 });
