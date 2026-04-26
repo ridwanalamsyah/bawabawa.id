@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
+import { Toaster } from "sonner";
 import { AppRouter } from "./app/router";
 import { store } from "./app/store";
 import { bindApiAuthStore } from "./shared/api/client";
@@ -16,6 +17,20 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <BrowserRouter>
         <AppRouter />
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            style: {
+              background: "var(--glass-bg-deep)",
+              border: "1px solid var(--glass-border-strong)",
+              color: "var(--color-text)",
+              boxShadow: "var(--glass-shadow-lg)",
+              backdropFilter: "blur(20px)"
+            }
+          }}
+        />
       </BrowserRouter>
     </Provider>
   </React.StrictMode>

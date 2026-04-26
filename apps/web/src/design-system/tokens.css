@@ -1,58 +1,224 @@
+/* ───────────────────────────────────────────────
+   bawabawa.id — Apple Liquid Glass Design Tokens
+   visionOS-inspired glassmorphism with mobile-first defaults.
+   ─────────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap");
+
 :root {
-  color-scheme: dark;
-  --color-bg: #0b0b0f;
-  --color-surface: rgba(21, 21, 29, 0.72);
-  --color-surface-solid: #15151d;
-  --color-text: #f5f5f7;
-  --color-muted: #b5bfd6;
-
-  --glass-bg: rgba(18, 24, 38, 0.56);
-  --glass-bg-strong: rgba(18, 24, 38, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.16);
-
-  --brand-name: "bawabawa.id";
-  /* Brand: indigo / violet palette */
-  --brand-accent: #6366f1;
-  --brand-accent-2: #8b5cf6;
-  --brand-accent-soft: rgba(99, 102, 241, 0.18);
-  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 16px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --font-base: Inter, Segoe UI, Arial, sans-serif;
-}
-
-[data-theme="light"] {
   color-scheme: light;
+
+  /* ── Surfaces (light theme is default — bersih, premium) ── */
   --color-bg: #f6f7fb;
-  --color-surface: rgba(255, 255, 255, 0.72);
+  --color-bg-elevated: #ffffff;
   --color-surface-solid: #ffffff;
   --color-text: #0b1220;
-  --color-muted: #42526b;
+  --color-text-strong: #050810;
+  --color-muted: #5b6779;
+  --color-subtle: #94a3b8;
 
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-strong: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(10, 20, 40, 0.12);
+  /* Glass primitives — frosted, translucent, premium */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --glass-bg-deep: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-border-strong: rgba(15, 23, 42, 0.14);
+  --glass-blur: 20px;
+  --glass-blur-strong: 28px;
+  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+  --glass-shadow-lg: 0 20px 60px rgba(31, 38, 135, 0.18);
+  --glass-shadow-hover: 0 12px 44px rgba(31, 38, 135, 0.22);
 
-  --brand-accent: #4f46e5;
-  --brand-accent-2: #7c3aed;
-  --brand-accent-soft: rgba(79, 70, 229, 0.15);
-  --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  /* Brand — indigo / violet halus */
+  --brand-name: "bawabawa.id";
+  --brand-accent: #6366f1;
+  --brand-accent-2: #8b5cf6;
+  --brand-accent-strong: #4f46e5;
+  --brand-accent-soft: rgba(99, 102, 241, 0.12);
+  --brand-accent-ring: rgba(99, 102, 241, 0.35);
+  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+
+  /* Status */
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #0284c7;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* Touch targets (mobile-first ≥44px) */
+  --tap-target: 44px;
+
+  /* Typography */
+  --font-base: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Playfair Display", "Plus Jakarta Sans", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Motion */
+  --motion-fast: 140ms cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #07080d;
+  --color-bg-elevated: #11131b;
+  --color-surface-solid: #14161f;
+  --color-text: #f5f5f7;
+  --color-text-strong: #ffffff;
+  --color-muted: #aab2c5;
+  --color-subtle: #6b7388;
+
+  --glass-bg: rgba(20, 22, 31, 0.55);
+  --glass-bg-strong: rgba(20, 22, 31, 0.72);
+  --glass-bg-deep: rgba(20, 22, 31, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-border-strong: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
+
+  --brand-accent: #818cf8;
+  --brand-accent-2: #a78bfa;
+  --brand-accent-strong: #6366f1;
+  --brand-accent-soft: rgba(129, 140, 248, 0.18);
+  --brand-accent-ring: rgba(129, 140, 248, 0.45);
+  --brand-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(129, 140, 248, 0.22) 0%, rgba(167, 139, 250, 0.22) 100%);
 }
 
 * {
   box-sizing: border-box;
   font-family: var(--font-base);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  /* Prevent horizontal scroll on small viewports (≥320px). */
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  margin: 0;
-  background: var(--color-bg);
+  font-size: 16px;
+  line-height: 1.55;
   color: var(--color-text);
-  background-image: radial-gradient(circle at 20% 10%, rgba(148, 163, 184, 0.10) 0%, transparent 44%),
-    radial-gradient(circle at 85% 0%, rgba(148, 163, 184, 0.08) 0%, transparent 40%);
-  min-height: 100vh;
+  background-color: var(--color-bg);
+  /* Premium gradient mesh background */
+  background-image:
+    radial-gradient(at 20% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(139, 92, 246, 0.16) 0%, transparent 45%),
+    radial-gradient(at 0% 100%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
+    radial-gradient(at 100% 80%, rgba(244, 114, 182, 0.10) 0%, transparent 45%);
+  background-attachment: fixed;
+  transition: background-color var(--motion-base), color var(--motion-base);
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(at 20% 0%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+    radial-gradient(at 80% 0%, rgba(139, 92, 246, 0.20) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
+    radial-gradient(at 100% 80%, rgba(168, 85, 247, 0.10) 0%, transparent 45%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--color-text-strong);
+  line-height: 1.18;
+  margin: 0;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(28px, 5vw, 44px);
+}
+h2 {
+  font-size: clamp(22px, 3.6vw, 32px);
+}
+h3 {
+  font-size: clamp(18px, 2.4vw, 22px);
+}
+
+p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+a {
+  color: var(--brand-accent);
+  text-decoration: none;
+  transition: color var(--motion-fast);
+}
+
+a:hover {
+  color: var(--brand-accent-2);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 16px; /* avoid iOS zoom on focus */
+}
+
+::selection {
+  background: var(--brand-accent-soft);
+  color: var(--color-text-strong);
+}
+
+/* Reduced-motion accessibility. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

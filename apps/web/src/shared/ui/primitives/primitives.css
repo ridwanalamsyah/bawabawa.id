@@ -1,0 +1,262 @@
+/* ───────────────────────────────────────────────
+   bawabawa.id primitives — shared, accessible UI atoms
+   styled with the Apple Liquid Glass token system.
+   ─────────────────────────────────────────────── */
+
+/* ── Button ─────────────────────────────────────────────────────── */
+.bb-button {
+  --_bb-button-bg: rgba(255, 255, 255, 0.08);
+  --_bb-button-fg: var(--color-text);
+  --_bb-button-border: var(--glass-border);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap-target);
+  min-width: var(--tap-target);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--_bb-button-border);
+  background: var(--_bb-button-bg);
+  color: var(--_bb-button-fg);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: transform var(--motion-fast), box-shadow var(--motion-base),
+    background var(--motion-base), color var(--motion-base),
+    border-color var(--motion-base);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.bb-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+.bb-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.bb-button:focus-visible {
+  outline: 2px solid var(--brand-accent-ring);
+  outline-offset: 2px;
+}
+
+.bb-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bb-button[data-variant="primary"] {
+  --_bb-button-bg: var(--brand-gradient);
+  --_bb-button-fg: #ffffff;
+  --_bb-button-border: transparent;
+  box-shadow: 0 6px 20px var(--brand-accent-soft);
+}
+
+.bb-button[data-variant="primary"]:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.bb-button[data-variant="ghost"] {
+  --_bb-button-bg: transparent;
+  --_bb-button-border: transparent;
+}
+
+.bb-button[data-variant="ghost"]:hover:not(:disabled) {
+  --_bb-button-bg: var(--glass-bg);
+  --_bb-button-border: var(--glass-border);
+}
+
+.bb-button[data-variant="outline"] {
+  --_bb-button-bg: var(--glass-bg);
+  --_bb-button-border: var(--glass-border-strong);
+}
+
+.bb-button[data-variant="danger"] {
+  --_bb-button-bg: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  --_bb-button-fg: #ffffff;
+  --_bb-button-border: transparent;
+}
+
+.bb-button[data-size="sm"] {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.bb-button[data-size="lg"] {
+  min-height: 52px;
+  padding: 14px 24px;
+  font-size: 16px;
+  border-radius: var(--radius-lg);
+}
+
+.bb-button[data-size="icon"] {
+  padding: 0;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  min-width: var(--tap-target);
+  border-radius: var(--radius-md);
+}
+
+/* ── Glass Card ─────────────────────────────────────────────────── */
+.bb-glass-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  padding: clamp(20px, 4vw, 32px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  transition: box-shadow var(--motion-base), transform var(--motion-base),
+    border-color var(--motion-base);
+}
+
+.bb-glass-card[data-interactive="true"] {
+  cursor: pointer;
+}
+
+.bb-glass-card[data-interactive="true"]:hover {
+  border-color: var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.bb-glass-card[data-elevated="true"] {
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+/* ── Sheet (full-screen mobile overlay) ─────────────────────────── */
+.bb-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(7, 8, 13, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.bb-sheet-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: max(24px, env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px));
+  background: var(--glass-bg-deep);
+  backdrop-filter: blur(var(--glass-blur-strong)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(160%);
+  color: var(--color-text);
+  overflow-y: auto;
+}
+
+[data-theme="dark"] .bb-sheet-overlay {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.bb-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bb-sheet-close {
+  border-radius: var(--radius-full);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  width: var(--tap-target);
+  height: var(--tap-target);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+}
+
+/* ── Dialog ─────────────────────────────────────────────────────── */
+.bb-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(7, 8, 13, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bb-dialog-panel {
+  width: min(520px, 100%);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-deep);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  backdrop-filter: blur(var(--glass-blur-strong));
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+}
+
+.bb-dialog-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  margin: 0;
+}
+
+.bb-dialog-description {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.bb-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Theme toggle ──────────────────────────────────────────────── */
+.bb-theme-toggle {
+  position: relative;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--motion-base), color var(--motion-base),
+    border-color var(--motion-base), transform var(--motion-base);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.bb-theme-toggle:hover {
+  border-color: var(--glass-border-strong);
+  transform: translateY(-1px);
+}
+
+.bb-theme-toggle:focus-visible {
+  outline: 2px solid var(--brand-accent-ring);
+  outline-offset: 2px;
+}
