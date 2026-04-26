@@ -8,42 +8,42 @@
 :root {
   color-scheme: light;
 
-  /* ── Surfaces (light theme is default — bersih, premium) ── */
-  --color-bg: #f6f7fb;
+  /* ── Surfaces (light theme is default — sage + cream, warm minimalist) ── */
+  --color-bg: #faf7f0;            /* warm cream */
   --color-bg-elevated: #ffffff;
-  --color-surface-solid: #ffffff;
-  --color-text: #0b1220;
-  --color-text-strong: #050810;
-  --color-muted: #5b6779;
-  --color-subtle: #94a3b8;
+  --color-surface-solid: #fdfbf6;
+  --color-text: #2a2c28;          /* dark olive */
+  --color-text-strong: #161916;
+  --color-muted: #6b6e66;
+  --color-subtle: #9ea298;
 
-  /* Glass primitives — frosted, translucent, premium */
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-bg-strong: rgba(255, 255, 255, 0.82);
-  --glass-bg-deep: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --glass-border-strong: rgba(15, 23, 42, 0.14);
+  /* Glass primitives — frosted cream, warm shadow */
+  --glass-bg: rgba(255, 252, 244, 0.68);
+  --glass-bg-strong: rgba(255, 252, 244, 0.86);
+  --glass-bg-deep: rgba(255, 252, 244, 0.94);
+  --glass-border: rgba(42, 44, 40, 0.10);
+  --glass-border-strong: rgba(42, 44, 40, 0.18);
   --glass-blur: 20px;
   --glass-blur-strong: 28px;
-  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
-  --glass-shadow-lg: 0 20px 60px rgba(31, 38, 135, 0.18);
-  --glass-shadow-hover: 0 12px 44px rgba(31, 38, 135, 0.22);
+  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
+  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
+  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
 
-  /* Brand — indigo / violet halus */
+  /* Brand — sage + warm tan, earthy minimalist */
   --brand-name: "bawabawa.id";
-  --brand-accent: #6366f1;
-  --brand-accent-2: #8b5cf6;
-  --brand-accent-strong: #4f46e5;
-  --brand-accent-soft: rgba(99, 102, 241, 0.12);
-  --brand-accent-ring: rgba(99, 102, 241, 0.35);
-  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+  --brand-accent: #7c9885;             /* sage */
+  --brand-accent-2: #d4a373;           /* warm tan */
+  --brand-accent-strong: #5e7a68;      /* deep sage */
+  --brand-accent-soft: rgba(124, 152, 133, 0.14);
+  --brand-accent-ring: rgba(124, 152, 133, 0.36);
+  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
 
-  /* Status */
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-info: #0284c7;
+  /* Status — tuned to read against the warm palette */
+  --color-success: #5e7a68;
+  --color-warning: #c08552;
+  --color-danger: #b3463f;
+  --color-info: #6b8a99;
 
   /* Spacing scale */
   --space-1: 4px;
@@ -83,30 +83,30 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --color-bg: #07080d;
-  --color-bg-elevated: #11131b;
-  --color-surface-solid: #14161f;
-  --color-text: #f5f5f7;
+  --color-bg: #15140f;            /* warm charcoal */
+  --color-bg-elevated: #1d1c17;
+  --color-surface-solid: #23211b;
+  --color-text: #f4efe4;
   --color-text-strong: #ffffff;
-  --color-muted: #aab2c5;
-  --color-subtle: #6b7388;
+  --color-muted: #b8b3a6;
+  --color-subtle: #76726a;
 
-  --glass-bg: rgba(20, 22, 31, 0.55);
-  --glass-bg-strong: rgba(20, 22, 31, 0.72);
-  --glass-bg-deep: rgba(20, 22, 31, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.10);
-  --glass-border-strong: rgba(255, 255, 255, 0.18);
+  --glass-bg: rgba(35, 33, 27, 0.58);
+  --glass-bg-strong: rgba(35, 33, 27, 0.76);
+  --glass-bg-deep: rgba(35, 33, 27, 0.90);
+  --glass-border: rgba(244, 239, 228, 0.10);
+  --glass-border-strong: rgba(244, 239, 228, 0.18);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
   --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
   --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
 
-  --brand-accent: #818cf8;
-  --brand-accent-2: #a78bfa;
-  --brand-accent-strong: #6366f1;
-  --brand-accent-soft: rgba(129, 140, 248, 0.18);
-  --brand-accent-ring: rgba(129, 140, 248, 0.45);
-  --brand-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(129, 140, 248, 0.22) 0%, rgba(167, 139, 250, 0.22) 100%);
+  --brand-accent: #a3bfa8;             /* lifted sage for dark surface */
+  --brand-accent-2: #e3b88a;           /* warm tan, brighter on dark */
+  --brand-accent-strong: #7c9885;
+  --brand-accent-soft: rgba(163, 191, 168, 0.20);
+  --brand-accent-ring: rgba(163, 191, 168, 0.48);
+  --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
 }
 
 * {
@@ -136,22 +136,22 @@ body {
   line-height: 1.55;
   color: var(--color-text);
   background-color: var(--color-bg);
-  /* Premium gradient mesh background */
+  /* Sage + cream gradient mesh — warm, earthy, premium */
   background-image:
-    radial-gradient(at 20% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
-    radial-gradient(at 80% 0%, rgba(139, 92, 246, 0.16) 0%, transparent 45%),
-    radial-gradient(at 0% 100%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
-    radial-gradient(at 100% 80%, rgba(244, 114, 182, 0.10) 0%, transparent 45%);
+    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.22) 0%, transparent 50%),
+    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.18) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(196, 213, 175, 0.18) 0%, transparent 55%),
+    radial-gradient(at 100% 80%, rgba(232, 215, 188, 0.18) 0%, transparent 50%);
   background-attachment: fixed;
   transition: background-color var(--motion-base), color var(--motion-base);
 }
 
 [data-theme="dark"] body {
   background-image:
-    radial-gradient(at 20% 0%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
-    radial-gradient(at 80% 0%, rgba(139, 92, 246, 0.20) 0%, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
-    radial-gradient(at 100% 80%, rgba(168, 85, 247, 0.10) 0%, transparent 45%);
+    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.28) 0%, transparent 55%),
+    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.20) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(94, 122, 104, 0.18) 0%, transparent 55%),
+    radial-gradient(at 100% 80%, rgba(192, 133, 82, 0.16) 0%, transparent 50%);
 }
 
 h1,
