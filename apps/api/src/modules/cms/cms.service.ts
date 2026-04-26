@@ -99,7 +99,10 @@ export class CmsService {
   // ── Pages ───────────────────────────────────────────────────────────────
   async listPages(opts: { publishedOnly?: boolean } = {}) {
     const pool = await getPool();
-    const where = opts.publishedOnly ? "WHERE is_published = 1 OR is_published = TRUE" : "";
+    // `WHERE is_published` is portable: Postgres treats BOOLEAN naturally,
+    // SQLite stores 0/1 as INTEGER which evaluates falsy/truthy. Avoid the
+    // `= 1` literal which Postgres rejects on a BOOLEAN column.
+    const where = opts.publishedOnly ? "WHERE is_published" : "";
     const result = await pool.query(
       `SELECT id, slug, title, content, meta_title, meta_description, og_image,
               is_published, published_at, created_at, updated_at
@@ -138,9 +141,12 @@ export class CmsService {
     const id = randomUUID();
     const pool = await getPool();
     await pool.query(
+      // Bind userId twice for created_by + updated_by. The SQLite adapter in
+      // pool.ts converts each `$N` to a positional `?`, so reusing `$10`
+      // would create two `?` slots but only ten params — pass userId twice.
       `INSERT INTO cms_pages (id, slug, title, content, meta_title, meta_description, og_image,
                               is_published, published_at, created_by, updated_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         id,
         input.slug,
@@ -151,6 +157,7 @@ export class CmsService {
         input.ogImage ?? null,
         input.isPublished ? 1 : 0,
         input.isPublished ? new Date().toISOString() : null,
+        userId,
         userId
       ]
     );
@@ -319,7 +326,9 @@ export class CmsService {
   // ── Navigation ──────────────────────────────────────────────────────────
   async listNavItems(opts: { activeOnly?: boolean } = {}) {
     const pool = await getPool();
-    const where = opts.activeOnly ? "WHERE is_active = 1 OR is_active = TRUE" : "";
+    // Same pattern as listPages: `WHERE is_active` works on Postgres BOOLEAN
+    // and SQLite INTEGER alike.
+    const where = opts.activeOnly ? "WHERE is_active" : "";
     const result = await pool.query(
       `SELECT id, label, href, parent_id, required_permission, required_role,
               sort_order, is_external, is_active

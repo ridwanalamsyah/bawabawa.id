@@ -142,15 +142,25 @@ ON CONFLICT (setting_key) DO NOTHING;
 -- Default top-level navigation that mirrors the previous hardcoded DEFAULT_NAV
 -- in AppShell.tsx. Once this lands, the AppShell reads from this table and the
 -- old constant becomes a fallback only.
-INSERT INTO cms_nav_items (id, label, href, parent_id, required_permission, sort_order, is_external, is_active)
-VALUES
-  (gen_random_uuid(), 'Dashboard',   '/',            NULL, NULL,                    10, FALSE, TRUE),
-  (gen_random_uuid(), 'Sales',       '/sales',       NULL, NULL,                    20, FALSE, TRUE),
-  (gen_random_uuid(), 'Orders',      '/orders',      NULL, 'orders:read',           30, FALSE, TRUE),
-  (gen_random_uuid(), 'Inventory',   '/inventory',   NULL, NULL,                    40, FALSE, TRUE),
-  (gen_random_uuid(), 'Procurement', '/procurement', NULL, NULL,                    50, FALSE, TRUE),
-  (gen_random_uuid(), 'Finance',     '/finance',     NULL, 'finance:manage_finance',60, FALSE, TRUE),
-  (gen_random_uuid(), 'CRM',         '/crm',         NULL, NULL,                    70, FALSE, TRUE),
-  (gen_random_uuid(), 'HR',          '/hr',          NULL, NULL,                    80, FALSE, TRUE),
-  (gen_random_uuid(), 'Admin',       '/admin',       NULL, 'users:manage_users',    90, FALSE, TRUE)
-ON CONFLICT DO NOTHING;
+--
+-- Idempotency: only seed when the table is empty so a re-run of the migration
+-- (or a manual `psql -f` execution) does not duplicate rows. We use fresh
+-- random UUIDs per row instead of fixed ones because admins can rename / move
+-- these entries from the UI; on re-run we simply skip.
+DO $cms_nav_seed$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM cms_nav_items LIMIT 1) THEN
+    INSERT INTO cms_nav_items (id, label, href, parent_id, required_permission, sort_order, is_external, is_active)
+    VALUES
+      (gen_random_uuid(), 'Dashboard',   '/',            NULL, NULL,                    10, FALSE, TRUE),
+      (gen_random_uuid(), 'Sales',       '/sales',       NULL, NULL,                    20, FALSE, TRUE),
+      (gen_random_uuid(), 'Orders',      '/orders',      NULL, 'orders:read',           30, FALSE, TRUE),
+      (gen_random_uuid(), 'Inventory',   '/inventory',   NULL, NULL,                    40, FALSE, TRUE),
+      (gen_random_uuid(), 'Procurement', '/procurement', NULL, NULL,                    50, FALSE, TRUE),
+      (gen_random_uuid(), 'Finance',     '/finance',     NULL, 'finance:manage_finance',60, FALSE, TRUE),
+      (gen_random_uuid(), 'CRM',         '/crm',         NULL, NULL,                    70, FALSE, TRUE),
+      (gen_random_uuid(), 'HR',          '/hr',          NULL, NULL,                    80, FALSE, TRUE),
+      (gen_random_uuid(), 'Admin',       '/admin',       NULL, 'users:manage_users',    90, FALSE, TRUE);
+  END IF;
+END
+$cms_nav_seed$;
