@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { api } from "../../shared/api/client";
 import { useAppDispatch } from "../../app/hooks";
 import { setSession } from "./auth.slice";
-import { brand } from "../../design-system/brand";
+import { useBrand } from "../cms/CmsContext";
 import { ThemeToggle } from "../../shared/ui/primitives/ThemeToggle";
 import "./LoginPage.css";
 import type { LoginResponse } from "@erp/shared";
@@ -16,6 +16,7 @@ type LoginInput = { email: string; password: string };
 export function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const brand = useBrand();
   const [apiError, setApiError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -79,7 +80,7 @@ export function LoginPage() {
         </div>
 
         <h1 className="login-headline">{brand.name}</h1>
-        <p className="login-subtitle">Enterprise Resource Planning</p>
+        <p className="login-subtitle">{brand.tagline}</p>
 
         <button type="button" className="login-demo-hint" onClick={fillDemo}>
           <span className="login-demo-icon" aria-hidden="true">⚡</span>

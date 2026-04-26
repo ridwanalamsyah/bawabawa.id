@@ -12,6 +12,7 @@ import { procurementRouter } from "./modules/procurement/procurement.routes";
 import { crmRouter } from "./modules/crm/crm.routes";
 import { hrRouter } from "./modules/hr/hr.routes";
 import { erpRouter } from "./modules/erp/erp.routes";
+import { cmsRouter } from "./modules/cms/cms.routes";
 import { pingDatabase } from "./infrastructure/db/pool";
 import { getMetricsSnapshot } from "./common/observability/metrics";
 
@@ -47,3 +48,4 @@ apiRouter.use("/procurement", procurementRouter);
 apiRouter.use("/crm", crmRouter);
 apiRouter.use("/hr", hrRouter);
 apiRouter.use("/erp", erpRouter);
+apiRouter.use("/cms", cmsRouter);

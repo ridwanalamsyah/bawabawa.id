@@ -11,6 +11,11 @@ import { FinancePage } from "../features/finance/FinancePage";
 import { CrmPage } from "../features/crm/CrmPage";
 import { HrPage } from "../features/hr/HrPage";
 import { AdminPage } from "../features/admin/AdminPage";
+import { SiteSettingsPage } from "../features/admin/SiteSettingsPage";
+import { NavigationPage } from "../features/admin/NavigationPage";
+import { PagesPage } from "../features/admin/PagesPage";
+import { SectionsPage } from "../features/admin/SectionsPage";
+import { MediaPage } from "../features/admin/MediaPage";
 
 export function AppRouter() {
   return (
@@ -57,6 +62,46 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredPermission="users:manage_users">
               <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cms/settings"
+          element={
+            <ProtectedRoute requiredPermission="cms:manage">
+              <SiteSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cms/navigation"
+          element={
+            <ProtectedRoute requiredPermission="cms:manage">
+              <NavigationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cms/pages"
+          element={
+            <ProtectedRoute requiredPermission="cms:manage">
+              <PagesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cms/sections"
+          element={
+            <ProtectedRoute requiredPermission="cms:manage">
+              <SectionsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cms/media"
+          element={
+            <ProtectedRoute requiredPermission="cms:manage">
+              <MediaPage />
             </ProtectedRoute>
           }
         />
