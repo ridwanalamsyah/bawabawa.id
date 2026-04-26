@@ -334,7 +334,7 @@ export class CmsService {
               sort_order, is_external, is_active
        FROM cms_nav_items
        ${where}
-       ORDER BY COALESCE(parent_id, ''), sort_order, label`
+       ORDER BY (parent_id IS NULL) DESC, parent_id, sort_order, label`
     );
     return result.rows.map((row: any) => this.mapNavItem(row));
   }
