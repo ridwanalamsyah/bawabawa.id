@@ -26,6 +26,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Google Identity Services (Sign in with Google). The script is small and
+     lazy-initialized via Auth.bootGoogle() once we know the client ID. -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ═══════════════════════════════════════════
    DESIGN SYSTEM — ENTERPRISE TOKENS
@@ -708,7 +711,17 @@ img{max-width:100%;display:block}
         <span class="auth-card-name" id="auth-card-name">bawabawa.id</span>
       </div>
       <div class="auth-card-title">Masuk ke dashboard</div>
-      <div class="auth-card-subtitle">Kelola operasional bisnis kamu dari satu layar — kasir, inventory, finance, dan laporan.</div>
+      <div class="auth-card-subtitle" id="auth-tagline">Kelola operasional bisnis kamu dari satu layar — kasir, inventory, finance, dan laporan.</div>
+
+      <!-- ── GOOGLE SIGN-IN (production) ── -->
+      <div id="auth-google-section" style="display:none">
+        <div class="auth-alert" id="google-alert"></div>
+        <div id="g-signin-container" style="display:flex;justify-content:center;margin:6px 0 16px"></div>
+        <div class="auth-note" id="google-note" style="text-align:center">Masuk dengan akun Google. Akun baru menunggu persetujuan admin sebelum dapat akses.</div>
+      </div>
+
+      <!-- ── DEMO EMAIL/PASSWORD (development only) ── -->
+      <div id="auth-demo-section" style="display:none">
       <div class="auth-tabs">
         <button class="auth-tab active" onclick="Auth.switchTab('login')">Masuk</button>
         <button class="auth-tab" onclick="Auth.switchTab('register')">Daftar</button>
@@ -752,6 +765,7 @@ img{max-width:100%;display:block}
         <button class="btn btn-primary btn-full" id="btn-register" onclick="Auth.register()">Buat Akun</button>
         <p class="auth-note" id="register-note" style="margin-top:8px">Akun baru akan menunggu persetujuan Admin.</p>
       </div>
+      </div><!-- /auth-demo-section -->
     </div>
   </div>
 </div>
@@ -2044,6 +2058,112 @@ const Auth = {
       loginNote.textContent = 'Masukkan kredensial untuk masuk.';
     }
   },
+
+  /**
+   * Fetch /auth/config and decide which sign-in surfaces to render.
+   *  - googleClientId present     → render Google button
+   *  - allowEmailLogin true       → also keep the demo email/password form visible
+   *  - both null                  → show fatal-config message
+   */
+  async bootGoogleAndDemo() {
+    let cfg = null;
+    try {
+      const res = await fetch(ApiService.BASE_URL + '/auth/config', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const body = await res.json();
+        if (body && body.success && body.data) cfg = body.data;
+      }
+    } catch (err) {
+      if (DEBUG) console.warn('[Auth] /auth/config fetch failed', err);
+    }
+    const googleSection = $('auth-google-section');
+    const demoSection = $('auth-demo-section');
+    const googleId = cfg && typeof cfg.googleClientId === 'string' ? cfg.googleClientId : null;
+    const allowDemo = !!(cfg && cfg.allowEmailLogin);
+
+    if (googleId) {
+      if (googleSection) googleSection.style.display = '';
+      Auth._renderGoogleButton(googleId);
+    }
+    if (allowDemo) {
+      if (demoSection) demoSection.style.display = '';
+    }
+    if (!googleId && !allowDemo) {
+      // Server returned neither: fall back to demo so the page is at least usable.
+      if (demoSection) demoSection.style.display = '';
+      Auth.showAlert('login-alert', 'Konfigurasi auth tidak tersedia. Hubungi admin.', 'error');
+    }
+  },
+
+  _renderGoogleButton(clientId) {
+    const container = $('g-signin-container');
+    if (!container) return;
+    const tryRender = () => {
+      if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.id) {
+        return false;
+      }
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response) => Auth.loginWithGoogle(response && response.credential),
+          ux_mode: 'popup',
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        container.innerHTML = '';
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        window.google.accounts.id.renderButton(container, {
+          theme: isDark ? 'filled_black' : 'outline',
+          size: 'large',
+          shape: 'pill',
+          text: 'signin_with',
+          logo_alignment: 'center',
+          width: 320
+        });
+        return true;
+      } catch (err) {
+        if (DEBUG) console.warn('[Auth] google button render failed', err);
+        return false;
+      }
+    };
+    if (tryRender()) return;
+    let tries = 0;
+    const t = setInterval(() => {
+      tries += 1;
+      if (tryRender() || tries > 40) clearInterval(t);
+    }, 150);
+  },
+
+  async loginWithGoogle(credential) {
+    if (!credential) {
+      Auth.showAlert('google-alert', 'Token Google tidak diterima. Coba lagi.');
+      return;
+    }
+    Auth.hideAlert('google-alert');
+    const apiResult = await ApiService.post('/auth/google', { idToken: credential }, true);
+    if (!apiResult.success || !apiResult.data) {
+      const code = apiResult.error && apiResult.error.code;
+      const message = (apiResult.error && apiResult.error.message) ||
+        (code === 'PENDING_APPROVAL'
+          ? 'Akun Google kamu menunggu persetujuan admin.'
+          : 'Login Google gagal. Silakan coba lagi.');
+      Auth.showAlert('google-alert', message);
+      return;
+    }
+    const { accessToken, refreshToken, user } = apiResult.data;
+    ApiService.setTokens(accessToken, refreshToken);
+    ApiService.setStoredUser(user);
+    Auth._syncApiUserToLocal(user);
+    S.currentUser = Auth._findOrCreateLocalUser(user);
+    AuditLog.add('LOGIN', 'auth', S.currentUser, null, { email: user.email, source: 'google' }, S.currentUser);
+    DB.save();
+    $('auth-screen').style.display = 'none';
+    $('app-shell').classList.add('active');
+    App.init();
+    UI.toast('Selamat datang, ' + (user.fullName || user.email) + '!');
+  },
   switchTab(tab) {
     $$('.auth-tab').forEach((el,i) => el.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
     $('form-login').classList.toggle('active', tab==='login');
@@ -2455,6 +2575,58 @@ const Router = {
       settings: Settings.load,
     };
     if(renderers[page]) renderers[page]();
+  }
+};
+
+// ═══════════════ CMS ═══════════════
+/**
+ * Fetches the small public slice of CMS settings (brand / seo / feature flags)
+ * during boot, before applyBrand() paints. Values found in the CMS override
+ * the legacy hardcoded defaults in S.settings so every downstream screen
+ * (login, topbar, favicon/theme-color, document title) reads from the DB.
+ * Falls back silently to seeded defaults when the API is unreachable —
+ * index.html must keep rendering even when the backend is down.
+ */
+const Cms = {
+  async boot() {
+    let data = null;
+    try {
+      const base = ApiService.BASE_URL;
+      const res = await fetch(base + '/cms/settings/public', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) return;
+      const body = await res.json();
+      if (!body || body.success !== true || !Array.isArray(body.data)) return;
+      data = {};
+      for (const row of body.data) {
+        if (row && typeof row.key === 'string' && row.value && typeof row.value === 'object') {
+          data[row.key] = row.value;
+        }
+      }
+    } catch (err) {
+      if (DEBUG) console.warn('[Cms] boot fetch failed, using local defaults', err);
+      return;
+    }
+    if (!data) return;
+    const brand = data.brand || {};
+    const seo = data.seo || {};
+    if (typeof brand.name === 'string' && brand.name.trim()) S.settings.name = brand.name.trim();
+    if (typeof brand.monogram === 'string' && brand.monogram.trim()) S.settings.logo = brand.monogram.trim().slice(0, 3);
+    if (typeof brand.logoUrl === 'string' && brand.logoUrl.trim()) S.settings.logoUrl = brand.logoUrl.trim();
+    if (typeof brand.primaryColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(brand.primaryColor)) {
+      S.settings.color = brand.primaryColor;
+    }
+    if (typeof brand.accentColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(brand.accentColor)) {
+      document.documentElement.style.setProperty('--accent', brand.accentColor);
+    }
+    if (typeof brand.tagline === 'string' && brand.tagline.trim()) {
+      const sub = document.getElementById('auth-tagline');
+      if (sub) sub.textContent = brand.tagline.trim();
+    }
+    if (typeof seo.defaultTitle === 'string' && seo.defaultTitle.trim()) {
+      document.title = seo.defaultTitle.trim();
+    }
   }
 };
 
@@ -4135,7 +4307,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('[ReadinessCritical]', readiness.critical);
   }
   Auth.setupAuthView();
+  // Pull brand / SEO overrides from CMS before first paint of the brand.
+  await Cms.boot();
   App.applyBrand();
+  // Decide which sign-in surfaces to render (Google + optional demo form).
+  Auth.bootGoogleAndDemo();
   App.updateNotifBadge();
   window.onerror = function(message, source, lineno, colno) {
     AuditLog.add('JS_ERROR','runtime','window',null,{ message:String(message), source, lineno, colno });
