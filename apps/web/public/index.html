@@ -708,7 +708,7 @@ img{max-width:100%;display:block}
         <span class="auth-card-name" id="auth-card-name">bawabawa.id</span>
       </div>
       <div class="auth-card-title">Masuk ke dashboard</div>
-      <div class="auth-card-subtitle">Kelola operasional bisnis kamu dari satu layar — kasir, inventory, finance, dan laporan.</div>
+      <div class="auth-card-subtitle" id="auth-tagline">Kelola operasional bisnis kamu dari satu layar — kasir, inventory, finance, dan laporan.</div>
       <div class="auth-tabs">
         <button class="auth-tab active" onclick="Auth.switchTab('login')">Masuk</button>
         <button class="auth-tab" onclick="Auth.switchTab('register')">Daftar</button>
@@ -2458,6 +2458,58 @@ const Router = {
   }
 };
 
+// ═══════════════ CMS ═══════════════
+/**
+ * Fetches the small public slice of CMS settings (brand / seo / feature flags)
+ * during boot, before applyBrand() paints. Values found in the CMS override
+ * the legacy hardcoded defaults in S.settings so every downstream screen
+ * (login, topbar, favicon/theme-color, document title) reads from the DB.
+ * Falls back silently to seeded defaults when the API is unreachable —
+ * index.html must keep rendering even when the backend is down.
+ */
+const Cms = {
+  async boot() {
+    let data = null;
+    try {
+      const base = ApiService.BASE_URL;
+      const res = await fetch(base + '/cms/settings/public', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) return;
+      const body = await res.json();
+      if (!body || body.success !== true || !Array.isArray(body.data)) return;
+      data = {};
+      for (const row of body.data) {
+        if (row && typeof row.key === 'string' && row.value && typeof row.value === 'object') {
+          data[row.key] = row.value;
+        }
+      }
+    } catch (err) {
+      if (DEBUG) console.warn('[Cms] boot fetch failed, using local defaults', err);
+      return;
+    }
+    if (!data) return;
+    const brand = data.brand || {};
+    const seo = data.seo || {};
+    if (typeof brand.name === 'string' && brand.name.trim()) S.settings.name = brand.name.trim();
+    if (typeof brand.monogram === 'string' && brand.monogram.trim()) S.settings.logo = brand.monogram.trim().slice(0, 3);
+    if (typeof brand.logoUrl === 'string' && brand.logoUrl.trim()) S.settings.logoUrl = brand.logoUrl.trim();
+    if (typeof brand.primaryColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(brand.primaryColor)) {
+      S.settings.color = brand.primaryColor;
+    }
+    if (typeof brand.accentColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(brand.accentColor)) {
+      document.documentElement.style.setProperty('--accent', brand.accentColor);
+    }
+    if (typeof brand.tagline === 'string' && brand.tagline.trim()) {
+      const sub = document.getElementById('auth-tagline');
+      if (sub) sub.textContent = brand.tagline.trim();
+    }
+    if (typeof seo.defaultTitle === 'string' && seo.defaultTitle.trim()) {
+      document.title = seo.defaultTitle.trim();
+    }
+  }
+};
+
 // ═══════════════ APP ═══════════════
 const App = {
   init() {
@@ -4135,6 +4187,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('[ReadinessCritical]', readiness.critical);
   }
   Auth.setupAuthView();
+  // Pull brand / SEO overrides from CMS before first paint of the brand.
+  await Cms.boot();
   App.applyBrand();
   App.updateNotifBadge();
   window.onerror = function(message, source, lineno, colno) {
