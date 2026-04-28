@@ -1,7 +1,6 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
-import path from "node:path";
 import pinoHttp from "pino-http";
 import { requestIdMiddleware } from "./common/middleware/request-id";
 import { rateLimitMiddleware } from "./common/security/rate-limit";
@@ -20,7 +19,9 @@ export function createApp() {
   const app = express();
   const allowedOrigins = buildAllowedOrigins();
 
-  // Helmet: allow inline scripts/styles for the single-file frontend
+  // API-only surface. The React web app (apps/web) is served by Vite in dev
+  // and by `vite preview` / a static host in production — Express no longer
+  // serves frontend HTML.
   app.use(
     helmet({
       contentSecurityPolicy: false,
@@ -44,13 +45,7 @@ export function createApp() {
   app.use(express.json({ limit: "2mb" }));
   app.use(requestIdMiddleware);
   app.use(metricsMiddleware);
-  app.use(
-    pinoHttp({
-      autoLogging: {
-        ignore: (req) => (req as any).url?.startsWith?.("/assets") || (req as any).url?.endsWith?.(".html") || (req as any).url?.endsWith?.(".css") || (req as any).url?.endsWith?.(".js")
-      }
-    })
-  );
+  app.use(pinoHttp());
   app.use(rateLimitMiddleware);
 
   // ── API routes ──
@@ -58,16 +53,6 @@ export function createApp() {
 
   // ── SEO well-known files (sitemap.xml, robots.txt) ──
   app.use("/", cmsPublicRouter);
-
-  // ── Serve frontend static files ──
-  const webPublicDir = path.resolve(__dirname, "../../web/public");
-  app.use(express.static(webPublicDir));
-
-  // SPA fallback: serve erp.html for any non-API route
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api/")) return next();
-    res.sendFile(path.join(webPublicDir, "erp.html"));
-  });
 
   app.use(errorHandler);
 
