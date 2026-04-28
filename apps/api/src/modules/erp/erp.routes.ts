@@ -38,7 +38,7 @@ async function ensureSyncTable() {
   );
 }
 
-// Minimal sync endpoint for the ERP client.
+// Minimal sync endpoint for the single-file ERP client.
 // In production, you can extend this to persist ops and/or return server state.
 erpRouter.post("/sync", authGuard, async (req, res, next) => {
   try {
