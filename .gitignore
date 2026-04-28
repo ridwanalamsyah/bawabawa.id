@@ -8,3 +8,9 @@ apps/api/uploads
 
 # tsc build cache (handled by Vite, not committed)
 *.tsbuildinfo
+
+# Local SQLite dev/test databases — regenerated on startup by seedCmsDefaults
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
