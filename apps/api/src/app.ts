@@ -63,10 +63,10 @@ export function createApp() {
   const webPublicDir = path.resolve(__dirname, "../../web/public");
   app.use(express.static(webPublicDir));
 
-  // SPA fallback: serve erp.html for any non-API route
+  // SPA fallback: serve index.html for any non-API route so deep links work.
   app.get("*", (req, res, next) => {
     if (req.path.startsWith("/api/")) return next();
-    res.sendFile(path.join(webPublicDir, "erp.html"));
+    res.sendFile(path.join(webPublicDir, "index.html"));
   });
 
   app.use(errorHandler);
