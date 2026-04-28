@@ -84,15 +84,21 @@ async function getSqliteDb() {
 async function createTestSchema() {
   const db = await getSqliteDb();
 
-  // Create users table
+  // Create users table (mirrors prod migrations 001 + 005 with sqlite types).
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
+      password_hash TEXT,
       full_name TEXT NOT NULL,
       division TEXT NOT NULL,
       is_active INTEGER DEFAULT 1,
+      oauth_provider TEXT,
+      oauth_subject TEXT,
+      picture_url TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      approved_at DATETIME,
+      approved_by TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);

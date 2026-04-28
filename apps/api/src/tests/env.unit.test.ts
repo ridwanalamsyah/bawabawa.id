@@ -58,4 +58,39 @@ describe("config/env loadEnv()", () => {
     process.env.DEMO_MODE = "false";
     expect(loadEnv().DEMO_MODE).toBe(false);
   });
+
+  it("requires GOOGLE_OAUTH_CLIENT_ID + DATABASE_URL when NODE_ENV=production", () => {
+    process.env.NODE_ENV = "production";
+    process.env.JWT_ACCESS_SECRET = "0123456789abcdef0123456789abcdef";
+    process.env.JWT_REFRESH_SECRET = "0123456789abcdef0123456789abcdef-r";
+    delete process.env.GOOGLE_OAUTH_CLIENT_ID;
+    delete process.env.DATABASE_URL;
+    expect(() => loadEnv()).toThrow();
+  });
+
+  it("rejects DEMO_MODE=true in production", () => {
+    process.env.NODE_ENV = "production";
+    process.env.JWT_ACCESS_SECRET = "0123456789abcdef0123456789abcdef";
+    process.env.JWT_REFRESH_SECRET = "0123456789abcdef0123456789abcdef-r";
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "1234567890.apps.googleusercontent.com";
+    process.env.DATABASE_URL = "postgres://user:pw@localhost:5432/db";
+    process.env.DEMO_MODE = "1";
+    expect(() => loadEnv()).toThrow();
+  });
+
+  it("accepts a fully-populated production env", () => {
+    process.env.NODE_ENV = "production";
+    process.env.JWT_ACCESS_SECRET = "0123456789abcdef0123456789abcdef";
+    process.env.JWT_REFRESH_SECRET = "0123456789abcdef0123456789abcdef-r";
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "1234567890.apps.googleusercontent.com";
+    process.env.DATABASE_URL = "postgres://user:pw@localhost:5432/db";
+    process.env.OAUTH_ALLOWED_DOMAINS = "bawabawa.id,bawabawa.co.id";
+    delete process.env.DEMO_MODE;
+    const env = loadEnv();
+    expect(env.NODE_ENV).toBe("production");
+    expect(env.DEMO_MODE).toBe(false);
+    expect(env.GOOGLE_OAUTH_CLIENT_ID).toContain("googleusercontent.com");
+    expect(env.OAUTH_ALLOWED_DOMAINS).toEqual(["bawabawa.id", "bawabawa.co.id"]);
+    expect(env.OAUTH_REQUIRE_APPROVAL).toBe(true);
+  });
 });
