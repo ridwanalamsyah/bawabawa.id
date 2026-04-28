@@ -1,7 +1,7 @@
 # ERP Enterprise (Express + Single-File Frontend + PostgreSQL/SQLite)
 
 Monorepo ERP production-grade baseline dengan arsitektur 3 layer:
-- `apps/web/public/erp.html`: Single-file frontend (UI/UX final).
+- `apps/web/public/index.html`: Single-file frontend utama (UI/UX final).
 - `apps/api`: Express application layer.
 - `apps/api/src/infrastructure/db`: SQL data layer.
 
@@ -46,7 +46,7 @@ Monorepo ERP production-grade baseline dengan arsitektur 3 layer:
 Catatan: transaksi sistem diarahkan ke API + database cloud, bukan hardcoded file statis.
 
 ## Hosting terpisah (Netlify/Vercel untuk frontend)
-- **Opsi 1 (paling gampang)**: tetap serve `erp.html` dari backend (Nginx/VPS/Render/Railway) → tidak ada CORS (same-origin).
+- **Opsi 1 (paling gampang)**: tetap serve `index.html` dari backend (Nginx/VPS/Render/Railway) → tidak ada CORS (same-origin).
 - **Opsi 2 (frontend & backend beda domain)**:
   - Set env backend `CORS_ALLOWED_ORIGINS` ke origin frontend (contoh: `https://erp-frontend.vercel.app`).
   - Di browser, set `localStorage.erp_api_base` ke base API production (contoh: `https://api.example.com/api/v1`).
