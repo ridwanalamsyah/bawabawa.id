@@ -6,12 +6,29 @@
 <meta name="description" content="bawabawa.id — Enterprise Business Management System">
 <meta name="theme-color" content="#7c9885" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#15140f" media="(prefers-color-scheme: dark)">
+<script>
+  /* No-FOUC theme bootstrap: apply stored theme before any stylesheet paints. */
+  (function(){
+    try {
+      var t = localStorage.getItem('bawabawa:theme');
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 <title>bawabawa.id</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Google Identity Services (Sign in with Google). The script is small and
+     lazy-initialized via Auth.bootGoogle() once we know the client ID. -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ═══════════════════════════════════════════
    DESIGN SYSTEM — ENTERPRISE TOKENS
@@ -86,6 +103,16 @@
   --shadow-md: 0 18px 48px rgba(2,6,23,.18);
   --shadow-lg: 0 26px 64px rgba(2,6,23,.26);
   --shadow-xl: 0 34px 86px rgba(2,6,23,.30);
+  /* Apple Liquid Glass elevation — soft sage-tinted premium shadow */
+  --shadow-glass: 0 8px 32px rgba(31,38,135,.12), 0 2px 6px rgba(15,23,42,.04);
+  --shadow-glass-lg: 0 24px 60px rgba(31,38,135,.16), 0 4px 12px rgba(15,23,42,.06);
+  /* Glass surfaces — swapped by [data-theme='dark'] below */
+  --glass-surface: rgba(255,255,255,.66);
+  --glass-surface-strong: rgba(255,255,255,.82);
+  --glass-border: rgba(255,255,255,.55);
+  --glass-border-strong: rgba(255,255,255,.7);
+  --glass-blur: blur(20px) saturate(1.45);
+  --glass-blur-lg: blur(28px) saturate(1.5);
   --dur-1: 140ms;
   --dur-2: 220ms;
   --ease-out: cubic-bezier(.16, 1, .3, 1);
@@ -112,12 +139,23 @@
   --gray-700: #E2E8F0;
   --gray-800: #F1F5F9;
   --gray-900: #F8FAFC;
+
+  /* Glass tokens for dark mode */
+  --glass-surface: rgba(26,24,20,.62);
+  --glass-surface-strong: rgba(26,24,20,.78);
+  --glass-border: rgba(255,255,255,.08);
+  --glass-border-strong: rgba(255,255,255,.14);
+  --shadow-glass: 0 8px 32px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.24);
+  --shadow-glass-lg: 0 24px 60px rgba(0,0,0,.5), 0 4px 12px rgba(0,0,0,.28);
 }
 
 /* RESET */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:var(--font);font-size:14px;background:var(--surface-1);color:var(--gray-900);overflow-x:hidden;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);font-size:14px;background:var(--surface-1);color:var(--gray-900);overflow-x:hidden;line-height:1.5;-webkit-font-smoothing:antialiased;position:relative;min-height:100vh}
+/* Apple Liquid Glass — gradient mesh aurora anchored behind everything. */
+body::before{content:'';position:fixed;inset:-20vmin;z-index:-1;pointer-events:none;background-image:radial-gradient(60vmax 55vmax at 12% 18%, rgba(124,152,133,.28), transparent 65%),radial-gradient(48vmax 40vmax at 88% 12%, rgba(212,163,115,.22), transparent 70%),radial-gradient(55vmax 50vmax at 72% 88%, rgba(183,110,121,.16), transparent 68%),radial-gradient(45vmax 40vmax at 22% 92%, rgba(14,124,123,.14), transparent 70%);filter:blur(40px) saturate(1.2);transition:opacity .4s var(--ease-out)}
+[data-theme="dark"] body::before{opacity:.55}
 input,select,textarea,button{font-family:var(--font);font-size:14px}
 h1,h2,h3,h4,h5,h6,.heading{font-family:var(--heading-font);letter-spacing:-.01em;font-weight:600}
 a{color:inherit;text-decoration:none}
@@ -128,14 +166,19 @@ img{max-width:100%;display:block}
 ::-webkit-scrollbar-thumb:hover{background:var(--gray-400)}
 
 /* ══ LAYOUT ══ */
-#auth-screen{display:flex;min-height:100vh;max-height:100vh;background:var(--gray-900);overflow:hidden}
+
 #app-shell{display:none;height:100vh;overflow:hidden;flex-direction:column}
 #app-shell.active{display:flex}
-.topbar{height:var(--topbar-h);background:rgba(255,255,255,.72);backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,.7);display:flex;align-items:center;padding:0 16px;gap:8px;flex-shrink:0;z-index:200;position:sticky;top:0;transition:all .2s ease}
+.topbar{height:var(--topbar-h);background:var(--glass-surface-strong);backdrop-filter:var(--glass-blur-lg);-webkit-backdrop-filter:var(--glass-blur-lg);border-bottom:1px solid var(--glass-border);display:flex;align-items:center;padding:0 16px;gap:8px;flex-shrink:0;z-index:200;position:sticky;top:0;transition:all .2s ease}
 .topbar.shrink{height:46px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
-.body-wrap{display:flex;flex:1;overflow:hidden}
-.sidebar{width:var(--sidebar-w);background:var(--surface-0);border-right:1px solid var(--gray-200);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
-.main-content{flex:1;overflow-y:auto;background:var(--surface-1)}
+.body-wrap{display:flex;flex:1;overflow:hidden;position:relative}
+.sidebar{width:var(--sidebar-w);background:var(--glass-surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;transition:transform var(--dur-2) var(--ease-out)}
+.sidebar-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.36);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:150;opacity:0;pointer-events:none;transition:opacity var(--dur-2) var(--ease-out)}
+.sidebar-backdrop.open{opacity:1;pointer-events:auto}
+.hamburger-btn{display:none;width:40px;height:40px;border-radius:var(--radius-sm);background:var(--surface-1);border:1px solid var(--gray-200);cursor:pointer;align-items:center;justify-content:center;color:var(--gray-700);flex-shrink:0;padding:0}
+.hamburger-btn svg{width:18px;height:18px}
+.hamburger-btn:hover{background:var(--gray-100)}
+.main-content{flex:1;overflow-y:auto;background:transparent}
 .page-content{padding:20px;max-width:1400px}
 .page{display:none}
 .page.active{display:block}
@@ -218,8 +261,8 @@ img{max-width:100%;display:block}
 .btn-loading::after{content:'';position:absolute;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;color:#fff}
 
 /* ══ CARDS ══ */
-.card{background:var(--surface-0);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px;transition:transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out)}
-.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);border-color:rgba(15,23,42,.14)}
+.card{background:var(--glass-surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-glass);transition:transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out)}
+.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-glass-lg);border-color:var(--glass-border-strong)}
 .card-sm{padding:12px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .card-title{font-size:13px;font-weight:600;color:var(--gray-900);display:flex;align-items:center;gap:8px}
@@ -227,8 +270,8 @@ img{max-width:100%;display:block}
 .card-icon svg{width:14px;height:14px}
 
 /* ══ KPI CARDS ══ */
-.kpi-card{background:var(--surface-0);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:14px 16px;transition:var(--transition)}
-.kpi-card:hover{border-color:var(--gray-300);box-shadow:var(--shadow-md)}
+.kpi-card{background:var(--glass-surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-glass);transition:var(--transition)}
+.kpi-card:hover{border-color:var(--glass-border-strong);box-shadow:var(--shadow-glass-lg);transform:translateY(-1px)}
 .kpi-label{font-size:11px;font-weight:500;color:var(--gray-500);margin-bottom:4px}
 .kpi-value{font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:1}
 .kpi-sub{font-size:11px;color:var(--gray-400);margin-top:4px;display:flex;align-items:center;gap:4px}
@@ -276,7 +319,7 @@ img{max-width:100%;display:block}
 .toast.toast-info .toast-icon{background:#2563eb}
 
 /* ══ MODAL ══ */
-.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(3px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(12px) saturate(1.1);-webkit-backdrop-filter:blur(12px) saturate(1.1);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-backdrop.active{display:flex}
 .modal{background:var(--surface-0);border-radius:var(--radius-xl);box-shadow:var(--shadow-xl);padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:modalIn .2s ease;border:1px solid rgba(15,23,42,.10);backdrop-filter:blur(18px);transition:var(--transition)}
 .modal-lg{max-width:720px}
@@ -304,34 +347,42 @@ img{max-width:100%;display:block}
 .notif-item-body{font-size:11px;color:var(--gray-500);margin-top:1px}
 .notif-time{font-size:10px;color:var(--gray-400);margin-top:3px}
 
-/* ══ AUTH ══ */
-.auth-left{display:none}
-.auth-hero{display:none}
-.auth-logo-big{width:56px;height:56px;background:var(--brand);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;margin-bottom:20px;letter-spacing:-.5px;box-shadow:0 18px 48px rgba(2,6,23,.22)}
-.auth-hero h1{font-size:32px;font-weight:800;letter-spacing:-.8px;line-height:1.2;margin-bottom:12px}
-.auth-hero p{font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:32px}
-.auth-features{display:flex;flex-direction:column;gap:12px}
-.auth-feat{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.06);border-radius:10px;border:1px solid rgba(255,255,255,.08)}
-.auth-feat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.auth-feat-icon svg{width:16px;height:16px}
-.auth-feat-text{font-size:12px;color:rgba(255,255,255,.7);font-weight:500}
-.auth-right{width:100%;background:linear-gradient(145deg,#0b1324,#1f2937);display:flex;align-items:center;justify-content:center;padding:32px 16px;overflow-y:auto;max-height:100vh}
-.auth-card{width:100%;max-width:430px;padding:22px 20px 24px;border:1px solid rgba(255,255,255,.22);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.3);background:rgba(17,24,39,.66);backdrop-filter:blur(16px)}
-.auth-card-name,.auth-note,.form-label{color:#e2e8f0}
-.auth-tab{color:#dbe5f5}
-.auth-tab.active{color:#fff}
-.auth-card-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
-.auth-card-brand{width:36px;height:36px;background:var(--brand);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
-.auth-card-name{font-size:15px;font-weight:700;color:#e2e8f0}
-.auth-tabs{display:flex;border-bottom:1.5px solid var(--gray-200);margin-bottom:24px}
-.auth-tab{flex:1;padding:8px;font-size:13px;font-weight:500;color:var(--gray-400);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:var(--transition)}
-.auth-tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+/* ══ AUTH (two-pane, aesthetic sage+cream) ══ */
+#auth-screen{display:flex;min-height:100vh;max-height:100vh;overflow:hidden;background:var(--surface-1)}
+.auth-left{display:flex;flex:1 1 50%;min-width:0;align-items:center;justify-content:center;padding:48px 56px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(150deg,#6a8472 0%,#7c9885 48%,#d4a373 100%)}
+.auth-left::before{content:'';position:absolute;inset:-30%;background-image:radial-gradient(50% 50% at 18% 22%, rgba(255,255,255,.28), transparent 70%),radial-gradient(55% 50% at 82% 78%, rgba(255,255,255,.18), transparent 70%),radial-gradient(45% 40% at 78% 12%, rgba(212,163,115,.35), transparent 70%);filter:blur(30px) saturate(1.25);pointer-events:none}
+.auth-left::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg, transparent 55%, rgba(0,0,0,.12));pointer-events:none}
+.auth-hero{display:flex;flex-direction:column;max-width:440px;position:relative;z-index:1}
+.auth-logo-big{width:64px;height:64px;background:rgba(255,255,255,.22);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.32);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin-bottom:28px;letter-spacing:-.5px;box-shadow:0 18px 48px rgba(15,23,42,.22);overflow:hidden}
+.auth-logo-big img{width:100%;height:100%;object-fit:cover}
+.auth-hero h1{font-family:var(--heading-font);font-size:36px;font-weight:600;letter-spacing:-.8px;line-height:1.15;margin-bottom:14px;color:#fff}
+.auth-hero p{font-size:15px;color:rgba(255,255,255,.82);line-height:1.6;margin-bottom:32px;font-weight:400}
+.auth-features{display:flex;flex-direction:column;gap:10px}
+.auth-feat{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.14);border-radius:14px;border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out)}
+.auth-feat:hover{transform:translateX(2px);background:rgba(255,255,255,.2)}
+.auth-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,.22)}
+.auth-feat-icon svg{width:17px;height:17px;stroke:#fff}
+.auth-feat-text{font-size:13px;color:rgba(255,255,255,.92);font-weight:500;line-height:1.4}
+.auth-left-footer{position:absolute;bottom:32px;left:56px;right:56px;font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.04em;z-index:1}
+
+.auth-right{flex:1 1 50%;min-width:0;background:var(--surface-1);display:flex;align-items:center;justify-content:center;padding:48px 32px;overflow-y:auto;max-height:100vh;position:relative}
+.auth-card{width:100%;max-width:440px;padding:32px 28px 28px;border:1px solid var(--glass-border);border-radius:22px;box-shadow:var(--shadow-glass-lg);background:var(--glass-surface-strong);backdrop-filter:var(--glass-blur-lg);-webkit-backdrop-filter:var(--glass-blur-lg)}
+.auth-card-logo{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.auth-card-brand{width:36px;height:36px;background:var(--brand);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;overflow:hidden}
+.auth-card-brand img{width:100%;height:100%;object-fit:cover}
+.auth-card-name{font-size:15px;font-weight:700;color:var(--gray-900)}
+.auth-card-title{font-family:var(--heading-font);font-size:22px;font-weight:600;color:var(--gray-900);margin-bottom:4px;letter-spacing:-.3px}
+.auth-card-subtitle{font-size:13px;color:var(--gray-500);margin-bottom:22px;line-height:1.5}
+.auth-tabs{display:flex;background:var(--surface-2);border:1px solid var(--gray-200);padding:3px;border-radius:12px;margin-bottom:22px;gap:3px}
+.auth-tab{flex:1;padding:8px 10px;font-size:13px;font-weight:600;color:var(--gray-500);border:none;background:transparent;cursor:pointer;border-radius:9px;transition:var(--transition)}
+.auth-tab:hover{color:var(--gray-700)}
+.auth-tab.active{background:var(--surface-0);color:var(--brand);box-shadow:0 2px 8px rgba(15,23,42,.08)}
 .auth-form{display:none}
 .auth-form.active{display:block}
-.auth-alert{padding:10px 12px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:14px;display:none}
+.auth-alert{padding:10px 12px;border-radius:var(--radius-md);font-size:12px;margin-bottom:14px;display:none}
 .auth-alert.error{background:var(--danger-light);color:var(--danger-dark);border:1px solid var(--danger-border)}
 .auth-alert.success{background:var(--success-light);color:var(--success-dark);border:1px solid var(--success-border)}
-.auth-note{text-align:center;margin-top:12px;font-size:11px;color:var(--gray-400);line-height:1.45}
+.auth-note{text-align:center;margin-top:14px;font-size:11.5px;color:var(--gray-500);line-height:1.5}
 
 /* ══ PAGE HEADER ══ */
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
@@ -545,15 +596,21 @@ img{max-width:100%;display:block}
 .page{animation:fadeIn .2s ease}
 
 /* ══ RESPONSIVE ══ */
-@media(max-width:768px){
-  .sidebar{display:none}
+@media(max-width:900px){
   .auth-left{display:none}
-  .auth-right{width:100%}
+  .auth-right{flex:1 1 100%;padding:28px 18px}
+  .auth-card{padding:26px 22px 22px;border-radius:18px}
+}
+@media(max-width:768px){
+  .hamburger-btn{display:inline-flex}
+  .sidebar{position:fixed;left:0;top:var(--topbar-h);bottom:0;width:min(82vw,280px);z-index:160;transform:translateX(-110%);box-shadow:0 24px 60px rgba(15,23,42,.25)}
+  .sidebar.open{transform:translateX(0)}
   .tb-brand{min-width:0;padding-right:0;border-right:none}
   .tb-breadcrumb{display:none}
   .topbar{padding:0 10px}
   .tb-actions{gap:6px}
   .user-chip{padding:4px 8px 4px 4px}
+  .user-chip .user-name,.user-chip .user-role{display:none}
   .page-content{padding:12px}
   .card{padding:12px}
   .modal{padding:16px}
@@ -561,6 +618,7 @@ img{max-width:100%;display:block}
   .grid-3,.grid-4{grid-template-columns:1fr 1fr}
   .grid-2{grid-template-columns:1fr}
   .scenario-grid{grid-template-columns:1fr}
+  .icon-btn{width:40px;height:40px}
 }
 
 /* ══ UTILITY ══ */
@@ -621,7 +679,7 @@ img{max-width:100%;display:block}
   <div class="auth-left">
     <div class="auth-hero">
       <div class="auth-logo-big" id="auth-logo">BW</div>
-      <h1 id="auth-title">bawabawa.id<br>Enterprise ERP</h1>
+      <h1 id="auth-title">Operasi bisnis<br>terpadu, satu layar.</h1>
       <p>Sistem manajemen bisnis lengkap untuk operasional sehari-hari — dari kasir, inventory, keuangan, hingga laporan.</p>
       <div class="auth-features">
         <div class="auth-feat">
@@ -644,6 +702,7 @@ img{max-width:100%;display:block}
         </div>
       </div>
     </div>
+    <div class="auth-left-footer">© 2026 bawabawa.id — Enterprise-grade, mobile-first.</div>
   </div>
   <div class="auth-right">
     <div class="auth-card">
@@ -651,6 +710,18 @@ img{max-width:100%;display:block}
         <div class="auth-card-brand" id="auth-card-brand">BW</div>
         <span class="auth-card-name" id="auth-card-name">bawabawa.id</span>
       </div>
+      <div class="auth-card-title">Masuk ke dashboard</div>
+      <div class="auth-card-subtitle" id="auth-tagline">Kelola operasional bisnis kamu dari satu layar — kasir, inventory, finance, dan laporan.</div>
+
+      <!-- ── GOOGLE SIGN-IN (production) ── -->
+      <div id="auth-google-section" style="display:none">
+        <div class="auth-alert" id="google-alert"></div>
+        <div id="g-signin-container" style="display:flex;justify-content:center;margin:6px 0 16px"></div>
+        <div class="auth-note" id="google-note" style="text-align:center">Masuk dengan akun Google. Akun baru menunggu persetujuan admin sebelum dapat akses.</div>
+      </div>
+
+      <!-- ── DEMO EMAIL/PASSWORD (development only) ── -->
+      <div id="auth-demo-section" style="display:none">
       <div class="auth-tabs">
         <button class="auth-tab active" onclick="Auth.switchTab('login')">Masuk</button>
         <button class="auth-tab" onclick="Auth.switchTab('register')">Daftar</button>
@@ -694,6 +765,7 @@ img{max-width:100%;display:block}
         <button class="btn btn-primary btn-full" id="btn-register" onclick="Auth.register()">Buat Akun</button>
         <p class="auth-note" id="register-note" style="margin-top:8px">Akun baru akan menunggu persetujuan Admin.</p>
       </div>
+      </div><!-- /auth-demo-section -->
     </div>
   </div>
 </div>
@@ -702,6 +774,9 @@ img{max-width:100%;display:block}
 <div id="app-shell">
   <!-- TOPBAR -->
   <div class="topbar">
+    <button class="hamburger-btn" id="hamburger-btn" onclick="App.toggleSidebar()" aria-label="Toggle menu" title="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <div class="tb-brand">
       <div class="tb-logo" id="tb-logo">BW</div>
       <div>
@@ -715,8 +790,8 @@ img{max-width:100%;display:block}
       <span class="current" id="bc-page"></span>
     </div>
     <div class="tb-actions">
-      <div class="icon-btn" onclick="App.toggleTheme()" id="theme-btn" title="Ganti tema">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+      <div class="icon-btn" onclick="App.toggleTheme()" id="theme-btn" title="Ganti tema" role="button" aria-label="Toggle theme">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
       </div>
       <div class="icon-btn" onclick="App.toggleNotif()" id="notif-btn" title="Notifikasi">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -733,6 +808,7 @@ img{max-width:100%;display:block}
   </div>
 
   <div class="body-wrap">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="App.closeSidebar()"></div>
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
       <div class="sb-section"><div class="sb-label">UTAMA</div>
@@ -1982,6 +2058,112 @@ const Auth = {
       loginNote.textContent = 'Masukkan kredensial untuk masuk.';
     }
   },
+
+  /**
+   * Fetch /auth/config and decide which sign-in surfaces to render.
+   *  - googleClientId present     → render Google button
+   *  - allowEmailLogin true       → also keep the demo email/password form visible
+   *  - both null                  → show fatal-config message
+   */
+  async bootGoogleAndDemo() {
+    let cfg = null;
+    try {
+      const res = await fetch(ApiService.BASE_URL + '/auth/config', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const body = await res.json();
+        if (body && body.success && body.data) cfg = body.data;
+      }
+    } catch (err) {
+      if (DEBUG) console.warn('[Auth] /auth/config fetch failed', err);
+    }
+    const googleSection = $('auth-google-section');
+    const demoSection = $('auth-demo-section');
+    const googleId = cfg && typeof cfg.googleClientId === 'string' ? cfg.googleClientId : null;
+    const allowDemo = !!(cfg && cfg.allowEmailLogin);
+
+    if (googleId) {
+      if (googleSection) googleSection.style.display = '';
+      Auth._renderGoogleButton(googleId);
+    }
+    if (allowDemo) {
+      if (demoSection) demoSection.style.display = '';
+    }
+    if (!googleId && !allowDemo) {
+      // Server returned neither: fall back to demo so the page is at least usable.
+      if (demoSection) demoSection.style.display = '';
+      Auth.showAlert('login-alert', 'Konfigurasi auth tidak tersedia. Hubungi admin.', 'error');
+    }
+  },
+
+  _renderGoogleButton(clientId) {
+    const container = $('g-signin-container');
+    if (!container) return;
+    const tryRender = () => {
+      if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.id) {
+        return false;
+      }
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response) => Auth.loginWithGoogle(response && response.credential),
+          ux_mode: 'popup',
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        container.innerHTML = '';
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        window.google.accounts.id.renderButton(container, {
+          theme: isDark ? 'filled_black' : 'outline',
+          size: 'large',
+          shape: 'pill',
+          text: 'signin_with',
+          logo_alignment: 'center',
+          width: 320
+        });
+        return true;
+      } catch (err) {
+        if (DEBUG) console.warn('[Auth] google button render failed', err);
+        return false;
+      }
+    };
+    if (tryRender()) return;
+    let tries = 0;
+    const t = setInterval(() => {
+      tries += 1;
+      if (tryRender() || tries > 40) clearInterval(t);
+    }, 150);
+  },
+
+  async loginWithGoogle(credential) {
+    if (!credential) {
+      Auth.showAlert('google-alert', 'Token Google tidak diterima. Coba lagi.');
+      return;
+    }
+    Auth.hideAlert('google-alert');
+    const apiResult = await ApiService.post('/auth/google', { idToken: credential }, true);
+    if (!apiResult.success || !apiResult.data) {
+      const code = apiResult.error && apiResult.error.code;
+      const message = (apiResult.error && apiResult.error.message) ||
+        (code === 'PENDING_APPROVAL'
+          ? 'Akun Google kamu menunggu persetujuan admin.'
+          : 'Login Google gagal. Silakan coba lagi.');
+      Auth.showAlert('google-alert', message);
+      return;
+    }
+    const { accessToken, refreshToken, user } = apiResult.data;
+    ApiService.setTokens(accessToken, refreshToken);
+    ApiService.setStoredUser(user);
+    Auth._syncApiUserToLocal(user);
+    S.currentUser = Auth._findOrCreateLocalUser(user);
+    AuditLog.add('LOGIN', 'auth', S.currentUser, null, { email: user.email, source: 'google' }, S.currentUser);
+    DB.save();
+    $('auth-screen').style.display = 'none';
+    $('app-shell').classList.add('active');
+    App.init();
+    UI.toast('Selamat datang, ' + (user.fullName || user.email) + '!');
+  },
   switchTab(tab) {
     $$('.auth-tab').forEach((el,i) => el.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
     $('form-login').classList.toggle('active', tab==='login');
@@ -2382,6 +2564,7 @@ const Router = {
     $('bc-sep').style.display='none'; $('bc-page').textContent='';
     Router.current = page;
     $('main-content').scrollTop = 0;
+    if (window.innerWidth <= 768 && typeof App !== 'undefined' && App.closeSidebar) App.closeSidebar();
     // Page-specific init
     const renderers = {
       dashboard: Dashboard.render, pos: POS.renderCatalog, orders: Orders.render,
@@ -2392,6 +2575,58 @@ const Router = {
       settings: Settings.load,
     };
     if(renderers[page]) renderers[page]();
+  }
+};
+
+// ═══════════════ CMS ═══════════════
+/**
+ * Fetches the small public slice of CMS settings (brand / seo / feature flags)
+ * during boot, before applyBrand() paints. Values found in the CMS override
+ * the legacy hardcoded defaults in S.settings so every downstream screen
+ * (login, topbar, favicon/theme-color, document title) reads from the DB.
+ * Falls back silently to seeded defaults when the API is unreachable —
+ * index.html must keep rendering even when the backend is down.
+ */
+const Cms = {
+  async boot() {
+    let data = null;
+    try {
+      const base = ApiService.BASE_URL;
+      const res = await fetch(base + '/cms/settings/public', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) return;
+      const body = await res.json();
+      if (!body || body.success !== true || !Array.isArray(body.data)) return;
+      data = {};
+      for (const row of body.data) {
+        if (row && typeof row.key === 'string' && row.value && typeof row.value === 'object') {
+          data[row.key] = row.value;
+        }
+      }
+    } catch (err) {
+      if (DEBUG) console.warn('[Cms] boot fetch failed, using local defaults', err);
+      return;
+    }
+    if (!data) return;
+    const brand = data.brand || {};
+    const seo = data.seo || {};
+    if (typeof brand.name === 'string' && brand.name.trim()) S.settings.name = brand.name.trim();
+    if (typeof brand.monogram === 'string' && brand.monogram.trim()) S.settings.logo = brand.monogram.trim().slice(0, 3);
+    if (typeof brand.logoUrl === 'string' && brand.logoUrl.trim()) S.settings.logoUrl = brand.logoUrl.trim();
+    if (typeof brand.primaryColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(brand.primaryColor)) {
+      S.settings.color = brand.primaryColor;
+    }
+    if (typeof brand.accentColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(brand.accentColor)) {
+      document.documentElement.style.setProperty('--accent', brand.accentColor);
+    }
+    if (typeof brand.tagline === 'string' && brand.tagline.trim()) {
+      const sub = document.getElementById('auth-tagline');
+      if (sub) sub.textContent = brand.tagline.trim();
+    }
+    if (typeof seo.defaultTitle === 'string' && seo.defaultTitle.trim()) {
+      document.title = seo.defaultTitle.trim();
+    }
   }
 };
 
@@ -2434,16 +2669,43 @@ const App = {
     const at=$('auth-title');if(at)at.textContent=name+'\nEnterprise ERP';
   },
   applyTheme() {
-    const mode = S.settings.themeMode === 'dark' ? 'dark' : 'light';
+    // Prefer value already set by the no-FOUC bootstrap / localStorage; fall back to settings.
+    let mode;
+    try { mode = localStorage.getItem('bawabawa:theme'); } catch { mode = null; }
+    if (mode !== 'dark' && mode !== 'light') {
+      mode = S.settings.themeMode === 'dark' ? 'dark' : 'light';
+    }
+    S.settings.themeMode = mode;
     document.documentElement.setAttribute('data-theme', mode);
-    const icon = $('theme-btn');
-    if (icon) icon.title = mode === 'dark' ? 'Pakai Light Mode' : 'Pakai Dark Mode';
+    const btn = $('theme-btn');
+    if (btn) btn.title = mode === 'dark' ? 'Pakai Light Mode' : 'Pakai Dark Mode';
+    const icon = $('theme-icon');
+    if (icon) {
+      icon.innerHTML = mode === 'dark'
+        ? '<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>'
+        : '<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/>';
+    }
   },
   toggleTheme() {
-    S.settings.themeMode = S.settings.themeMode === 'dark' ? 'light' : 'dark';
+    const next = (S.settings.themeMode === 'dark') ? 'light' : 'dark';
+    S.settings.themeMode = next;
+    try { localStorage.setItem('bawabawa:theme', next); } catch {}
     App.applyTheme();
     DB.save();
-    UI.toast('Tema diubah ke ' + (S.settings.themeMode === 'dark' ? 'Dark' : 'Light'));
+    UI.toast('Tema diubah ke ' + (next === 'dark' ? 'Dark' : 'Light'));
+  },
+  toggleSidebar() {
+    const sb = $('sidebar'), bd = $('sidebar-backdrop');
+    if (!sb) return;
+    const open = sb.classList.toggle('open');
+    if (bd) bd.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  },
+  closeSidebar() {
+    const sb = $('sidebar'), bd = $('sidebar-backdrop');
+    if (sb) sb.classList.remove('open');
+    if (bd) bd.classList.remove('open');
+    document.body.style.overflow = '';
   },
   updateTopbar() {
     const u=getCU(); if(!u) return;
@@ -4045,7 +4307,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('[ReadinessCritical]', readiness.critical);
   }
   Auth.setupAuthView();
+  // Pull brand / SEO overrides from CMS before first paint of the brand.
+  await Cms.boot();
   App.applyBrand();
+  // Decide which sign-in surfaces to render (Google + optional demo form).
+  Auth.bootGoogleAndDemo();
   App.updateNotifBadge();
   window.onerror = function(message, source, lineno, colno) {
     AuditLog.add('JS_ERROR','runtime','window',null,{ message:String(message), source, lineno, colno });
