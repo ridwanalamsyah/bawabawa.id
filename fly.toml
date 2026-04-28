@@ -1,0 +1,56 @@
+# =============================================================================
+# Fly.io deployment manifest for bawabawa.id (single-region: Singapore).
+#
+# Quickstart:
+#   1. Install flyctl + run `fly auth login`.
+#   2. `fly launch --no-deploy --copy-config` to create the app & Postgres.
+#   3. Set secrets (NEVER commit them):
+#        fly secrets set \
+#          JWT_ACCESS_SECRET=$(openssl rand -hex 32) \
+#          JWT_REFRESH_SECRET=$(openssl rand -hex 32) \
+#          GOOGLE_OAUTH_CLIENT_ID=xxxx.apps.googleusercontent.com \
+#          OAUTH_ALLOWED_DOMAINS=bawabawa.id \
+#          PUBLIC_SITE_URL=https://bawabawa.id \
+#          CORS_ALLOWED_ORIGINS=https://bawabawa.id
+#   4. `fly postgres create --name bawabawa-db --region sin` then
+#      `fly postgres attach bawabawa-db` (auto-sets DATABASE_URL).
+#   5. `fly deploy`.
+# =============================================================================
+
+app = "bawabawa-id"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/api/v1/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  cpus = 1
+
+[deploy]
+  release_command = "node dist/infrastructure/db/migrate.js"

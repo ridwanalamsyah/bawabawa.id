@@ -68,11 +68,63 @@ const envSchema = z.object({
   // Public origin used when generating sitemap.xml / robots.txt links.
   PUBLIC_SITE_URL: z.string().url().optional(),
 
-  // Demo / runtime flags.
+  // Demo / runtime flags. When unset, defaults to true outside production so
+  // local `npm run dev` still works without Google credentials, and false in
+  // production where Google OAuth is mandatory (enforced by the refinement
+  // below).
   DEMO_MODE: z
     .union([z.string(), z.boolean()])
     .optional()
-    .transform((value) => value === true || value === "true" || value === "1")
+    .transform((value) => {
+      if (value === true || value === "true" || value === "1") return true;
+      if (value === false || value === "false" || value === "0") return false;
+      const node = process.env.NODE_ENV;
+      return node !== "production" && node !== "test";
+    }),
+
+  // Google OAuth (Identity Services / ID-token flow). Required outside dev
+  // demo mode — when DEMO_MODE=true and we're not in production, the API
+  // still mounts the legacy email/password form for local convenience.
+  GOOGLE_OAUTH_CLIENT_ID: z.string().min(10).optional(),
+
+  // Optional comma-separated list of email domains that are auto-approved
+  // (status='active') on first Google login. Anyone outside the list still
+  // signs in but lands on status='pending' awaiting admin approval.
+  // Example: OAUTH_ALLOWED_DOMAINS=bawabawa.id,bawabawa.co.id
+  OAUTH_ALLOWED_DOMAINS: csvList,
+
+  // When set to "false", new Google logins land in status='active' directly
+  // (NOT recommended for public deployments). Default is "true".
+  OAUTH_REQUIRE_APPROVAL: z
+    .union([z.string(), z.boolean()])
+    .optional()
+    .transform((value) => value !== false && value !== "false" && value !== "0")
+}).superRefine((env, ctx) => {
+  // Production deployments must use Google OAuth — no demo accounts allowed.
+  if (env.NODE_ENV === "production") {
+    if (env.DEMO_MODE === true) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["DEMO_MODE"],
+        message: "DEMO_MODE must be disabled when NODE_ENV=production"
+      });
+    }
+    if (!env.GOOGLE_OAUTH_CLIENT_ID) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GOOGLE_OAUTH_CLIENT_ID"],
+        message:
+          "GOOGLE_OAUTH_CLIENT_ID is required in production (Google sign-in is the only auth flow)"
+      });
+    }
+    if (!env.DATABASE_URL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["DATABASE_URL"],
+        message: "DATABASE_URL is required in production"
+      });
+    }
+  }
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
