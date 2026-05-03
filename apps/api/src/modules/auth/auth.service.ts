@@ -594,12 +594,14 @@ export class AuthService {
     // Prefer the (oauth_provider, oauth_subject) match — that's the
     // authoritative identity link Google issues. Falling back to email lets
     // a previously-seeded admin row get linked to its Google identity on
-    // first sign-in. ORDER BY ensures we don't accidentally pick the
-    // email-only row when both exist (which would otherwise try to
-    // re-assign oauth_subject and violate users_oauth_provider_subject_uq).
+    // first sign-in. COALESCE-to-FALSE is required because Postgres orders
+    // NULLs FIRST on DESC by default — without it, a row with
+    // oauth_provider IS NULL would compute sub_match=NULL and sort ahead of
+    // the genuine TRUE match, causing the next UPDATE to violate
+    // users_oauth_provider_subject_uq.
     const existing = await (pool as any).query(
       `SELECT id, email, full_name, division, status,
-              (oauth_provider = 'google' AND oauth_subject = $1) AS sub_match
+              COALESCE(oauth_provider = 'google' AND oauth_subject = $1, FALSE) AS sub_match
        FROM users
        WHERE (oauth_provider = 'google' AND oauth_subject = $1)
           OR LOWER(email) = LOWER($2)

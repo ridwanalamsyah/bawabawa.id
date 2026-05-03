@@ -162,9 +162,12 @@ describe("auth endpoints", () => {
     );
 
     // Run the same SELECT the service uses; verify ORDER BY picks Row B.
+    // COALESCE(..., FALSE) is critical for Postgres: a bare boolean
+    // expression returns NULL when oauth_provider IS NULL, and PG sorts
+    // NULLs FIRST on DESC, which would pick the email-only row instead.
     const result = await pool.query<{ id: string }>(
       `SELECT id, email, full_name, division, status,
-              (oauth_provider = 'google' AND oauth_subject = $1) AS sub_match
+              COALESCE(oauth_provider = 'google' AND oauth_subject = $1, FALSE) AS sub_match
        FROM users
        WHERE (oauth_provider = 'google' AND oauth_subject = $1)
           OR LOWER(email) = LOWER($2)
