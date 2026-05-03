@@ -107,6 +107,37 @@ describe("auth endpoints", () => {
     expect(replay.body.error.code).toBe("INVALID_REFRESH_TOKEN");
   });
 
+  it("POST /auth/refresh rejects is_active=0 users (SQLite integer truthiness)", async () => {
+    process.env.NODE_ENV = "test";
+
+    const userId = randomUUID();
+    const refreshToken = jwt.sign({ sub: userId }, requireEnv("JWT_REFRESH_SECRET"), {
+      expiresIn: "7d"
+    });
+    const refreshHash = await argon2.hash(refreshToken);
+    const pool = await getPool();
+
+    // status='active' but is_active=0. With strict `!== false` this would
+    // pass (because 0 !== false under strict equality on SQLite); the
+    // truthy check correctly rejects.
+    await pool.query(
+      `INSERT INTO users (id, email, password_hash, full_name, division, status, is_active)
+       VALUES ($1, $2, NULL, $3, $4, 'active', 0)`,
+      [userId, `inactive-${userId}@example.com`, "Inactive User", "ops"]
+    );
+    await pool.query(
+      `INSERT INTO user_sessions (id, user_id, refresh_token_hash, expires_at)
+       VALUES ($1, $2, $3, $4)`,
+      [randomUUID(), userId, refreshHash, new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()]
+    );
+
+    const res = await request(createApp())
+      .post("/api/v1/auth/refresh")
+      .send({ refreshToken });
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("ACCOUNT_NOT_ACTIVE");
+  });
+
   it("upsertGoogleUser SELECT prefers (oauth_subject) match over email match", async () => {
     process.env.NODE_ENV = "test";
     const pool = await getPool();

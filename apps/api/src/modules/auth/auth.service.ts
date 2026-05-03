@@ -366,7 +366,7 @@ export class AuthService {
       // token naturally expires (up to 7 days), because /auth/refresh would
       // happily mint new access+refresh pairs forever.
       const pool = await getPool();
-      const userRow = await pool.query<{ status: string | null; is_active: boolean | null }>(
+      const userRow = await pool.query<{ status: string | null; is_active: boolean | number | null }>(
         `SELECT status, is_active
            FROM users
           WHERE id = $1 AND deleted_at IS NULL
@@ -374,9 +374,11 @@ export class AuthService {
         [payload.sub]
       );
       const user = userRow.rows[0];
+      // Postgres returns boolean for is_active; SQLite returns 0/1 INTEGER.
+      // Coerce via truthiness so both drivers reject deactivated rows.
       const isUsable =
         !!user &&
-        user.is_active !== false &&
+        Boolean(user.is_active) &&
         (user.status == null || user.status === "active");
       if (!isUsable) {
         // Revoke the session that just authenticated so a stolen refresh
