@@ -169,13 +169,40 @@ describe("auth endpoints", () => {
       `SELECT id, email, full_name, division, status,
               COALESCE(oauth_provider = 'google' AND oauth_subject = $1, FALSE) AS sub_match
        FROM users
-       WHERE (oauth_provider = 'google' AND oauth_subject = $1)
-          OR LOWER(email) = LOWER($2)
+       WHERE ((oauth_provider = 'google' AND oauth_subject = $1)
+              OR LOWER(email) = LOWER($2))
+         AND deleted_at IS NULL
        ORDER BY sub_match DESC, created_at ASC
        LIMIT 1`,
       [subId, sharedEmail]
     );
     expect(result.rowCount).toBe(1);
     expect(result.rows[0].id).toBe(subRowId);
+  });
+
+  it("upsertGoogleUser SELECT excludes soft-deleted (deleted_at IS NOT NULL) rows", async () => {
+    process.env.NODE_ENV = "test";
+    const pool = await getPool();
+    const sub = `google-sub-${randomUUID().slice(0, 8)}`;
+    const email = `deleted-${randomUUID().slice(0, 8)}@example.com`;
+
+    // Soft-deleted row that matches both sub and email — must be filtered out.
+    await pool.query(
+      `INSERT INTO users
+        (id, email, password_hash, full_name, division, status, is_active,
+         oauth_provider, oauth_subject, deleted_at)
+       VALUES ($1, $2, NULL, $3, $4, 'active', 1, 'google', $5, '2024-01-01 00:00:00')`,
+      [randomUUID(), email, "Soft Deleted", "ops", sub]
+    );
+
+    const result = await pool.query(
+      `SELECT id FROM users
+       WHERE ((oauth_provider = 'google' AND oauth_subject = $1)
+              OR LOWER(email) = LOWER($2))
+         AND deleted_at IS NULL
+       LIMIT 1`,
+      [sub, email]
+    );
+    expect(result.rowCount).toBe(0);
   });
 });

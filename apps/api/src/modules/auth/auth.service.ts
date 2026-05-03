@@ -603,8 +603,9 @@ export class AuthService {
       `SELECT id, email, full_name, division, status,
               COALESCE(oauth_provider = 'google' AND oauth_subject = $1, FALSE) AS sub_match
        FROM users
-       WHERE (oauth_provider = 'google' AND oauth_subject = $1)
-          OR LOWER(email) = LOWER($2)
+       WHERE ((oauth_provider = 'google' AND oauth_subject = $1)
+              OR LOWER(email) = LOWER($2))
+         AND deleted_at IS NULL
        ORDER BY sub_match DESC, created_at ASC
        LIMIT 1`,
       [args.sub, args.email]
