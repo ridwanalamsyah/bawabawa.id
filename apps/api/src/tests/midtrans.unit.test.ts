@@ -233,6 +233,40 @@ describe("processMidtransNotification", () => {
     expect(client.state.order.payment_status).toBe("paid");
   });
 
+  it("does NOT regress succeeded → pending on out-of-order webhook delivery", async () => {
+    const client = makeFakeClient({ order: { id: "o-1", total_amount: 111000 } });
+    // Settlement arrives first (e.g. retry of late-firing notification)
+    await processMidtransNotification(
+      client,
+      signedNotification({ transaction_id: "txn-x", transaction_status: "settlement" })
+    );
+    expect(client.state.order.payment_status).toBe("paid");
+    // Out-of-order: a delayed `pending` notification for the same txn id
+    // arrives later. We must NOT roll the payment back to pending —
+    // doing so would silently undo a real settled payment.
+    const second = await processMidtransNotification(
+      client,
+      signedNotification({ transaction_id: "txn-x", transaction_status: "pending" })
+    );
+    if (second.ignored) throw new Error("unexpected ignored");
+    expect(second.duplicated).toBe(true);
+    expect(client.state.payments[0].status).toBe("succeeded");
+    expect(client.state.order.payment_status).toBe("paid");
+  });
+
+  it("uses 0.01 paid threshold (matches manual recordPayment) for sub-sen rounding gaps", async () => {
+    // Order total 100000.00 paid with 99999.99 — a single sen short. Manual
+    // recordPayment treats this as fully paid; webhook path should agree.
+    const client = makeFakeClient({ order: { id: "o-1", total_amount: 100000 } });
+    const result = await processMidtransNotification(
+      client,
+      signedNotification({ gross_amount: "99999.99" })
+    );
+    if (result.ignored) throw new Error("unexpected ignored");
+    expect(result.status).toBe("succeeded");
+    expect(client.state.order.payment_status).toBe("paid");
+  });
+
   it("returns ignored result for unknown order (no-op so Midtrans stops retrying)", async () => {
     const client = {
       async query() {

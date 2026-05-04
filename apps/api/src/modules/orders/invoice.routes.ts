@@ -15,7 +15,14 @@ invoiceRouter.get("/:id/invoice.pdf", authGuard, async (req, res, next) => {
   try {
     const orderId = String(req.params.id);
     const data = await loadInvoiceData(await getPool(), orderId);
-    const filename = `invoice-${data.order.orderNumber}.pdf`;
+    // Sanitize orderNumber before interpolating into the Content-Disposition
+    // header. Strip anything outside [A-Za-z0-9._-] so a malicious order
+    // number can't inject quotes or whitespace into the header (which would
+    // break filename parsing in browsers and trip RFC 6266).
+    const safeOrderNumber = String(data.order.orderNumber)
+      .replace(/[^A-Za-z0-9._-]/g, "_")
+      .slice(0, 80);
+    const filename = `invoice-${safeOrderNumber}.pdf`;
     const disposition = req.query.download === "1" ? "attachment" : "inline";
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `${disposition}; filename="${filename}"`);
