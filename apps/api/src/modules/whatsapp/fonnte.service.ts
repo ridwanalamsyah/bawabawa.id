@@ -207,6 +207,7 @@ export async function sendQueuedWhatsApp(
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
+    const exhausted = r.attempts + 1 >= MAX_ATTEMPTS;
     await qc.query(
       `UPDATE whatsapp_outbox
           SET attempts = attempts + 1,
@@ -216,7 +217,14 @@ export async function sendQueuedWhatsApp(
         WHERE id = $3`,
       [errorMsg, MAX_ATTEMPTS, whatsappId]
     );
-    return { delivered: false, reason: "RETRYABLE", error: errorMsg };
+    // Once we've burned MAX_ATTEMPTS, the row is terminal `failed` —
+    // surface that to the caller (and to flushWhatsAppOutbox's counters)
+    // as PERMANENT so it's not double-counted as still retryable.
+    return {
+      delivered: false,
+      reason: exhausted ? "PERMANENT" : "RETRYABLE",
+      error: errorMsg
+    };
   }
 
   const httpOk = res.ok ?? (res.status >= 200 && res.status < 300);
@@ -262,6 +270,7 @@ export async function sendQueuedWhatsApp(
   // Either non-2xx, or 200 + status:false. 5xx is retryable, the rest
   // is permanent.
   const isServerErr = res.status >= 500 && res.status < 600;
+  const exhausted = r.attempts + 1 >= MAX_ATTEMPTS;
   const errorMsg = String(
     res.body?.reason ?? res.body?.message ?? res.body?.error ?? `HTTP ${res.status}`
   );
@@ -278,9 +287,12 @@ export async function sendQueuedWhatsApp(
       WHERE id = $4`,
     [errorMsg, res.status, MAX_ATTEMPTS, whatsappId]
   );
+  // 5xx is normally retryable, but if this attempt also exhausted the
+  // budget the SQL above promoted the row to terminal `failed` — match
+  // that in the return classification.
   return {
     delivered: false,
-    reason: isServerErr ? "RETRYABLE" : "PERMANENT",
+    reason: isServerErr && !exhausted ? "RETRYABLE" : "PERMANENT",
     error: errorMsg
   };
 }

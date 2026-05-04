@@ -276,8 +276,23 @@ describe("sendQueuedWhatsApp", () => {
     const { whatsappId } = await enqueueWhatsApp(c, { to: "+6281234567890", message: "Halo" });
     c.rows[0].attempts = 4; // one more attempt = 5 = MAX
     const fetch = makeHttp(() => ({ status: 502, body: { status: false } }));
-    await sendQueuedWhatsApp(c, baseConfig({ fetch }), whatsappId);
+    const result = await sendQueuedWhatsApp(c, baseConfig({ fetch }), whatsappId);
     expect(c.rows[0].status).toBe("failed");
+    // Once the row is terminal `failed`, the return must reflect that —
+    // not RETRYABLE — otherwise flushWhatsAppOutbox double-counts it.
+    expect(result).toMatchObject({ delivered: false, reason: "PERMANENT" });
+  });
+
+  it("network exception on final attempt returns PERMANENT (matches DB terminal state)", async () => {
+    const c = makeFakeClient();
+    const { whatsappId } = await enqueueWhatsApp(c, { to: "+6281234567890", message: "Halo" });
+    c.rows[0].attempts = 4; // one more attempt = 5 = MAX
+    const fetch: HttpClient = async () => {
+      throw new Error("ETIMEDOUT");
+    };
+    const result = await sendQueuedWhatsApp(c, baseConfig({ fetch }), whatsappId);
+    expect(c.rows[0].status).toBe("failed");
+    expect(result).toMatchObject({ delivered: false, reason: "PERMANENT" });
   });
 
   it("network exception → retryable", async () => {
