@@ -155,10 +155,19 @@ export async function processMidtransNotification(
     if (existing.rowCount) {
       resolvedPaymentId = existing.rows[0].id;
       // Status may transition pending → succeeded on a subsequent webhook
-      // for the same transaction id (e.g., bank transfer settled). Update
-      // in place so order.payment_status recompute below sees the latest
-      // amount.
-      if (existing.rows[0].status !== status) {
+      // for the same transaction id (e.g., bank transfer settled). Only
+      // allow forward transitions (rank: pending < succeeded ≤ failed) so
+      // an out-of-order webhook delivery can't regress an already-settled
+      // payment back to pending — that would silently undo a real payment
+      // and roll the order back from `paid` to `pending`.
+      const STATUS_RANK: Record<string, number> = {
+        pending: 0,
+        succeeded: 1,
+        failed: 1
+      };
+      const existingRank = STATUS_RANK[existing.rows[0].status] ?? 0;
+      const newRank = STATUS_RANK[status] ?? 0;
+      if (existing.rows[0].status !== status && newRank >= existingRank) {
         await client.query(
           `UPDATE payments
               SET status = $1, paid_at = COALESCE($2, paid_at),
@@ -182,8 +191,12 @@ export async function processMidtransNotification(
   );
   const totalPaid = Number(sumRes.rows[0]?.total_paid ?? 0);
   const totalAmount = Number(order.total_amount);
+  // Match the manual recordPayment threshold (payments.service.ts uses a
+  // 0.01 tolerance) so an order with mixed manual + Midtrans payments
+  // doesn't end up `dp` here vs `paid` from the manual path due to a sub-
+  // sen rounding gap.
   let paymentStatus: "paid" | "dp" | "pending";
-  if (totalPaid >= totalAmount && totalAmount > 0) paymentStatus = "paid";
+  if (totalAmount > 0 && totalPaid >= totalAmount - 0.01) paymentStatus = "paid";
   else if (totalPaid > 0) paymentStatus = "dp";
   else paymentStatus = "pending";
   await client.query(

@@ -117,10 +117,13 @@ applyVoucherRouter.post("/:id/voucher", authGuard, idempotency(), (req, res, nex
       const orderId = String(req.params.id);
       const result = await withTransaction(async (client) => {
         const orderRow = await client.query<{
+          subtotal: string;
           total_amount: string;
+          discount_amount: string | null;
           customer_id: string | null;
         }>(
-          `SELECT total_amount, customer_id FROM orders WHERE id = $1 FOR UPDATE`,
+          `SELECT subtotal, total_amount, discount_amount, customer_id
+             FROM orders WHERE id = $1 FOR UPDATE`,
           [orderId]
         );
         if (!orderRow.rowCount) {
@@ -140,9 +143,14 @@ applyVoucherRouter.post("/:id/voucher", authGuard, idempotency(), (req, res, nex
         }
 
         const voucher = await getVoucherByCode(client, input.code);
-        // orders.total_amount is the pre-discount subtotal at the point of
-        // voucher application — no separate subtotal column exists on orders.
-        const subtotal = Number(orderRow.rows[0].total_amount);
+        // PR E (charges) introduced orders.subtotal as the pre-discount /
+        // pre-tax / pre-service-charge base. Always discount against subtotal
+        // so the discount math stays correct even if applyCharges already
+        // ran and inflated total_amount with PPN/service. Legacy orders pre-
+        // migration 011 have subtotal=0 → fall back to total_amount.
+        const storedSubtotal = Number(orderRow.rows[0].subtotal);
+        const subtotal =
+          storedSubtotal > 0 ? storedSubtotal : Number(orderRow.rows[0].total_amount);
         const discount = await validateAndCompute(client, voucher, {
           orderSubtotal: subtotal,
           customerId: orderRow.rows[0].customer_id ?? undefined
@@ -157,9 +165,19 @@ applyVoucherRouter.post("/:id/voucher", authGuard, idempotency(), (req, res, nex
           perUserLimit: voucher.per_user_limit
         });
 
+        // Update both subtotal-side discount tracking and total_amount.
+        // applyCharges (PR E) is the authoritative source for total_amount
+        // when tax/service charge is present; if charges are applied AFTER
+        // the voucher, that path will recompute total = (subtotal - discount)
+        // + service + tax. If charges were applied BEFORE, we still write
+        // newTotal = subtotal - discount here so unchanged callers see the
+        // discounted base; charges should be re-applied to recompose.
         await client.query(
-          "UPDATE orders SET total_amount = $1 WHERE id = $2",
-          [newTotal, orderId]
+          `UPDATE orders
+              SET total_amount = $1,
+                  discount_amount = $2
+            WHERE id = $3`,
+          [newTotal, discount, orderId]
         );
         return {
           orderId,
