@@ -165,6 +165,7 @@ export async function sendQueuedEmail(
       body: JSON.stringify(reqBody)
     });
   } catch (err) {
+    const exhausted = row.rows[0].attempts + 1 >= MAX_ATTEMPTS;
     await qc.query(
       `UPDATE email_outbox
           SET attempts = attempts + 1,
@@ -174,9 +175,12 @@ export async function sendQueuedEmail(
         WHERE id = $3`,
       [err instanceof Error ? err.message : String(err), MAX_ATTEMPTS, emailId]
     );
+    // After MAX_ATTEMPTS the SQL above promotes the row to terminal
+    // `failed` — surface that to the caller (and to flushOutbox
+    // counters) as PERMANENT so it's not double-counted as retryable.
     return {
       delivered: false,
-      reason: "RETRYABLE",
+      reason: exhausted ? "PERMANENT" : "RETRYABLE",
       error: err instanceof Error ? err.message : String(err)
     };
   }
@@ -214,6 +218,7 @@ export async function sendQueuedEmail(
 
   // 4xx → permanent (validation, blocked sender). 5xx → retryable.
   const isClientErr = res.status >= 400 && res.status < 500;
+  const exhausted = row.rows[0].attempts + 1 >= MAX_ATTEMPTS;
   const errorMsg = String(res.body?.message ?? res.body?.error ?? `HTTP ${res.status}`);
   await qc.query(
     `UPDATE email_outbox
@@ -228,9 +233,12 @@ export async function sendQueuedEmail(
       WHERE id = $4`,
     [errorMsg, res.status, MAX_ATTEMPTS, emailId]
   );
+  // 5xx is normally retryable, but if this attempt exhausted the
+  // budget the SQL above promoted the row to terminal `failed` —
+  // match that in the return classification.
   return {
     delivered: false,
-    reason: isClientErr ? "PERMANENT" : "RETRYABLE",
+    reason: isClientErr || exhausted ? "PERMANENT" : "RETRYABLE",
     error: errorMsg
   };
 }

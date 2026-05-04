@@ -287,6 +287,38 @@ describe("sendQueuedEmail", () => {
     expect(c.rows[0].last_error).toBe("ECONNRESET");
   });
 
+  it("5xx on final attempt returns PERMANENT (matches DB terminal `failed`)", async () => {
+    const c = makeFakeClient();
+    const { emailId } = await enqueueEmail(c, {
+      to: "a@b.co",
+      subject: "x",
+      html: "<p>x</p>"
+    });
+    c.rows[0].attempts = 4; // one more = 5 = MAX_ATTEMPTS
+    const fetch = makeHttp(() => ({ status: 503, body: { message: "upstream" } }));
+    const result = await sendQueuedEmail(c, baseConfig({ fetch }), emailId);
+    expect(c.rows[0].status).toBe("failed");
+    // Reason must be PERMANENT to prevent flushOutbox from
+    // double-counting a terminally-failed row as still retryable.
+    expect(result).toMatchObject({ delivered: false, reason: "PERMANENT" });
+  });
+
+  it("network exception on final attempt returns PERMANENT", async () => {
+    const c = makeFakeClient();
+    const { emailId } = await enqueueEmail(c, {
+      to: "a@b.co",
+      subject: "x",
+      html: "<p>x</p>"
+    });
+    c.rows[0].attempts = 4;
+    const fetch: HttpClient = async () => {
+      throw new Error("ETIMEDOUT");
+    };
+    const result = await sendQueuedEmail(c, baseConfig({ fetch }), emailId);
+    expect(c.rows[0].status).toBe("failed");
+    expect(result).toMatchObject({ delivered: false, reason: "PERMANENT" });
+  });
+
   it("2xx without id → permanent (broken provider response)", async () => {
     const c = makeFakeClient();
     const { emailId } = await enqueueEmail(c, {
