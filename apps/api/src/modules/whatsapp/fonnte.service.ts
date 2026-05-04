@@ -384,13 +384,21 @@ export async function applyWhatsAppWebhook(
   const currentStatus = existing.rows[0].status;
   const currentRank = STATUS_RANK[currentStatus] ?? 0;
   const incomingRank = STATUS_RANK[mapped] ?? 0;
-  // Block backwards transitions and re-applies of the same terminal.
-  // `failed` and `read` are siblings (rank 3) — neither converts to
-  // the other.
+  // Block backwards transitions and stale terminal arrivals:
+  //   * incomingRank < currentRank → strict regression (e.g. read→sent)
+  //   * `failed` is terminal — never overwrite it (re-apply same status
+  //     is fine but anything else is a stale event)
+  //   * `read` is terminal — same rule
+  //   * `delivered → failed` is rank-increasing (3 > 2) but is also a
+  //     stale Fonnte event: once the device confirmed delivery, a
+  //     later `failed` webhook is the gateway catching up to an old
+  //     send-time error. Applying it would corrupt a successfully
+  //     delivered message's record.
   if (
     incomingRank < currentRank ||
     (currentStatus === "failed" && mapped !== "failed") ||
-    (currentStatus === "read" && mapped !== "read")
+    (currentStatus === "read" && mapped !== "read") ||
+    (currentStatus === "delivered" && mapped === "failed")
   ) {
     return { updated: false, whatsappId: existing.rows[0].id, status: currentStatus };
   }

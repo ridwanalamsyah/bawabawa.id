@@ -397,6 +397,20 @@ describe("applyWhatsAppWebhook", () => {
     expect(c.rows[0].status).toBe("failed");
   });
 
+  it("blocks delivered → failed (stale failure after device confirmed delivery)", async () => {
+    // Real Fonnte scenario: delivery webhook arrives first, then a
+    // late `failed` webhook (the gateway catching up to an old
+    // send-time error). Once delivered=true the failure is stale and
+    // must not corrupt the row.
+    const c = makeFakeClient();
+    await enqueueWhatsApp(c, { to: "+6281234567890", message: "x" });
+    c.rows[0].provider_message_id = "msg_xyz";
+    c.rows[0].status = "delivered";
+    const r = await applyWhatsAppWebhook(c, { id: "msg_xyz", status: "failed" });
+    expect(r.updated).toBe(false);
+    expect(c.rows[0].status).toBe("delivered");
+  });
+
   it("read terminal blocks transition to failed", async () => {
     const c = makeFakeClient();
     await enqueueWhatsApp(c, { to: "+6281234567890", message: "x" });
