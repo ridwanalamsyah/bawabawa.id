@@ -271,6 +271,32 @@ describe("redeemVoucher", () => {
     ).rejects.toMatchObject({ code: "VOUCHER_REDEEM_RACE" });
   });
 
+  it("rejects redemption when per-user limit already consumed on prior commit", async () => {
+    // Simulate the race: a prior committed redemption exists for this
+    // customer. The redeemVoucher post-INSERT recount should detect it and
+    // throw VOUCHER_PER_USER_LIMIT_RACE (vs. the stale pre-check in
+    // validateAndCompute which was the TOCTOU attack surface).
+    const client = makeFakeClient([{ code: "PROMO10", per_user_limit: 1 }]);
+    const v = client.state.vouchers[0];
+    // Seed a prior redemption from an earlier (committed) transaction.
+    client.state.redemptions.push({
+      id: "r-prior",
+      voucher_id: v.id,
+      order_id: "order-prior",
+      customer_id: "cust-1",
+      discount_applied: 10
+    });
+    await expect(
+      redeemVoucher(client, {
+        voucherId: v.id,
+        orderId: "order-1",
+        customerId: "cust-1",
+        discountApplied: 10,
+        perUserLimit: 1
+      })
+    ).rejects.toMatchObject({ code: "VOUCHER_PER_USER_LIMIT_RACE" });
+  });
+
   it("serializes concurrent redeems via atomic update", async () => {
     // Simulate 5 concurrent redeems on a max_uses=2 voucher. Only 2 should
     // succeed; the other 3 must get VOUCHER_REDEEM_RACE. Without the atomic
