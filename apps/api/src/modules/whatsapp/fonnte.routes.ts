@@ -60,13 +60,18 @@ fonnteRouter.post(
       .then(async (input) => {
         const config = configFromEnv();
         if (!config) return notConfigured(res);
-        // Run the entire enqueue+send in one transaction so the row's
-        // FOR UPDATE lock in sendQueuedWhatsApp is held end-to-end.
-        const { whatsappId, result } = await withTransaction(async (client) => {
-          const { whatsappId: id } = await enqueueWhatsApp(client, input);
-          const r = await sendQueuedWhatsApp(client, config, id);
-          return { whatsappId: id, result: r };
-        });
+        // Two-phase commit pattern (mirrors resend.routes): the row
+        // MUST be persisted before we hit Fonnte, otherwise a crash
+        // between INSERT and UPDATE-after-send leaves a delivered
+        // message with no audit trail. Phase 1 commits the pending
+        // row; phase 2 attempts the send. If phase 2 throws, the
+        // row remains `pending` and the next flush will retry it.
+        const { whatsappId } = await withTransaction((client) =>
+          enqueueWhatsApp(client, input)
+        );
+        const result = await withTransaction((client) =>
+          sendQueuedWhatsApp(client, config, whatsappId)
+        );
         await logAudit({
           actorId: req.user?.sub,
           action: result.delivered ? "whatsapp.send" : "whatsapp.send.failed",
@@ -198,7 +203,19 @@ fonnteWebhookRouter.post(
         });
         return;
       }
-      const event = req.body as FonnteWebhookEvent;
+      const event = req.body as FonnteWebhookEvent | null | undefined;
+      // Reject malformed bodies early — same shape as the BiteShip /
+      // Resend webhooks (mismatched Content-Type, empty body, etc.
+      // should yield 400 not 500). At minimum we need a message id;
+      // without it the lookup in applyWhatsAppWebhook is trivially
+      // a no-op anyway.
+      if (!event || (!event.id && !event.messageid)) {
+        res.status(400).json({
+          success: false,
+          error: { code: "INVALID_PAYLOAD", message: "id atau messageid wajib diisi" }
+        });
+        return;
+      }
       // Wrap in a transaction so the SELECT ... FOR UPDATE inside
       // applyWhatsAppWebhook actually holds the row lock end-to-end
       // (otherwise each pool.query would run in its own implicit tx
