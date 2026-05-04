@@ -170,9 +170,13 @@ export async function redeemVoucher(
     orderId: string;
     customerId?: string;
     discountApplied: number;
+    perUserLimit?: number | null;
   }
 ) {
   // Atomic used_count increment guarded against over-redemption races.
+  // The UPDATE acquires a row lock on this voucher that serializes all
+  // concurrent redeemVoucher calls — so the post-INSERT per-user recount
+  // below sees all previously-committed redemptions for this customer.
   const update = await client.query(
     `UPDATE vouchers
         SET used_count = used_count + 1
@@ -197,5 +201,28 @@ export async function redeemVoucher(
       input.discountApplied
     ]
   );
+
+  // Per-user limit enforcement: validateAndCompute's pre-check is a TOCTOU
+  // guard only (two concurrent transactions for different orders by the same
+  // customer both read count=0). Re-count NOW, after the serializing UPDATE
+  // above has acquired the voucher row lock — any redemption committed by
+  // an earlier concurrent transaction will be visible. If we're over the
+  // limit, throw to roll back the enclosing transaction (undoing both the
+  // UPDATE and the INSERT above).
+  if (input.perUserLimit != null && input.customerId) {
+    const usage = await client.query<{ count: string | number }>(
+      "SELECT COUNT(*) AS count FROM voucher_redemptions WHERE voucher_id = $1 AND customer_id = $2",
+      [input.voucherId, input.customerId]
+    );
+    const used = Number(usage.rows[0]?.count ?? 0);
+    if (used > input.perUserLimit) {
+      throw new AppError(
+        409,
+        "VOUCHER_PER_USER_LIMIT_RACE",
+        `Batas pemakaian per-user voucher sudah tercapai (${input.perUserLimit})`
+      );
+    }
+  }
+
   return { redemptionId };
 }
