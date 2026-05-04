@@ -248,6 +248,23 @@ const STATUS_MAP: Record<string, string> = {
   returned: "cancelled"
 };
 
+/**
+ * Linear ordering for the shipment lifecycle. A webhook delivery for a
+ * status with rank < current status is a stale / out-of-order delivery
+ * (e.g. a delayed `dropping_off` arriving after we already saw
+ * `delivered`) and must be ignored — applying it would regress the row
+ * and overwrite the terminal `raw_payload` with stale data. `delivered`
+ * and `cancelled` are terminal: nothing transitions out of them.
+ */
+const STATUS_RANK: Record<string, number> = {
+  pending: 0,
+  confirmed: 1,
+  picked: 2,
+  in_transit: 3,
+  delivered: 4,
+  cancelled: 4
+};
+
 export async function applyShipmentWebhook(
   qc: QueryClient,
   payload: BiteshipWebhookPayload
@@ -260,28 +277,46 @@ export async function applyShipmentWebhook(
     : "in_transit";
   const waybill = payload.courier_waybill_id ?? payload.waybill_id ?? null;
 
-  const update = await qc.query<{ id: string }>(
+  // Lock the row so the rank check + UPDATE are atomic. Without FOR
+  // UPDATE two concurrent webhook deliveries could both pass the guard
+  // and the lower-ranked one could land last (lost-update race).
+  const existing = await qc.query<{ id: string; status: string }>(
+    `SELECT id, status FROM shipments
+      WHERE provider = $1 AND external_id = $2
+      FOR UPDATE`,
+    ["biteship", payload.order_id]
+  );
+  if (existing.rowCount === 0) {
+    // Webhook for a shipment we never booked (likely forged or for a
+    // different ERP instance). Return 200 silently — the signature
+    // check upstream is the security boundary.
+    return { shipmentId: "", status: normalized, updated: false };
+  }
+  const currentStatus = existing.rows[0].status;
+  const currentRank = STATUS_RANK[currentStatus] ?? 0;
+  const incomingRank = STATUS_RANK[normalized] ?? 0;
+  // Reject backwards transitions and re-applies of the same terminal
+  // state. `cancelled` (rank 4) and `delivered` (rank 4) are siblings
+  // — neither can transition into the other, so use strict `>`.
+  if (
+    incomingRank < currentRank ||
+    (currentStatus === "delivered" && normalized !== "delivered") ||
+    (currentStatus === "cancelled" && normalized !== "cancelled")
+  ) {
+    return { shipmentId: existing.rows[0].id, status: currentStatus, updated: false };
+  }
+
+  await qc.query(
     `UPDATE shipments
         SET status = $1,
             waybill_id = COALESCE($2, waybill_id),
             raw_payload = $3,
             updated_at = NOW()
-      WHERE provider = $4 AND external_id = $5`,
-    [normalized, waybill, JSON.stringify(payload), "biteship", payload.order_id]
-  );
-  if (update.rowCount === 0) {
-    // Webhook arrived before our INSERT (rare race) or for a shipment we
-    // never booked (forged). Either way, we return 200 silently — the
-    // signature check upstream is the security boundary.
-    return { shipmentId: "", status: normalized, updated: false };
-  }
-  // Resolve the shipment id for the audit log.
-  const found = await qc.query<{ id: string }>(
-    "SELECT id FROM shipments WHERE provider = $1 AND external_id = $2",
-    ["biteship", payload.order_id]
+      WHERE id = $4`,
+    [normalized, waybill, JSON.stringify(payload), existing.rows[0].id]
   );
   return {
-    shipmentId: found.rowCount ? found.rows[0].id : "",
+    shipmentId: existing.rows[0].id,
     status: normalized,
     updated: true
   };

@@ -229,14 +229,14 @@ describe("bookShipment", () => {
 });
 
 describe("applyShipmentWebhook", () => {
-  function makeFakeClient() {
+  function makeFakeClient(initialStatus: string = "confirmed") {
     const state = {
       shipments: [
         {
           id: "ship-1",
           provider: "biteship",
           external_id: "ext-1",
-          status: "confirmed",
+          status: initialStatus,
           waybill_id: null as string | null
         }
       ]
@@ -248,24 +248,25 @@ describe("applyShipmentWebhook", () => {
         params: any[] = []
       ): Promise<{ rows: Row[]; rowCount: number }> {
         const t = sql.trim();
-        if (/^UPDATE shipments/i.test(t)) {
-          const [status, waybill, , provider, externalId] = params;
-          const s = state.shipments.find(
-            (x) => x.provider === provider && x.external_id === externalId
-          );
-          if (!s) return { rows: [], rowCount: 0 };
-          s.status = status;
-          if (waybill) s.waybill_id = waybill;
-          return { rows: [], rowCount: 1 };
-        }
-        if (/^SELECT id FROM shipments/i.test(t)) {
+        if (/^SELECT id, status FROM shipments/i.test(t)) {
           const [provider, externalId] = params;
           const s = state.shipments.find(
             (x) => x.provider === provider && x.external_id === externalId
           );
           return s
-            ? { rows: [{ id: s.id } as unknown as Row], rowCount: 1 }
+            ? {
+                rows: [{ id: s.id, status: s.status } as unknown as Row],
+                rowCount: 1
+              }
             : { rows: [], rowCount: 0 };
+        }
+        if (/^UPDATE shipments/i.test(t)) {
+          const [status, waybill, , id] = params;
+          const s = state.shipments.find((x) => x.id === id);
+          if (!s) return { rows: [], rowCount: 0 };
+          s.status = status;
+          if (waybill) s.waybill_id = waybill;
+          return { rows: [], rowCount: 1 };
         }
         throw new Error(`unmocked: ${t.slice(0, 80)}`);
       }
@@ -305,5 +306,49 @@ describe("applyShipmentWebhook", () => {
     await expect(
       applyShipmentWebhook(client, { order_id: "" as string, status: "delivered" })
     ).rejects.toMatchObject({ code: "INVALID_PAYLOAD" });
+  });
+
+  it("does NOT regress delivered → in_transit on out-of-order webhook delivery", async () => {
+    // Real scenario: courier app fires `delivered` first; a delayed
+    // `dropping_off` retry arrives after. The earlier-stage event must
+    // not roll back the shipment row or overwrite the delivery payload.
+    const client = makeFakeClient("delivered");
+    const result = await applyShipmentWebhook(client, {
+      order_id: "ext-1",
+      status: "dropping_off"
+    });
+    expect(result.updated).toBe(false);
+    expect(result.status).toBe("delivered");
+    expect(client.state.shipments[0].status).toBe("delivered");
+  });
+
+  it("does NOT transition delivered → cancelled (terminal sibling)", async () => {
+    const client = makeFakeClient("delivered");
+    const result = await applyShipmentWebhook(client, {
+      order_id: "ext-1",
+      status: "cancelled"
+    });
+    expect(result.updated).toBe(false);
+    expect(client.state.shipments[0].status).toBe("delivered");
+  });
+
+  it("does NOT regress in_transit → confirmed", async () => {
+    const client = makeFakeClient("in_transit");
+    const result = await applyShipmentWebhook(client, {
+      order_id: "ext-1",
+      status: "confirmed"
+    });
+    expect(result.updated).toBe(false);
+    expect(client.state.shipments[0].status).toBe("in_transit");
+  });
+
+  it("allows forward transition confirmed → picked → in_transit → delivered", async () => {
+    const client = makeFakeClient("confirmed");
+    await applyShipmentWebhook(client, { order_id: "ext-1", status: "picked" });
+    expect(client.state.shipments[0].status).toBe("picked");
+    await applyShipmentWebhook(client, { order_id: "ext-1", status: "dropping_off" });
+    expect(client.state.shipments[0].status).toBe("in_transit");
+    await applyShipmentWebhook(client, { order_id: "ext-1", status: "delivered" });
+    expect(client.state.shipments[0].status).toBe("delivered");
   });
 });
