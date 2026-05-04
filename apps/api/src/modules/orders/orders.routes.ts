@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { authGuard, requirePermission } from "../../common/middleware/auth";
+import { idempotency } from "../../common/middleware/idempotency";
 import { AppError } from "../../common/errors/app-error";
 import { logAudit } from "../../common/audit/audit-log";
 import { OrdersService } from "./orders.service";
@@ -19,7 +20,7 @@ ordersRouter.get("/", authGuard, async (_req, res, next) => {
   }
 });
 
-ordersRouter.post("/", authGuard, requirePermission("orders:create"), (req, res, next) => {
+ordersRouter.post("/", authGuard, requirePermission("orders:create"), idempotency(), (req, res, next) => {
   z.object({
     customerId: z.string().uuid(),
     branchId: z.string().uuid(),
@@ -50,7 +51,7 @@ ordersRouter.post("/", authGuard, requirePermission("orders:create"), (req, res,
     .catch(next);
 });
 
-ordersRouter.post("/:id/payments", authGuard, (req, res, next) => {
+ordersRouter.post("/:id/payments", authGuard, idempotency(), (req, res, next) => {
   try {
     const orderId = String(req.params.id);
     const status = z.enum(["payment_dp", "payment_paid"]).parse(req.body.status);

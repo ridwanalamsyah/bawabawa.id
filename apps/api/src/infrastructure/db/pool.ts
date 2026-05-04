@@ -30,6 +30,11 @@ export async function getPool(): Promise<DbClient> {
           (_, intv: string) => `datetime('now', '+${intv}')`
         );
         translated = translated.replace(/\bNOW\(\)/gi, "CURRENT_TIMESTAMP");
+        // Postgres's null-safe comparison has no SQLite equivalent beyond `IS`.
+        translated = translated.replace(/\bIS NOT DISTINCT FROM\b/gi, "IS");
+        // Strip Postgres type casts like `$1::uuid` / `value::text` — SQLite is
+        // untyped so the cast is always a no-op in dev/test.
+        translated = translated.replace(/::\s*[a-zA-Z_][a-zA-Z0-9_]*/g, "");
         const positional: any[] = [];
         const normalized = translated.replace(/\$(\d+)/g, (_, n: string) => {
           const idx = parseInt(n, 10) - 1;

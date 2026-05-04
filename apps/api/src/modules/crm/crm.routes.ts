@@ -2,11 +2,12 @@ import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { z } from "zod";
 import { authGuard } from "../../common/middleware/auth";
+import { idempotency } from "../../common/middleware/idempotency";
 import { getPool } from "../../infrastructure/db/pool";
 
 const crmRouter = Router();
 
-crmRouter.post("/customers", authGuard, async (req, res, next) => {
+crmRouter.post("/customers", authGuard, idempotency(), async (req, res, next) => {
   try {
     const payload = z
       .object({
@@ -41,7 +42,7 @@ crmRouter.get("/customers", authGuard, async (_req, res, next) => {
   }
 });
 
-crmRouter.post("/leads", authGuard, async (req, res, next) => {
+crmRouter.post("/leads", authGuard, idempotency(), async (req, res, next) => {
   try {
     const payload = z
       .object({
