@@ -21,13 +21,28 @@ export async function getPool(): Promise<DbClient> {
     const db = await getSqliteDb();
     return {
       async query(sql: string, params?: any[]) {
-        const normalized = sql.replace(/\$\d+/g, "?");
+        // Translate Postgres-isms the codebase relies on into SQLite syntax.
+        // Repeated $N placeholders need separate positional bindings, NOW()
+        // doesn't exist, and `NOW() + INTERVAL '<n> days'` becomes
+        // `datetime('now', '+<n> days')`.
+        let translated = sql.replace(
+          /\bNOW\(\)\s*\+\s*INTERVAL\s*'([^']+)'/gi,
+          (_, intv: string) => `datetime('now', '+${intv}')`
+        );
+        translated = translated.replace(/\bNOW\(\)/gi, "CURRENT_TIMESTAMP");
+        const positional: any[] = [];
+        const normalized = translated.replace(/\$(\d+)/g, (_, n: string) => {
+          const idx = parseInt(n, 10) - 1;
+          positional.push(params?.[idx]);
+          return "?";
+        });
+        const args = positional.length ? positional : params ?? [];
         const head = normalized.trim().toUpperCase();
         if (head.startsWith("SELECT") || head.startsWith("WITH") || head.startsWith("PRAGMA")) {
-          const rows = await db.all(normalized, params ?? []);
+          const rows = await db.all(normalized, args);
           return { rows, rowCount: rows.length };
         }
-        const result = await db.run(normalized, params ?? []);
+        const result = await db.run(normalized, args);
         return { rows: [], rowCount: Number(result?.changes ?? 0) };
       },
       async end() {
@@ -99,8 +114,18 @@ async function createTestSchema() {
       status TEXT NOT NULL DEFAULT 'active',
       approved_at DATETIME,
       approved_by TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      deleted_at DATETIME
+    );
+
+    CREATE TABLE IF NOT EXISTS user_sessions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      refresh_token_hash TEXT NOT NULL,
+      expires_at DATETIME NOT NULL,
+      revoked_at DATETIME,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Create test user if not exists

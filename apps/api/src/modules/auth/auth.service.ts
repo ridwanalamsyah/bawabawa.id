@@ -361,10 +361,45 @@ export class AuthService {
         throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token tidak valid");
       }
 
-      await (await getPool()).query(
-        "UPDATE user_sessions SET revoked_at = NOW() WHERE id = $1",
-        [matchedSession.id]
+      // Re-check the user is still allowed to hold tokens. Without this, an
+      // admin suspending an account has no effect until the current refresh
+      // token naturally expires (up to 7 days), because /auth/refresh would
+      // happily mint new access+refresh pairs forever.
+      const pool = await getPool();
+      const userRow = await pool.query<{ status: string | null; is_active: boolean | number | null }>(
+        `SELECT status, is_active
+           FROM users
+          WHERE id = $1 AND deleted_at IS NULL
+          LIMIT 1`,
+        [payload.sub]
       );
+      const user = userRow.rows[0];
+      // Postgres returns boolean for is_active; SQLite returns 0/1 INTEGER.
+      // Coerce via truthiness so both drivers reject deactivated rows.
+      const isUsable =
+        !!user &&
+        Boolean(user.is_active) &&
+        (user.status == null || user.status === "active");
+      if (!isUsable) {
+        // Revoke the session that just authenticated so a stolen refresh
+        // token can't be replayed after the user is reactivated.
+        try {
+          await pool.query("UPDATE user_sessions SET revoked_at = NOW() WHERE id = $1", [
+            matchedSession.id
+          ]);
+        } catch (revokeErr) {
+          console.error("Session revoke failed during suspended-user refresh:", revokeErr);
+        }
+        throw new AppError(
+          403,
+          "ACCOUNT_NOT_ACTIVE",
+          "Akun tidak aktif. Silakan hubungi admin."
+        );
+      }
+
+      await pool.query("UPDATE user_sessions SET revoked_at = NOW() WHERE id = $1", [
+        matchedSession.id
+      ]);
 
       const accessToken = jwt.sign({ sub: payload.sub }, ACCESS_SECRET, {
         expiresIn: "15m"
@@ -373,13 +408,14 @@ export class AuthService {
         expiresIn: "7d"
       });
       const refreshHash = await argon2.hash(newRefreshToken);
-      await (await getPool()).query(
+      await pool.query(
         `INSERT INTO user_sessions (id, user_id, refresh_token_hash, expires_at)
          VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
         [randomUUID(), payload.sub, refreshHash]
       );
       return { accessToken, refreshToken: newRefreshToken };
-    } catch {
+    } catch (err) {
+      if (err instanceof AppError) throw err;
       throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token tidak valid");
     }
   }
@@ -555,11 +591,22 @@ export class AuthService {
     }
 
     const pool = await getPool();
+    // Prefer the (oauth_provider, oauth_subject) match — that's the
+    // authoritative identity link Google issues. Falling back to email lets
+    // a previously-seeded admin row get linked to its Google identity on
+    // first sign-in. COALESCE-to-FALSE is required because Postgres orders
+    // NULLs FIRST on DESC by default — without it, a row with
+    // oauth_provider IS NULL would compute sub_match=NULL and sort ahead of
+    // the genuine TRUE match, causing the next UPDATE to violate
+    // users_oauth_provider_subject_uq.
     const existing = await (pool as any).query(
-      `SELECT id, email, full_name, division, status
+      `SELECT id, email, full_name, division, status,
+              COALESCE(oauth_provider = 'google' AND oauth_subject = $1, FALSE) AS sub_match
        FROM users
-       WHERE (oauth_provider = 'google' AND oauth_subject = $1)
-          OR LOWER(email) = LOWER($2)
+       WHERE ((oauth_provider = 'google' AND oauth_subject = $1)
+              OR LOWER(email) = LOWER($2))
+         AND deleted_at IS NULL
+       ORDER BY sub_match DESC, created_at ASC
        LIMIT 1`,
       [args.sub, args.email]
     );
