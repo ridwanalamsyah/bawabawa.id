@@ -35,6 +35,9 @@ export async function getPool(): Promise<DbClient> {
         // Strip Postgres type casts like `$1::uuid` / `value::text` — SQLite is
         // untyped so the cast is always a no-op in dev/test.
         translated = translated.replace(/::\s*[a-zA-Z_][a-zA-Z0-9_]*/g, "");
+        // SQLite has no `SELECT ... FOR UPDATE`; its file-level locking
+        // serializes writes implicitly, so stripping the clause is safe.
+        translated = translated.replace(/\bFOR\s+UPDATE\b/gi, "");
         const positional: any[] = [];
         const normalized = translated.replace(/\$(\d+)/g, (_, n: string) => {
           const idx = parseInt(n, 10) - 1;

@@ -18,6 +18,12 @@ import { getPool } from "../../infrastructure/db/pool";
 
 const NULL_ACTOR_SENTINEL = "00000000-0000-0000-0000-000000000000";
 const PENDING_STATUS = 0;
+/**
+ * Any pending sentinel row older than this is considered abandoned (handler
+ * crashed / process died before the UPDATE landed). A fresh request with the
+ * same key may reclaim it so the key isn't permanently locked.
+ */
+const PENDING_STALENESS_MS = 60_000;
 
 const TABLE_CREATED = { done: false };
 async function ensureTable() {
@@ -127,8 +133,9 @@ export function idempotency(_options: IdempotencyOptions = {}) {
           request_hash: string;
           status_code: number;
           response_json: string;
+          created_at: string;
         }>(
-          `SELECT request_hash, status_code, response_json
+          `SELECT request_hash, status_code, response_json, created_at
              FROM idempotent_responses
             WHERE key = $1 AND actor_id IS NOT DISTINCT FROM $2
               AND method = $3 AND path = $4
@@ -153,6 +160,24 @@ export function idempotency(_options: IdempotencyOptions = {}) {
           return;
         }
         if (row.status_code === PENDING_STATUS) {
+          // If the sentinel is older than PENDING_STALENESS_MS, treat it as
+          // abandoned (handler crashed / process died before promoting the
+          // row to its final status). Delete it and fall through so the
+          // current request can reclaim the key — otherwise the key would
+          // be blocked forever with 425s.
+          const ageMs = Date.now() - new Date(row.created_at).getTime();
+          if (Number.isFinite(ageMs) && ageMs > PENDING_STALENESS_MS) {
+            await db
+              .query(
+                `DELETE FROM idempotent_responses
+                   WHERE key = $1 AND actor_id IS NOT DISTINCT FROM $2
+                     AND method = $3 AND path = $4 AND status_code = $5`,
+                [key, actorId, method, path, PENDING_STATUS]
+              )
+              .catch((err) => console.error("idempotency stale cleanup failed:", err));
+            next();
+            return;
+          }
           res.status(425).json({
             success: false,
             error: {
@@ -169,29 +194,43 @@ export function idempotency(_options: IdempotencyOptions = {}) {
       // Step 2: we claimed the slot. Wrap res.json so the real response is
       // persisted synchronously before the client sees it — guaranteeing a
       // subsequent retry hits the cached result, not the pending sentinel.
+      // res.json's return value is unused across this codebase, so the async
+      // wrapper is safe even though Express typings declare it sync.
       const originalJson = res.json.bind(res) as Response["json"];
-      (res as any).json = (body: unknown) => {
+      (res as any).json = async (body: unknown) => {
         const statusCode = res.statusCode || 200;
         const payload = JSON.stringify(body);
-        if (statusCode >= 200 && statusCode < 300) {
-          // Successful: promote the pending row to the final cached response.
-          db.query(
-            `UPDATE idempotent_responses
-                SET status_code = $1, response_json = $2
-              WHERE id = $3`,
-            [statusCode, payload, claimId]
-          ).catch((err) => {
-            console.error("idempotency cache update failed:", err);
-          });
-        } else {
-          // Handler errored; drop the sentinel so the client (or another
-          // actor) can legitimately retry the same key.
-          db.query(
-            `DELETE FROM idempotent_responses WHERE id = $1 AND status_code = $2`,
-            [claimId, PENDING_STATUS]
-          ).catch((err) => {
-            console.error("idempotency sentinel cleanup failed:", err);
-          });
+        try {
+          if (statusCode >= 200 && statusCode < 300) {
+            // Successful: promote the pending row to the final cached
+            // response BEFORE the client sees it, so retries hit the cache.
+            await db.query(
+              `UPDATE idempotent_responses
+                  SET status_code = $1, response_json = $2
+                WHERE id = $3`,
+              [statusCode, payload, claimId]
+            );
+          } else {
+            // Handler errored; drop the sentinel so the client (or another
+            // actor) can legitimately retry the same key.
+            await db.query(
+              `DELETE FROM idempotent_responses WHERE id = $1 AND status_code = $2`,
+              [claimId, PENDING_STATUS]
+            );
+          }
+        } catch (err) {
+          // Cache persistence failed — best-effort drop the pending sentinel
+          // so the key isn't locked permanently. Stale-cleanup in the
+          // conflict branch is the secondary safety net if this also fails.
+          console.error("idempotency cache persist failed:", err);
+          await db
+            .query(
+              `DELETE FROM idempotent_responses WHERE id = $1 AND status_code = $2`,
+              [claimId, PENDING_STATUS]
+            )
+            .catch((cleanupErr) =>
+              console.error("idempotency sentinel cleanup also failed:", cleanupErr)
+            );
         }
         return originalJson(body);
       };
