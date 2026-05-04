@@ -1,6 +1,11 @@
 import { AppError } from "../../common/errors/app-error";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
 import { OrdersService } from "./orders.service";
+import {
+  consumeForOrder,
+  releaseForOrder,
+  reserveForOrder
+} from "../inventory/reservation.service";
 import { randomUUID } from "node:crypto";
 
 export class WorkflowService {
@@ -64,7 +69,56 @@ export class WorkflowService {
       if (order.status !== "payment_paid") {
         throw new AppError(409, "PAYMENT_NOT_SETTLED", "Pembayaran belum lunas");
       }
+
+      const items = await client.query<{ product_id: string; qty: number }>(
+        "SELECT product_id, qty FROM order_items WHERE order_id = $1",
+        [orderId]
+      );
+      if (items.rowCount > 0) {
+        await reserveForOrder(
+          client,
+          orderId,
+          items.rows.map((row) => ({ productId: row.product_id, qty: Number(row.qty) }))
+        );
+      }
+
       return this.ordersService.transition(orderId, "stock_reserved", client);
+    });
+  }
+
+  async shipOrder(orderId: string) {
+    return withTransaction(async (client) => {
+      const order = await this.ordersService.getById(orderId, client);
+      if (!order) {
+        throw new AppError(404, "ORDER_NOT_FOUND", "Order tidak ditemukan");
+      }
+      if (order.status !== "packed") {
+        throw new AppError(409, "ORDER_NOT_PACKED", "Order belum di-pack");
+      }
+      await consumeForOrder(client, orderId);
+      return this.ordersService.transition(orderId, "shipped", client);
+    });
+  }
+
+  async cancelOrder(orderId: string) {
+    return withTransaction(async (client) => {
+      const order = await this.ordersService.getById(orderId, client);
+      if (!order) {
+        throw new AppError(404, "ORDER_NOT_FOUND", "Order tidak ditemukan");
+      }
+      const cancellable = [
+        "draft",
+        "confirmed",
+        "payment_pending",
+        "payment_dp",
+        "payment_paid",
+        "stock_reserved"
+      ];
+      if (!cancellable.includes(order.status)) {
+        throw new AppError(409, "ORDER_NOT_CANCELLABLE", "Order tidak bisa dibatalkan pada status ini");
+      }
+      await releaseForOrder(client, orderId);
+      return this.ordersService.transition(orderId, "cancelled", client);
     });
   }
 

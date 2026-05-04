@@ -74,7 +74,30 @@ ordersRouter.post("/:id/pack", authGuard, async (req, res, next) => {
 
 ordersRouter.post("/:id/ship", authGuard, async (req, res, next) => {
   try {
-    const order = await service.transition(String(req.params.id), "shipped");
+    const order = await workflowService.shipOrder(String(req.params.id));
+    await logAudit({
+      actorId: req.user?.sub,
+      action: "orders.ship",
+      moduleName: "orders",
+      entityId: order?.id,
+      afterData: order
+    });
+    res.json({ success: true, data: order });
+  } catch (error) {
+    next(error);
+  }
+});
+
+ordersRouter.post("/:id/cancel", authGuard, requirePermission("orders:update"), async (req, res, next) => {
+  try {
+    const order = await workflowService.cancelOrder(String(req.params.id));
+    await logAudit({
+      actorId: req.user?.sub,
+      action: "orders.cancel",
+      moduleName: "orders",
+      entityId: order?.id,
+      afterData: order
+    });
     res.json({ success: true, data: order });
   } catch (error) {
     next(error);
