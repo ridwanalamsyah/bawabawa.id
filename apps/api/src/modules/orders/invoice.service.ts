@@ -252,11 +252,16 @@ export function renderInvoicePdf(data: InvoiceData): Readable {
   let cursorY = tableTop + 20;
   doc.fillColor("#000").fontSize(10);
   for (const item of data.items) {
+    // Render the name first and capture its bottom Y *before* the right-
+    // aligned columns reset doc.y to a single line height. Then advance the
+    // cursor by whichever column ended up taller so wrapped product names
+    // don't get overwritten by the next row.
     doc.text(item.name, colX.name, cursorY, { width: 260 });
+    const nameBottomY = doc.y;
     doc.text(String(item.qty), colX.qty, cursorY, { width: 50, align: "right" });
     doc.text(formatRupiah(item.unitPrice), colX.price, cursorY, { width: 80, align: "right" });
     doc.text(formatRupiah(item.subtotal), colX.subtotal, cursorY, { width: 75, align: "right" });
-    cursorY = doc.y + 4;
+    cursorY = Math.max(nameBottomY, doc.y) + 4;
     doc.y = cursorY;
   }
   if (!data.items.length) {

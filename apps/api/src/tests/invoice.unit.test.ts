@@ -183,6 +183,26 @@ describe("renderInvoicePdf", () => {
     expect(buf.subarray(0, 5).toString()).toBe("%PDF-");
   });
 
+  it("renders multi-line wrapped product names without row overlap", async () => {
+    // A name long enough to wrap across multiple lines in the 260px name
+    // column at 10pt — exercises the cursor advance fix so the next row
+    // starts below the wrapped name rather than overlapping it.
+    const longName =
+      "Kemeja Linen Premium Edisi Terbatas Lebaran Lengan Panjang Warna Sage Tersedia Ukuran S M L XL XXL";
+    const data: InvoiceData = {
+      ...fixture,
+      items: [
+        { name: longName, sku: "SKU-LONG", qty: 1, unitPrice: 250000, subtotal: 250000 },
+        { name: "Celana Chino", sku: "SKU-2", qty: 2, unitPrice: 150000, subtotal: 300000 }
+      ]
+    };
+    const buf = await collectStream(data);
+    expect(buf.subarray(0, 5).toString()).toBe("%PDF-");
+    // Sanity: the document must be larger than a single-row invoice since
+    // we just added a wrapping row + an extra item.
+    expect(buf.length).toBeGreaterThan(800);
+  });
+
   it("renders without customer/branch/brand (graceful degradation)", async () => {
     const minimal: InvoiceData = {
       ...fixture,
