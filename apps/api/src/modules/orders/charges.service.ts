@@ -18,7 +18,9 @@ export type ComputeTotalsInput = {
   /**
    * When true, the `subtotal` already includes tax (harga sudah termasuk
    * PPN) and we back-solve `tax_amount` out of it rather than stacking it
-   * on top. Service charge is still applied on the net (pre-tax) basis.
+   * on top. Service charge is applied on the *net* (pre-tax) post-discount
+   * amount in this mode, then re-added to the tax-inclusive total — see the
+   * formulas in the docstring below.
    */
   taxInclusive?: boolean;
 };
@@ -44,13 +46,21 @@ function round2(n: number): number {
  * service-charge rate + optional tax rate. Pure function — no DB access,
  * no side effects. Contract:
  *
- *   post_discount       = subtotal - discount
- *   service_charge_amt  = round(post_discount * service_charge_rate)
- *   taxable_base        = post_discount + service_charge_amt
- *   tax_amount          = round(taxable_base * tax_rate)      (tax exclusive)
- *                       = round(taxable_base - taxable_base / (1+tax_rate))  (tax inclusive)
- *   total_amount        = taxable_base + tax_amount            (tax exclusive)
- *                       = taxable_base                          (tax inclusive, tax already inside)
+ *   tax-exclusive (default):
+ *     post_discount       = subtotal - discount
+ *     service_charge_amt  = round(post_discount * service_charge_rate)
+ *     taxable_base        = post_discount + service_charge_amt
+ *     tax_amount          = round(taxable_base * tax_rate)
+ *     total_amount        = taxable_base + tax_amount
+ *
+ *   tax-inclusive (subtotal already contains PPN):
+ *     post_discount_gross = subtotal - discount
+ *     net_post_discount   = round(post_discount_gross / (1 + tax_rate))
+ *     service_charge_amt  = round(net_post_discount * service_charge_rate)  ← on NET
+ *     net_taxable_base    = net_post_discount + service_charge_amt
+ *     tax_amount          = round(net_taxable_base * tax_rate)
+ *     total_amount        = round(net_taxable_base + tax_amount)
+ *     (taxable_base in the result is the gross-equivalent for display.)
  *
  * All monetary outputs are rounded to 2 decimal places.
  */
@@ -75,19 +85,29 @@ export function computeTotals(input: ComputeTotalsInput): ComputeTotalsResult {
     throw new AppError(422, "INVALID_TAX_RATE", "Tax rate harus 0-1 (contoh 0.11)");
   }
 
-  const postDiscount = round2(input.subtotal - discountAmount);
-  const serviceChargeAmount = round2(postDiscount * serviceChargeRate);
-  const taxableBase = round2(postDiscount + serviceChargeAmount);
+  const taxInclusive = Boolean(input.taxInclusive);
+  const postDiscountGross = round2(input.subtotal - discountAmount);
+
+  // Compute service charge on the NET (pre-tax) post-discount basis so the
+  // tax-inclusive flag doesn't double-count tax inside the service charge.
+  // For tax-exclusive mode netPostDiscount === postDiscountGross.
+  const netPostDiscount =
+    taxInclusive && taxRate > 0
+      ? round2(postDiscountGross / (1 + taxRate))
+      : postDiscountGross;
+  const serviceChargeAmount = round2(netPostDiscount * serviceChargeRate);
+  const netTaxableBase = round2(netPostDiscount + serviceChargeAmount);
 
   let taxAmount: number;
   let totalAmount: number;
-  const taxInclusive = Boolean(input.taxInclusive);
+  let taxableBase: number;
   if (taxInclusive && taxRate > 0) {
-    // Back-solve: taxableBase already contains the tax, so separate it out.
-    const pretax = round2(taxableBase / (1 + taxRate));
-    taxAmount = round2(taxableBase - pretax);
-    totalAmount = taxableBase;
+    taxAmount = round2(netTaxableBase * taxRate);
+    totalAmount = round2(netTaxableBase + taxAmount);
+    // Expose the gross-equivalent base for display parity with exclusive mode.
+    taxableBase = totalAmount;
   } else {
+    taxableBase = netTaxableBase;
     taxAmount = round2(taxableBase * taxRate);
     totalAmount = round2(taxableBase + taxAmount);
   }
@@ -117,14 +137,22 @@ export type ApplyChargesInput = {
  * order row, re-reads `subtotal` (or `total_amount` if subtotal is zero),
  * plus any existing `discount_amount`, computes the full breakdown, and
  * writes back all charge columns + the new `total_amount`.
+ *
+ * Optional rate fields are *partial-update* friendly: omitting a field
+ * preserves the value already stored on the order. Pass `0` (or `false`
+ * for taxInclusive) to explicitly clear a previously applied rate.
  */
 export async function applyCharges(client: QueryClient, input: ApplyChargesInput) {
   const row = await client.query<{
     subtotal: string;
     total_amount: string;
     discount_amount: string;
+    service_charge_rate: string | number | null;
+    tax_rate: string | number | null;
+    tax_inclusive: boolean | number | null;
   }>(
-    `SELECT subtotal, total_amount, discount_amount
+    `SELECT subtotal, total_amount, discount_amount,
+            service_charge_rate, tax_rate, tax_inclusive
        FROM orders WHERE id = $1 FOR UPDATE`,
     [input.orderId]
   );
@@ -138,12 +166,18 @@ export async function applyCharges(client: QueryClient, input: ApplyChargesInput
   const subtotal = storedSubtotal > 0 ? storedSubtotal : Number(row.rows[0].total_amount);
   const discountAmount = Number(row.rows[0].discount_amount);
 
+  // Preserve any previously-applied rates when the caller omits them.
+  // Explicit `0` / `false` from the caller still wins (clearing semantics).
+  const storedServiceRate = Number(row.rows[0].service_charge_rate ?? 0);
+  const storedTaxRate = Number(row.rows[0].tax_rate ?? 0);
+  const storedTaxInclusive = Boolean(row.rows[0].tax_inclusive);
+
   const totals = computeTotals({
     subtotal,
     discountAmount,
-    serviceChargeRate: input.serviceChargeRate,
-    taxRate: input.taxRate,
-    taxInclusive: input.taxInclusive
+    serviceChargeRate: input.serviceChargeRate ?? storedServiceRate,
+    taxRate: input.taxRate ?? storedTaxRate,
+    taxInclusive: input.taxInclusive ?? storedTaxInclusive
   });
 
   await client.query(
