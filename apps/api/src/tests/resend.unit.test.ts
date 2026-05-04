@@ -135,10 +135,15 @@ function makeFakeClient() {
         const [status, id] = params;
         const r = rows.find((x) => x.id === id);
         if (r) {
-          // Mirror the SQL guard exactly: terminal statuses ('sent' is
-          // also terminal because email.delivery_delayed → 'pending'
-          // would otherwise allow a re-send).
-          if (!["sent", "bounced", "complained", "failed"].includes(r.status)) {
+          // Mirror the SQL guard exactly:
+          //   1. bounced/complained/failed are terminal
+          //   2. sent → pending is blocked (delivery_delayed regression)
+          //   3. everything else applies
+          if (["bounced", "complained", "failed"].includes(r.status)) {
+            // no-op
+          } else if (r.status === "sent" && status === "pending") {
+            // no-op — block sent→pending regression
+          } else {
             r.status = status;
           }
         }
@@ -428,5 +433,37 @@ describe("applyEmailWebhook", () => {
     });
     expect(r.updated).toBe(true); // we ran the UPDATE — guard handled inside SQL
     expect(c.rows[0].status).toBe("sent"); // but the row didn't actually change
+  });
+
+  it("DOES allow sent → bounced (legitimate delayed bounce after initial 2xx)", async () => {
+    // Resend can return 202 (sent) and only later report a hard
+    // bounce via webhook. We must record the bounce so the operator
+    // sees the address as bad — silently keeping it `sent` would
+    // damage sender reputation.
+    const c = makeFakeClient();
+    await enqueueEmail(c, { to: "a@b.co", subject: "x", html: "<p>x</p>" });
+    c.rows[0].provider_message_id = "msg_xyz";
+    c.rows[0].status = "sent";
+    const r = await applyEmailWebhook(c, {
+      type: "email.bounced",
+      data: { email_id: "msg_xyz" }
+    });
+    expect(r).toEqual({ updated: true, emailId: c.rows[0].id, status: "bounced" });
+    expect(c.rows[0].status).toBe("bounced");
+  });
+
+  it("DOES allow sent → complained (spam complaint after delivery)", async () => {
+    // Recipient marked as spam — must be recorded for compliance and
+    // suppression-list management.
+    const c = makeFakeClient();
+    await enqueueEmail(c, { to: "a@b.co", subject: "x", html: "<p>x</p>" });
+    c.rows[0].provider_message_id = "msg_xyz";
+    c.rows[0].status = "sent";
+    const r = await applyEmailWebhook(c, {
+      type: "email.complained",
+      data: { email_id: "msg_xyz" }
+    });
+    expect(r.status).toBe("complained");
+    expect(c.rows[0].status).toBe("complained");
   });
 });
