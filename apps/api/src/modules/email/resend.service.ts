@@ -304,12 +304,16 @@ export async function applyEmailWebhook(
     [messageId]
   );
   if (!row.rowCount) return { updated: false };
-  // Only allow forward-ish transitions: never roll a 'sent' back to
-  // 'pending' on a delayed-delivery event for example.
+  // Forward-only transitions. `sent` is included in the guard because
+  // `EVENT_STATUS_MAP['email.delivery_delayed'] = 'pending'`, and a
+  // delayed-delivery webhook arriving after `email.delivered` would
+  // otherwise roll the row back to `pending` and let `flushOutbox`
+  // re-send it (duplicate delivery). `bounced`/`complained`/`failed`
+  // are terminal.
   await qc.query(
     `UPDATE email_outbox
         SET status = CASE
-              WHEN status IN ('bounced','complained','failed') THEN status
+              WHEN status IN ('sent','bounced','complained','failed') THEN status
               ELSE $1
             END,
             updated_at = NOW()

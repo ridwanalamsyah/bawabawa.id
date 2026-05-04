@@ -133,6 +133,11 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(20).optional(),
   RESEND_FROM_EMAIL: z.string().email().optional(),
   RESEND_REPLY_TO: z.string().email().optional(),
+  // Svix-style webhook signing secret from the Resend dashboard
+  // (Webhooks → Signing secret, format `whsec_...`). When unset the
+  // /webhooks/resend receiver fails closed (503) so a misconfigured
+  // deploy can't accept forged delivery-status events.
+  RESEND_WEBHOOK_SECRET: z.string().min(20).optional(),
   RESEND_BASE_URL: z
     .string()
     .url()
