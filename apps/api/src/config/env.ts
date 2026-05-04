@@ -100,9 +100,15 @@ const envSchema = z.object({
     .optional()
     .transform((value) => value !== false && value !== "false" && value !== "0"),
 
-  // BiteShip shipping API. Required for quote/book endpoints; webhook
-  // signature is verified using the same key. Endpoints return 503 if unset.
+  // BiteShip shipping API. Required for quote/book endpoints. Endpoints
+  // return 503 if unset. The webhook receiver authenticates using a
+  // separate `BITESHIP_WEBHOOK_TOKEN` (BiteShip does not sign webhook
+  // bodies — they recommend using a private URL token instead) and
+  // returns 503 if that is unset. Generate with `openssl rand -hex 32`
+  // and configure as a Bearer token in the BiteShip dashboard webhook
+  // settings (or include as `?token=` on the URL).
   BITESHIP_API_KEY: z.string().min(20).optional(),
+  BITESHIP_WEBHOOK_TOKEN: z.string().min(20).optional(),
   BITESHIP_BASE_URL: z
     .string()
     .url()

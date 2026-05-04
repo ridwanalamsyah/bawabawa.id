@@ -125,15 +125,70 @@ shippingRouter.post(
 const shippingWebhookRouter = Router();
 
 /**
+ * Constant-time comparison helper. Same pattern as
+ * `verifyMidtransSignature` — guards against timing oracles even though
+ * the secret is short.
+ */
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
+/**
+ * Extract the webhook token from either `Authorization: Bearer <token>`
+ * or a `?token=` query string parameter (BiteShip dashboard supports
+ * embedding the token in the webhook URL).
+ */
+function extractWebhookToken(req: import("express").Request): string {
+  const auth = req.header("authorization") ?? "";
+  const bearerMatch = auth.match(/^Bearer\s+(.+)$/i);
+  if (bearerMatch) return bearerMatch[1].trim();
+  const query = req.query?.token;
+  if (typeof query === "string" && query) return query;
+  return "";
+}
+
+/**
  * POST /api/v1/webhooks/biteship — BiteShip status update.
  *
- * Like Midtrans, this is unauthenticated by design — BiteShip authenticates
- * itself via a shared secret in a header. We only verify the body payload
- * structure and idempotently apply status updates. Returns 200 even for
- * unknown shipments (no retries are useful in that case).
+ * BiteShip does not sign webhook bodies, so we authenticate the caller
+ * using a pre-shared `BITESHIP_WEBHOOK_TOKEN` configured in the dashboard
+ * (either as a Bearer header or `?token=` URL parameter). Comparison is
+ * constant-time. Returns 503 if the token is not configured (so a
+ * misconfigured deployment fails closed instead of accepting forged
+ * payloads), 401 if the token is wrong, and 200 even for unknown
+ * shipments (no retries are useful in that case).
  */
 shippingWebhookRouter.post("/biteship", json({ limit: "100kb" }), async (req, res, next) => {
   try {
+    const env = loadEnv();
+    if (!env.BITESHIP_WEBHOOK_TOKEN) {
+      res.status(503).json({
+        success: false,
+        error: {
+          code: "BITESHIP_WEBHOOK_NOT_CONFIGURED",
+          message: "BiteShip webhook token tidak diset"
+        }
+      });
+      return;
+    }
+    const presented = extractWebhookToken(req);
+    if (!presented || !constantTimeEqual(presented, env.BITESHIP_WEBHOOK_TOKEN)) {
+      await logAudit({
+        action: "shipping.webhook.unauthorized",
+        moduleName: "orders",
+        afterData: { ip: req.ip ?? null, hasToken: Boolean(presented) }
+      });
+      res.status(401).json({
+        success: false,
+        error: { code: "INVALID_WEBHOOK_TOKEN", message: "Token webhook tidak valid" }
+      });
+      return;
+    }
     const payload = req.body as BiteshipWebhookPayload;
     if (!payload?.order_id) {
       res.status(400).json({
