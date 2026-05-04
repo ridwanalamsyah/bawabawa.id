@@ -153,7 +153,8 @@ applyVoucherRouter.post("/:id/voucher", authGuard, idempotency(), (req, res, nex
           voucherId: voucher.id,
           orderId,
           customerId: orderRow.rows[0].customer_id ?? undefined,
-          discountApplied: discount
+          discountApplied: discount,
+          perUserLimit: voucher.per_user_limit
         });
 
         await client.query(
