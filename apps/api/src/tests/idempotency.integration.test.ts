@@ -11,21 +11,10 @@ import { getPool } from "../infrastructure/db/pool";
 
 describe("idempotency middleware", () => {
   beforeAll(async () => {
-    // Ensure the idempotency table exists in SQLite before the test app boots.
+    // The middleware's own ensureTable() creates idempotent_responses on
+    // boot (surrogate id PK + unique expression index that handles NULL
+    // actor_id). We just need the customers table for CRM integration.
     const db = await getPool();
-    await db.query(
-      `CREATE TABLE IF NOT EXISTS idempotent_responses (
-         key TEXT NOT NULL,
-         actor_id TEXT,
-         method TEXT NOT NULL,
-         path TEXT NOT NULL,
-         request_hash TEXT NOT NULL,
-         status_code INTEGER NOT NULL,
-         response_json TEXT NOT NULL,
-         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-         PRIMARY KEY (key, actor_id, method, path)
-       )`
-    );
     await db.query(
       `CREATE TABLE IF NOT EXISTS customers (
          id TEXT PRIMARY KEY,
@@ -118,6 +107,48 @@ describe("idempotency middleware", () => {
     expect(resA.status).toBe(201);
     expect(resB.status).toBe(201);
     expect(resA.body.data.id).not.toBe(resB.body.data.id);
+  });
+
+  it("prevents duplicate resource creation under concurrent replay", async () => {
+    const userId = randomUUID();
+    const token = signToken(userId);
+    const key = `idem-race-${randomUUID()}`;
+    const body = {
+      name: "Race Customer",
+      phone: "08999999999",
+      branchId: randomUUID()
+    };
+
+    const app = createApp();
+    // Two requests fired concurrently with the same key. Exactly one should
+    // create the customer; the other must see either the cached response
+    // (same id) or an in-flight 425 — never a second distinct customer.
+    const [a, b] = await Promise.all([
+      request(app)
+        .post("/api/v1/crm/customers")
+        .set("Authorization", `Bearer ${token}`)
+        .set("x-idempotency-key", key)
+        .send(body),
+      request(app)
+        .post("/api/v1/crm/customers")
+        .set("Authorization", `Bearer ${token}`)
+        .set("x-idempotency-key", key)
+        .send(body)
+    ]);
+
+    const statuses = [a.status, b.status].sort();
+    const successes = [a, b].filter((r) => r.status === 201);
+    const inFlight = [a, b].filter((r) => r.status === 425);
+
+    // Either both succeeded with the same id (first completed before second
+    // arrived) or one succeeded and the other saw the in-flight sentinel.
+    expect(statuses[0]).toBeLessThanOrEqual(statuses[1]);
+    if (successes.length === 2) {
+      expect(successes[0].body.data.id).toBe(successes[1].body.data.id);
+    } else {
+      expect(successes).toHaveLength(1);
+      expect(inFlight).toHaveLength(1);
+    }
   });
 
   it("no-ops when header is absent (endpoints without required=true)", async () => {
