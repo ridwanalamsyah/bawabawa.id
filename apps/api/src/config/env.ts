@@ -98,7 +98,19 @@ const envSchema = z.object({
   OAUTH_REQUIRE_APPROVAL: z
     .union([z.string(), z.boolean()])
     .optional()
-    .transform((value) => value !== false && value !== "false" && value !== "0")
+    .transform((value) => value !== false && value !== "false" && value !== "0"),
+
+  // Midtrans payment gateway. Server key is used to verify webhook
+  // signatures; client key is exposed to the frontend Snap SDK. Both
+  // optional — when unset the webhook endpoint returns 503 and Snap is not
+  // mounted on the storefront. Sandbox keys start with `SB-Mid-` while
+  // production keys start with `Mid-`.
+  MIDTRANS_SERVER_KEY: z.string().min(20).optional(),
+  MIDTRANS_CLIENT_KEY: z.string().min(20).optional(),
+  MIDTRANS_IS_PRODUCTION: z
+    .union([z.string(), z.boolean()])
+    .optional()
+    .transform((value) => value === true || value === "true" || value === "1")
 }).superRefine((env, ctx) => {
   // Production deployments must use Google OAuth — no demo accounts allowed.
   if (env.NODE_ENV === "production") {
