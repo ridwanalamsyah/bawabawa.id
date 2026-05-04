@@ -80,26 +80,38 @@ function constantTimeEqual(a: string, b: string): boolean {
  *   2. Try to insert a payment row keyed by (gateway, transaction_id) — if
  *      a duplicate webhook arrives, the unique index makes this a no-op.
  *   3. When the new status is "succeeded", recompute the order's paid total
- *      and flip `payment_status` to "paid"/"partial"/"unpaid" accordingly.
+ *      and flip `payment_status` to "paid"/"dp"/"pending" accordingly.
  *
  * Caller must supply a transactional client so the lookup + insert + order
  * update commit atomically.
  */
+export type ProcessNotificationResult =
+  | {
+      ignored: false;
+      paymentId: string;
+      status: "succeeded" | "pending" | "failed";
+      duplicated: boolean;
+      orderId: string;
+    }
+  | {
+      ignored: true;
+      reason: "ORDER_NOT_FOUND";
+      orderRef: string;
+    };
+
 export async function processMidtransNotification(
   client: QueryClient,
   notification: MidtransNotification
-): Promise<{
-  paymentId: string;
-  status: "succeeded" | "pending" | "failed";
-  duplicated: boolean;
-  orderId: string;
-}> {
+): Promise<ProcessNotificationResult> {
   const orderRes = await client.query<{ id: string; total_amount: string }>(
     "SELECT id, total_amount FROM orders WHERE order_number = $1 FOR UPDATE",
     [notification.order_id]
   );
   if (!orderRes.rowCount) {
-    throw new AppError(404, "ORDER_NOT_FOUND", `Order ${notification.order_id} tidak ditemukan`);
+    // No-op for Midtrans — the route layer maps this to a 200 so Midtrans
+    // stops retrying. Throwing 404 here would trigger their retry loop
+    // until they give up (~24h of duplicate deliveries).
+    return { ignored: true, reason: "ORDER_NOT_FOUND", orderRef: notification.order_id };
   }
   const order = orderRes.rows[0];
   const status = mapMidtransStatus(notification.transaction_status, notification.fraud_status);
@@ -159,8 +171,10 @@ export async function processMidtransNotification(
   }
 
   // Recompute order payment_status from the current set of succeeded
-  // payments. Done as a single SQL summarization so concurrent partial
-  // payments don't drift.
+  // payments. Use the existing taxonomy `pending`/`dp`/`paid` so the rest
+  // of the system (Order type, dashboards, recordPayment) interprets the
+  // value correctly — NOT `unpaid`/`partial` which would silently break
+  // downstream filters.
   const sumRes = await client.query<{ total_paid: string | number | null }>(
     `SELECT COALESCE(SUM(amount), 0) AS total_paid FROM payments
        WHERE order_id = $1 AND status = 'succeeded'`,
@@ -168,14 +182,14 @@ export async function processMidtransNotification(
   );
   const totalPaid = Number(sumRes.rows[0]?.total_paid ?? 0);
   const totalAmount = Number(order.total_amount);
-  let paymentStatus: "paid" | "partial" | "unpaid";
+  let paymentStatus: "paid" | "dp" | "pending";
   if (totalPaid >= totalAmount && totalAmount > 0) paymentStatus = "paid";
-  else if (totalPaid > 0) paymentStatus = "partial";
-  else paymentStatus = "unpaid";
+  else if (totalPaid > 0) paymentStatus = "dp";
+  else paymentStatus = "pending";
   await client.query(
     "UPDATE orders SET payment_status = $1 WHERE id = $2",
     [paymentStatus, order.id]
   );
 
-  return { paymentId: resolvedPaymentId, status, duplicated, orderId: order.id };
+  return { ignored: false, paymentId: resolvedPaymentId, status, duplicated, orderId: order.id };
 }

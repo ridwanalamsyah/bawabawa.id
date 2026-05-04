@@ -172,29 +172,33 @@ describe("processMidtransNotification", () => {
       client,
       signedNotification({ order_id: "INV-001", gross_amount: "111000.00" })
     );
+    if (result.ignored) throw new Error("unexpected ignored");
     expect(result.status).toBe("succeeded");
     expect(result.duplicated).toBe(false);
     expect(client.state.payments).toHaveLength(1);
     expect(client.state.order.payment_status).toBe("paid");
   });
 
-  it("marks order partial when paid amount is less than total", async () => {
+  it("marks order 'dp' (partial) when paid amount is less than total", async () => {
+    // Uses the existing payment_status taxonomy `pending`/`dp`/`paid` so
+    // dashboards and recordPayment downstream stay consistent.
     const client = makeFakeClient({ order: { id: "o-1", total_amount: 111000 } });
     await processMidtransNotification(
       client,
       signedNotification({ gross_amount: "50000.00" })
     );
-    expect(client.state.order.payment_status).toBe("partial");
+    expect(client.state.order.payment_status).toBe("dp");
   });
 
-  it("keeps order unpaid when notification status is pending", async () => {
+  it("keeps order 'pending' when notification status is pending", async () => {
     const client = makeFakeClient({ order: { id: "o-1", total_amount: 111000 } });
     const result = await processMidtransNotification(
       client,
       signedNotification({ transaction_status: "pending" })
     );
+    if (result.ignored) throw new Error("unexpected ignored");
     expect(result.status).toBe("pending");
-    expect(client.state.order.payment_status).toBe("unpaid");
+    expect(client.state.order.payment_status).toBe("pending");
   });
 
   it("idempotent: duplicate transaction_id does not double-record", async () => {
@@ -204,6 +208,7 @@ describe("processMidtransNotification", () => {
       client,
       signedNotification({ transaction_id: "txn-dup" })
     );
+    if (second.ignored) throw new Error("unexpected ignored");
     expect(second.duplicated).toBe(true);
     expect(client.state.payments).toHaveLength(1);
     expect(client.state.order.payment_status).toBe("paid");
@@ -216,25 +221,28 @@ describe("processMidtransNotification", () => {
       client,
       signedNotification({ transaction_id: "txn-bt", transaction_status: "pending" })
     );
-    expect(client.state.order.payment_status).toBe("unpaid");
+    expect(client.state.order.payment_status).toBe("pending");
     // Same transaction_id later settles
     const second = await processMidtransNotification(
       client,
       signedNotification({ transaction_id: "txn-bt", transaction_status: "settlement" })
     );
+    if (second.ignored) throw new Error("unexpected ignored");
     expect(second.duplicated).toBe(true);
     expect(second.status).toBe("succeeded");
     expect(client.state.order.payment_status).toBe("paid");
   });
 
-  it("throws ORDER_NOT_FOUND when order missing", async () => {
+  it("returns ignored result for unknown order (no-op so Midtrans stops retrying)", async () => {
     const client = {
       async query() {
         return { rows: [], rowCount: 0 };
       }
     };
-    await expect(
-      processMidtransNotification(client, signedNotification({ order_id: "MISSING" }))
-    ).rejects.toMatchObject({ code: "ORDER_NOT_FOUND" });
+    const result = await processMidtransNotification(
+      client,
+      signedNotification({ order_id: "MISSING" })
+    );
+    expect(result).toEqual({ ignored: true, reason: "ORDER_NOT_FOUND", orderRef: "MISSING" });
   });
 });

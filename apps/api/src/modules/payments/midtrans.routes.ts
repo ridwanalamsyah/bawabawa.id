@@ -74,6 +74,23 @@ midtransRouter.post("/midtrans", json({ limit: "100kb" }), async (req, res, next
       processMidtransNotification(client, notification)
     );
 
+    if (result.ignored) {
+      // Unknown order — return 200 so Midtrans stops retrying. This is the
+      // documented no-op contract; the audit log still records the event so
+      // operators can investigate stale webhook deliveries.
+      await logAudit({
+        action: "payments.midtrans.notification.ignored",
+        moduleName: "orders",
+        afterData: {
+          reason: result.reason,
+          orderRef: result.orderRef,
+          transactionId: notification.transaction_id
+        }
+      });
+      res.json({ success: true, data: { ignored: true, reason: result.reason } });
+      return;
+    }
+
     await logAudit({
       action: "payments.midtrans.notification",
       moduleName: "orders",
