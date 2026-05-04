@@ -142,7 +142,22 @@ const envSchema = z.object({
     .string()
     .url()
     .optional()
-    .default("https://api.resend.com")
+    .default("https://api.resend.com"),
+
+  // Fonnte WhatsApp gateway. When unset, /api/v1/whatsapp/fonnte
+  // endpoints return 503 and the outbox flush is a no-op. Get a device
+  // token from https://md.fonnte.com (one device per number). The
+  // webhook secret is a separate value the operator configures in
+  // Fonnte's dashboard for their incoming-message webhook URL — when
+  // unset, the receiver fails closed (503) so a misconfigured deploy
+  // can't accept forged messages.
+  FONNTE_DEVICE_TOKEN: z.string().min(20).optional(),
+  FONNTE_WEBHOOK_TOKEN: z.string().min(20).optional(),
+  FONNTE_BASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://api.fonnte.com")
 }).superRefine((env, ctx) => {
   // Production deployments must use Google OAuth — no demo accounts allowed.
   if (env.NODE_ENV === "production") {
