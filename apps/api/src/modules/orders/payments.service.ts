@@ -47,8 +47,11 @@ export async function splitOrderBill(
     throw new AppError(422, "INVALID_SPLIT", "Minimal 2 split untuk bagi tagihan");
   }
 
+  // FOR UPDATE locks the order row so a second concurrent splitOrderBill
+  // call for the same order blocks here instead of racing the
+  // COUNT(*)-based "already split?" guard below and double-inserting splits.
   const orderRow = await client.query<{ total_amount: string }>(
-    "SELECT total_amount FROM orders WHERE id = $1",
+    "SELECT total_amount FROM orders WHERE id = $1 FOR UPDATE",
     [orderId]
   );
   if (!orderRow.rowCount) {
@@ -119,8 +122,11 @@ export async function recordPayment(
     throw new AppError(422, "INVALID_AMOUNT", "Amount harus > 0");
   }
 
+  // FOR UPDATE serializes concurrent recordPayment calls on the same order,
+  // so the SUM(payments) recomputation below sees a stable set of committed
+  // payments and the derived payment_status (pending/dp/paid) is consistent.
   const orderRow = await client.query<{ total_amount: string; payment_status: string }>(
-    "SELECT total_amount, payment_status FROM orders WHERE id = $1",
+    "SELECT total_amount, payment_status FROM orders WHERE id = $1 FOR UPDATE",
     [input.orderId]
   );
   if (!orderRow.rowCount) {
@@ -128,8 +134,11 @@ export async function recordPayment(
   }
 
   if (input.splitId) {
+    // Lock the split row too so two concurrent payments against the same
+    // split can't both read the stale amount_paid, both pass the overpay
+    // check, and both increment — pushing amount_paid over amount_due.
     const splitRow = await client.query<{ amount_due: string; amount_paid: string }>(
-      "SELECT amount_due, amount_paid FROM order_splits WHERE id = $1 AND order_id = $2",
+      "SELECT amount_due, amount_paid FROM order_splits WHERE id = $1 AND order_id = $2 FOR UPDATE",
       [input.splitId, input.orderId]
     );
     if (!splitRow.rowCount) {
