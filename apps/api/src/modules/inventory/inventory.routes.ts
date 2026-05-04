@@ -2,13 +2,14 @@ import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { authGuard } from "../../common/middleware/auth";
+import { idempotency } from "../../common/middleware/idempotency";
 import { AppError } from "../../common/errors/app-error";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
 import { getPool } from "../../infrastructure/db/pool";
 
 const inventoryRouter = Router();
 
-inventoryRouter.post("/adjustments", authGuard, (req, res, next) => {
+inventoryRouter.post("/adjustments", authGuard, idempotency(), (req, res, next) => {
   z.object({
     productId: z.string().uuid(),
     branchId: z.string().uuid(),
