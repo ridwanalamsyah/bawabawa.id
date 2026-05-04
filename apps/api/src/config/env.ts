@@ -98,7 +98,16 @@ const envSchema = z.object({
   OAUTH_REQUIRE_APPROVAL: z
     .union([z.string(), z.boolean()])
     .optional()
-    .transform((value) => value !== false && value !== "false" && value !== "0")
+    .transform((value) => value !== false && value !== "false" && value !== "0"),
+
+  // BiteShip shipping API. Required for quote/book endpoints; webhook
+  // signature is verified using the same key. Endpoints return 503 if unset.
+  BITESHIP_API_KEY: z.string().min(20).optional(),
+  BITESHIP_BASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://api.biteship.com")
 }).superRefine((env, ctx) => {
   // Production deployments must use Google OAuth — no demo accounts allowed.
   if (env.NODE_ENV === "production") {
