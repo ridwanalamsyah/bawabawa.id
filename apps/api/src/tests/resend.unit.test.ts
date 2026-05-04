@@ -135,7 +135,10 @@ function makeFakeClient() {
         const [status, id] = params;
         const r = rows.find((x) => x.id === id);
         if (r) {
-          if (!["bounced", "complained", "failed"].includes(r.status)) {
+          // Mirror the SQL guard exactly: terminal statuses ('sent' is
+          // also terminal because email.delivery_delayed → 'pending'
+          // would otherwise allow a re-send).
+          if (!["sent", "bounced", "complained", "failed"].includes(r.status)) {
             r.status = status;
           }
         }
@@ -408,5 +411,22 @@ describe("applyEmailWebhook", () => {
     });
     expect(r).toEqual({ updated: false });
     expect(c.rows[0].status).toBe("sent");
+  });
+
+  it("does NOT regress sent → pending on delayed-delivery event (would cause duplicate send)", async () => {
+    // Real-world scenario: email.delivered arrives first and the row
+    // is set to `sent`. A delayed `email.delivery_delayed` for the
+    // same message arrives later. The SQL guard must keep the row at
+    // `sent`, otherwise flushOutbox would re-send the email.
+    const c = makeFakeClient();
+    await enqueueEmail(c, { to: "a@b.co", subject: "x", html: "<p>x</p>" });
+    c.rows[0].provider_message_id = "msg_xyz";
+    c.rows[0].status = "sent";
+    const r = await applyEmailWebhook(c, {
+      type: "email.delivery_delayed",
+      data: { email_id: "msg_xyz" }
+    });
+    expect(r.updated).toBe(true); // we ran the UPDATE — guard handled inside SQL
+    expect(c.rows[0].status).toBe("sent"); // but the row didn't actually change
   });
 });

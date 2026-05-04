@@ -197,7 +197,13 @@ shippingWebhookRouter.post("/biteship", json({ limit: "100kb" }), async (req, re
       });
       return;
     }
-    const result = await applyShipmentWebhook(await getPool(), payload);
+    // Must run inside a transaction — otherwise the SELECT ... FOR
+    // UPDATE in applyShipmentWebhook releases the row lock immediately
+    // (each pool.query() is its own implicit transaction), defeating
+    // the rank-guard race protection.
+    const result = await withTransaction((client) =>
+      applyShipmentWebhook(client, payload)
+    );
     await logAudit({
       action: result.updated ? "shipping.webhook.update" : "shipping.webhook.unknown",
       moduleName: "orders",

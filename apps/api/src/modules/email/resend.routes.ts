@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { Router, json } from "express";
 import { z } from "zod";
 import { authGuard } from "../../common/middleware/auth";
@@ -5,7 +6,6 @@ import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { loadEnv } from "../../config/env";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
-import { getPool } from "../../infrastructure/db/pool";
 import {
   applyEmailWebhook,
   enqueueEmail,
@@ -130,33 +130,112 @@ emailsRouter.post(
 const emailsWebhookRouter = Router();
 
 /**
+ * Verify a Svix-style webhook signature. Resend (built on Svix) sends:
+ *   svix-id:        unique message id
+ *   svix-timestamp: unix seconds (rejected if older than 5 minutes to
+ *                   block replay attacks)
+ *   svix-signature: space-separated `v1,<base64>` entries — we accept
+ *                   if any one matches.
+ *
+ * The signed payload is `${svix-id}.${svix-timestamp}.${rawBody}`
+ * HMAC-SHA256'd with the base64-decoded portion of the
+ * `whsec_<base64secret>` from the Resend dashboard. Constant-time
+ * compare guards against timing oracles.
+ */
+function verifyResendSignature(
+  rawBody: string,
+  headers: Record<string, string | undefined>,
+  whsecKey: string
+): boolean {
+  const svixId = headers["svix-id"];
+  const svixTimestamp = headers["svix-timestamp"];
+  const svixSignature = headers["svix-signature"];
+  if (!svixId || !svixTimestamp || !svixSignature) return false;
+
+  // Reject replays older than 5 minutes (Svix recommendation).
+  const ts = Number(svixTimestamp);
+  if (!Number.isFinite(ts)) return false;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowSec - ts) > 5 * 60) return false;
+
+  const secret = whsecKey.startsWith("whsec_") ? whsecKey.slice(6) : whsecKey;
+  const secretBytes = Buffer.from(secret, "base64");
+  const expected = createHmac("sha256", secretBytes)
+    .update(`${svixId}.${svixTimestamp}.${rawBody}`)
+    .digest();
+
+  const presented = svixSignature.split(" ");
+  for (const entry of presented) {
+    const [, sig] = entry.split(",");
+    if (!sig) continue;
+    let candidate: Buffer;
+    try {
+      candidate = Buffer.from(sig, "base64");
+    } catch {
+      continue;
+    }
+    if (
+      candidate.length === expected.length &&
+      timingSafeEqual(candidate, expected)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * POST /api/v1/webhooks/resend — Resend webhook receiver.
  *
- * Resend signs webhook payloads using the Svix `webhook_secret` you
- * configure in their dashboard. We verify the signature using a simple
- * HMAC-SHA256 over the raw body to avoid a hard dependency on the Svix
- * SDK. Unknown event types / unknown email ids are silently no-op (200)
- * so Resend stops retrying.
+ * Authenticates via Svix-style HMAC-SHA256 over the raw body using
+ * `RESEND_WEBHOOK_SECRET`. Returns 503 if the secret is unset (so a
+ * misconfigured deployment fails closed instead of accepting forged
+ * status updates), 401 if the signature is wrong, and 200 even for
+ * unknown event types / unknown email ids so Resend stops retrying.
  */
 emailsWebhookRouter.post(
   "/resend",
   json({
     limit: "100kb",
     verify: (req: any, _res, buf) => {
-      // Stash raw body for signature verification.
+      // Capture the raw body so the signature check sees the exact
+      // bytes Resend signed (express's body-parser would otherwise
+      // re-serialize and break the comparison).
       req.rawBody = buf.toString("utf8");
     }
   }),
   async (req, res, next) => {
     try {
       const env = loadEnv();
-      if (!env.RESEND_API_KEY) {
+      if (!env.RESEND_API_KEY || !env.RESEND_WEBHOOK_SECRET) {
         res.status(503).json({
           success: false,
           error: {
-            code: "RESEND_NOT_CONFIGURED",
-            message: "Resend belum dikonfigurasi"
+            code: "RESEND_WEBHOOK_NOT_CONFIGURED",
+            message:
+              "RESEND_API_KEY / RESEND_WEBHOOK_SECRET belum diset"
           }
+        });
+        return;
+      }
+      const rawBody = ((req as any).rawBody as string | undefined) ?? "";
+      const headerMap: Record<string, string | undefined> = {
+        "svix-id": req.header("svix-id"),
+        "svix-timestamp": req.header("svix-timestamp"),
+        "svix-signature": req.header("svix-signature")
+      };
+      if (!verifyResendSignature(rawBody, headerMap, env.RESEND_WEBHOOK_SECRET)) {
+        await logAudit({
+          action: "email.webhook.unauthorized",
+          moduleName: "email",
+          afterData: {
+            ip: req.ip ?? null,
+            hasSignature: Boolean(headerMap["svix-signature"])
+          }
+        });
+        res.status(401).json({
+          success: false,
+          error: { code: "INVALID_WEBHOOK_SIGNATURE", message: "Signature webhook tidak valid" }
         });
         return;
       }
@@ -168,7 +247,11 @@ emailsWebhookRouter.post(
         });
         return;
       }
-      const result = await applyEmailWebhook(await getPool(), event);
+      // Wrap in a transaction so any future row-level locking inside
+      // applyEmailWebhook (e.g. SELECT ... FOR UPDATE) actually holds.
+      const result = await withTransaction((client) =>
+        applyEmailWebhook(client, event)
+      );
       await logAudit({
         action: result.updated ? "email.webhook.update" : "email.webhook.unknown",
         moduleName: "email",
@@ -182,4 +265,4 @@ emailsWebhookRouter.post(
   }
 );
 
-export { emailsRouter, emailsWebhookRouter };
+export { emailsRouter, emailsWebhookRouter, verifyResendSignature };
