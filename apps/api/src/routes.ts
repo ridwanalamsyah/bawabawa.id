@@ -18,6 +18,7 @@ import { crmRouter } from "./modules/crm/crm.routes";
 import { hrRouter } from "./modules/hr/hr.routes";
 import { erpRouter } from "./modules/erp/erp.routes";
 import { cmsRouter } from "./modules/cms/cms.routes";
+import { emailsRouter, emailsWebhookRouter } from "./modules/email/resend.routes";
 import { pingDatabase } from "./infrastructure/db/pool";
 import { getMetricsSnapshot } from "./common/observability/metrics";
 
@@ -49,7 +50,9 @@ apiRouter.use("/orders", invoiceRouter);
 apiRouter.use("/orders", chargesRouter);
 apiRouter.use("/vouchers", vouchersRouter);
 apiRouter.use("/webhooks", midtransRouter);
+apiRouter.use("/webhooks", emailsWebhookRouter);
 apiRouter.use("/payments", paymentsConfigRouter);
+apiRouter.use("/emails", emailsRouter);
 apiRouter.use("/inventory", inventoryRouter);
 apiRouter.use("/finance", financeRouter);
 apiRouter.use("/approvals", approvalRouter);

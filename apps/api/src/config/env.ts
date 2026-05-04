@@ -110,7 +110,19 @@ const envSchema = z.object({
   MIDTRANS_IS_PRODUCTION: z
     .union([z.string(), z.boolean()])
     .optional()
-    .transform((value) => value === true || value === "true" || value === "1")
+    .transform((value) => value === true || value === "true" || value === "1"),
+
+  // Resend transactional email. When unset, /api/v1/emails endpoints
+  // return 503 and outbox flush is a no-op. Verify your sending domain
+  // (SPF/DKIM) at https://resend.com/domains before going live.
+  RESEND_API_KEY: z.string().min(20).optional(),
+  RESEND_FROM_EMAIL: z.string().email().optional(),
+  RESEND_REPLY_TO: z.string().email().optional(),
+  RESEND_BASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://api.resend.com")
 }).superRefine((env, ctx) => {
   // Production deployments must use Google OAuth — no demo accounts allowed.
   if (env.NODE_ENV === "production") {
