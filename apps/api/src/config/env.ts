@@ -100,6 +100,21 @@ const envSchema = z.object({
     .optional()
     .transform((value) => value !== false && value !== "false" && value !== "0"),
 
+  // BiteShip shipping API. Required for quote/book endpoints. Endpoints
+  // return 503 if unset. The webhook receiver authenticates using a
+  // separate `BITESHIP_WEBHOOK_TOKEN` (BiteShip does not sign webhook
+  // bodies — they recommend using a private URL token instead) and
+  // returns 503 if that is unset. Generate with `openssl rand -hex 32`
+  // and configure as a Bearer token in the BiteShip dashboard webhook
+  // settings (or include as `?token=` on the URL).
+  BITESHIP_API_KEY: z.string().min(20).optional(),
+  BITESHIP_WEBHOOK_TOKEN: z.string().min(20).optional(),
+  BITESHIP_BASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://api.biteship.com"),
+
   // Midtrans payment gateway. Server key is used to verify webhook
   // signatures; client key is exposed to the frontend Snap SDK. Both
   // optional — when unset the webhook endpoint returns 503 and Snap is not
