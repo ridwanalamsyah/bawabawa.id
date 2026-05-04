@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authRouter } from "./modules/auth/auth.routes";
 import { rbacRouter } from "./modules/rbac/rbac.routes";
 import { ordersRouter } from "./modules/orders/orders.routes";
+import { paymentsRouter } from "./modules/orders/payments.routes";
 import { inventoryRouter } from "./modules/inventory/inventory.routes";
 import { financeRouter } from "./modules/finance/finance.routes";
 import { approvalRouter } from "./modules/finance/approval.routes";
@@ -38,6 +39,7 @@ apiRouter.get("/metrics", (_req, res) => {
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/rbac", rbacRouter);
 apiRouter.use("/orders", ordersRouter);
+apiRouter.use("/orders", paymentsRouter);
 apiRouter.use("/inventory", inventoryRouter);
 apiRouter.use("/finance", financeRouter);
 apiRouter.use("/approvals", approvalRouter);
