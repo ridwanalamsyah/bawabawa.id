@@ -449,7 +449,82 @@
   animation: loginSpin 0.7s linear infinite;
 }
 
+.login-spinner--dark {
+  border: 2px solid var(--glass-border-strong);
+  border-top-color: var(--brand-accent-strong);
+}
+
 @keyframes loginSpin { to { transform: rotate(360deg); } }
+
+/* ── Google Sign-In ── */
+.login-google {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* GIS renders an iframe inside this element; we just constrain the box. */
+.login-google-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.login-google-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* ── "atau" divider between Google + email/password ── */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 18px;
+  color: var(--color-subtle);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border-strong);
+}
+
+.login-divider span {
+  flex-shrink: 0;
+}
+
+/* ── Register link ── */
+.login-register {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-muted);
+}
+
+.login-register-link {
+  color: var(--brand-accent-strong);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.login-register-link:hover {
+  border-bottom-color: var(--brand-accent-strong);
+}
 
 /* ── Note ── */
 .login-note {

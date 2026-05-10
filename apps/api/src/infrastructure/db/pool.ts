@@ -71,7 +71,7 @@ export async function getPool(): Promise<DbClient> {
   return {
     async query<Row = any>(sql: string, params?: any[]) {
       const result = await pool.query(sql, params);
-      return { rows: result.rows as Row[], rowCount: Number(result.rowCount ?? result.rows.length ?? 0) };
+      return normalizeQueryResult<Row>(result);
     },
     async end() {
       await pool.end();
@@ -81,7 +81,7 @@ export async function getPool(): Promise<DbClient> {
       return {
         async query<Row = any>(sql: string, params?: any[]) {
           const result = await client.query(sql, params);
-          return { rows: result.rows as Row[], rowCount: Number(result.rowCount ?? result.rows.length ?? 0) };
+          return normalizeQueryResult<Row>(result);
         },
         release() {
           client.release();
@@ -89,6 +89,24 @@ export async function getPool(): Promise<DbClient> {
       };
     }
   };
+}
+
+/**
+ * Coerces every shape pg's driver hands back into our internal contract.
+ * pg returns a plain QueryResult for parameterized statements but an array
+ * of QueryResult objects when the SQL string contains multiple statements
+ * separated by semicolons (which is exactly what migration files look
+ * like). Without this wrapper, accessing `.rows.length` on the array
+ * crashes the migration runner — the bug we hit on first deploy.
+ */
+function normalizeQueryResult<Row = any>(result: any): DbQueryResult<Row> {
+  const last = Array.isArray(result) ? result[result.length - 1] : result;
+  if (!last || typeof last !== "object") {
+    return { rows: [], rowCount: 0 };
+  }
+  const rows = Array.isArray(last.rows) ? (last.rows as Row[]) : [];
+  const count = typeof last.rowCount === "number" ? last.rowCount : rows.length;
+  return { rows, rowCount: Number(count) };
 }
 
 async function getSqliteDb() {

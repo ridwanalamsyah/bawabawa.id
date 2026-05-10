@@ -134,7 +134,7 @@ export function AppShell({ navLinks, children }: AppShellProps) {
               onClick={logout}
               className="bb-navbar-logout-desktop"
             >
-              Logout
+              Keluar
             </Button>
           ) : null}
           <button
@@ -214,7 +214,7 @@ export function AppShell({ navLinks, children }: AppShellProps) {
                 </div>
               </div>
               <Button variant="outline" onClick={logout} size="lg">
-                Logout
+                Keluar
               </Button>
             </>
           ) : (

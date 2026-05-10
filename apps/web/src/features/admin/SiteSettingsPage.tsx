@@ -121,7 +121,7 @@ export function SiteSettingsPage() {
   return (
     <AdminLayout
       title="Site Settings"
-      subtitle="Brand identity, kontak, sosial, defaults SEO, feature flags. Disimpan ke tabel site_settings."
+      subtitle="Identitas brand, kontak, media sosial, default SEO, dan toggle fitur. Perubahan langsung ter-sinkron ke landing page."
     >
       {error ? <div className="admin-error">{error}</div> : null}
       {loading ? (

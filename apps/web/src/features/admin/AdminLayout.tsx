@@ -12,11 +12,11 @@ interface AdminTab {
 }
 
 const ADMIN_TABS: AdminTab[] = [
-  { to: "/admin", label: "Overview", icon: "🏛" },
-  { to: "/admin/cms/settings", label: "Site Settings", icon: "⚙" },
-  { to: "/admin/cms/navigation", label: "Navigation", icon: "🧭" },
-  { to: "/admin/cms/pages", label: "Pages", icon: "📄" },
-  { to: "/admin/cms/sections", label: "Sections", icon: "🧩" },
+  { to: "/admin", label: "Ringkasan", icon: "🏛" },
+  { to: "/admin/cms/settings", label: "Pengaturan Situs", icon: "⚙" },
+  { to: "/admin/cms/navigation", label: "Navigasi", icon: "🧭" },
+  { to: "/admin/cms/pages", label: "Halaman", icon: "📄" },
+  { to: "/admin/cms/sections", label: "Section", icon: "🧩" },
   { to: "/admin/cms/media", label: "Media", icon: "🖼" }
 ];
 
@@ -42,7 +42,7 @@ export function AdminLayout({
           {subtitle ? <p className="admin-subtitle">{subtitle}</p> : null}
         </header>
 
-        <nav className="admin-tabs" aria-label="Admin sections">
+        <nav className="admin-tabs" aria-label="Bagian admin">
           {ADMIN_TABS.map((tab) => (
             <NavLink
               key={tab.to}

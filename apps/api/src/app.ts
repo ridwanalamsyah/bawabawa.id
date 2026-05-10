@@ -20,7 +20,19 @@ export function createApp() {
   const app = express();
   const allowedOrigins = buildAllowedOrigins();
 
-  // Helmet: allow inline scripts/styles for the single-file frontend
+  // Required when running behind Fly.io / Vercel / Cloudflare so that
+  // `req.ip` reflects the real client (X-Forwarded-For) instead of the
+  // proxy. Without this, every request appears to come from the proxy
+  // address and per-IP rate limiting is effectively disabled. Trust only
+  // the first hop — we own that hop in our deployment topology.
+  app.set("trust proxy", 1);
+
+  // Helmet: allow inline scripts/styles for the single-file frontend.
+  // CSP is intentionally disabled because the legacy `apps/web/public/index.html`
+  // bundle ships its own inline scripts; tightening it requires rewriting
+  // that file to use external assets first. All other helmet defaults
+  // (X-Frame-Options=DENY, X-Content-Type-Options=nosniff, Referrer-Policy,
+  // Strict-Transport-Security, etc.) remain on.
   app.use(
     helmet({
       contentSecurityPolicy: false,

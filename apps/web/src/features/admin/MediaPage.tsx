@@ -93,12 +93,12 @@ export function MediaPage() {
   return (
     <AdminLayout
       title="Media"
-      subtitle="Daftar URL gambar siap pakai sebagai logo, og:image, atau ilustrasi sections. Backend storage disesuaikan kebutuhan deploy."
+      subtitle="Galeri aset publik: logo, gambar OG, dan ilustrasi yang dipakai di seluruh konten website."
     >
       <h2 className="admin-section-title">Tambah media</h2>
       <p className="admin-section-subtitle">
-        Tempel URL publik (CDN, S3, Supabase Storage, dsb). Backend hanya menyimpan referensi — upload binary
-        akan ditangani oleh integrasi storage di deploy production.
+        Tambahkan tautan publik gambar (mis. dari penyedia hosting gambar). Item akan langsung tersedia di galeri
+        untuk dipakai sebagai logo, OG image, atau ilustrasi konten.
       </p>
       <form className="admin-form" onSubmit={handleSubmit(onSubmit)} style={{ marginBottom: 28 }}>
         <div className="admin-row two-col">

@@ -98,7 +98,7 @@ export function NavigationPage() {
   return (
     <AdminLayout
       title="Navigation"
-      subtitle="Edit menu utama: label, link, urutan, dan permission gate. Tersimpan di tabel cms_nav_items."
+      subtitle="Edit menu utama: label, tautan, urutan, dan kontrol akses. Perubahan langsung ter-sinkron ke landing page."
     >
       <div className="admin-actions" style={{ justifyContent: "flex-end" }}>
         <Button onClick={() => setEditing({ ...EMPTY_NAV, sortOrder: (sorted.at(-1)?.sortOrder ?? 0) + 10 })}>
@@ -265,8 +265,8 @@ function NavEditDialog({
             boxShadow: "var(--glass-shadow-lg)"
           }}
         >
-          <h2 className="admin-section-title" style={{ marginBottom: 4 }}>{initial.id ? "Edit" : "Tambah"} link</h2>
-          <p className="admin-section-subtitle">Permission gate opsional dievaluasi via usePermission().</p>
+          <h2 className="admin-section-title" style={{ marginBottom: 4 }}>{initial.id ? "Edit" : "Tambah"} tautan</h2>
+          <p className="admin-section-subtitle">Atur label dan tujuan tautan. Kontrol akses opsional menyembunyikan menu untuk pengguna tanpa izin.</p>
           <div className="admin-row two-col">
             <div className="admin-field">
               <label htmlFor="nav-label">Label</label>
