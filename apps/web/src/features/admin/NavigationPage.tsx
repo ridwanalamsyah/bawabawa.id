@@ -265,8 +265,8 @@ function NavEditDialog({
             boxShadow: "var(--glass-shadow-lg)"
           }}
         >
-          <h2 className="admin-section-title" style={{ marginBottom: 4 }}>{initial.id ? "Edit" : "Tambah"} link</h2>
-          <p className="admin-section-subtitle">Permission gate opsional dievaluasi via usePermission().</p>
+          <h2 className="admin-section-title" style={{ marginBottom: 4 }}>{initial.id ? "Edit" : "Tambah"} tautan</h2>
+          <p className="admin-section-subtitle">Atur label dan tujuan tautan. Kontrol akses opsional menyembunyikan menu untuk pengguna tanpa izin.</p>
           <div className="admin-row two-col">
             <div className="admin-field">
               <label htmlFor="nav-label">Label</label>

@@ -87,7 +87,7 @@ export function AppRouter() {
             path="/orders"
             element={
               <ProtectedRoute requiredPermission="orders:read">
-                <Seo title="Orders" noindex />
+                <Seo title="Pesanan" noindex />
                 <OrdersPage />
               </ProtectedRoute>
             }
@@ -96,7 +96,7 @@ export function AppRouter() {
             path="/sales"
             element={
               <ProtectedRoute>
-                <Seo title="Sales" noindex />
+                <Seo title="Penjualan" noindex />
                 <SalesPage />
               </ProtectedRoute>
             }
@@ -105,7 +105,7 @@ export function AppRouter() {
             path="/inventory"
             element={
               <ProtectedRoute>
-                <Seo title="Inventory" noindex />
+                <Seo title="Inventaris" noindex />
                 <InventoryPage />
               </ProtectedRoute>
             }
@@ -114,7 +114,7 @@ export function AppRouter() {
             path="/procurement"
             element={
               <ProtectedRoute>
-                <Seo title="Procurement" noindex />
+                <Seo title="Pengadaan" noindex />
                 <ProcurementPage />
               </ProtectedRoute>
             }
@@ -123,7 +123,7 @@ export function AppRouter() {
             path="/finance"
             element={
               <ProtectedRoute requiredPermission="finance:manage_finance">
-                <Seo title="Finance" noindex />
+                <Seo title="Keuangan" noindex />
                 <FinancePage />
               </ProtectedRoute>
             }
@@ -141,7 +141,7 @@ export function AppRouter() {
             path="/hr"
             element={
               <ProtectedRoute>
-                <Seo title="HR" noindex />
+                <Seo title="SDM" noindex />
                 <HrPage />
               </ProtectedRoute>
             }
@@ -159,7 +159,7 @@ export function AppRouter() {
             path="/admin/cms/settings"
             element={
               <ProtectedRoute requiredPermission="cms:manage">
-                <Seo title="Site Settings" noindex />
+                <Seo title="Pengaturan Situs" noindex />
                 <SiteSettingsPage />
               </ProtectedRoute>
             }
@@ -168,7 +168,7 @@ export function AppRouter() {
             path="/admin/cms/navigation"
             element={
               <ProtectedRoute requiredPermission="cms:manage">
-                <Seo title="Navigation" noindex />
+                <Seo title="Navigasi" noindex />
                 <NavigationPage />
               </ProtectedRoute>
             }
@@ -177,7 +177,7 @@ export function AppRouter() {
             path="/admin/cms/pages"
             element={
               <ProtectedRoute requiredPermission="cms:manage">
-                <Seo title="Pages" noindex />
+                <Seo title="Halaman" noindex />
                 <PagesPage />
               </ProtectedRoute>
             }
@@ -186,7 +186,7 @@ export function AppRouter() {
             path="/admin/cms/sections"
             element={
               <ProtectedRoute requiredPermission="cms:manage">
-                <Seo title="Sections" noindex />
+                <Seo title="Section" noindex />
                 <SectionsPage />
               </ProtectedRoute>
             }

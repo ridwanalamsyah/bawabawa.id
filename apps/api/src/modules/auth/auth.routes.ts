@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { AuthService } from "./auth.service";
 import { authGuard } from "../../common/middleware/auth";
+import { authRateLimitMiddleware } from "../../common/security/rate-limit";
 import { loadEnv } from "../../config/env";
 import { AppError } from "../../common/errors/app-error";
 
@@ -47,7 +48,7 @@ authRouter.get("/config", (_req, res) => {
  * Production sign-in path. Frontend exchanges a Google Identity Services
  * `credential` (ID token) for our access + refresh JWT pair.
  */
-authRouter.post("/google", async (req, res, next) => {
+authRouter.post("/google", authRateLimitMiddleware, async (req, res, next) => {
   try {
     const body = googleSchema.parse(req.body);
     const result = await service.loginWithGoogle(body.idToken);
@@ -72,7 +73,7 @@ function emailLoginGuard(): void {
   }
 }
 
-authRouter.post("/login", async (req, res, next) => {
+authRouter.post("/login", authRateLimitMiddleware, async (req, res, next) => {
   try {
     emailLoginGuard();
     const body = loginSchema.parse(req.body);
@@ -83,7 +84,7 @@ authRouter.post("/login", async (req, res, next) => {
   }
 });
 
-authRouter.post("/register", async (req, res, next) => {
+authRouter.post("/register", authRateLimitMiddleware, async (req, res, next) => {
   try {
     emailLoginGuard();
     const body = registerSchema.parse(req.body);
