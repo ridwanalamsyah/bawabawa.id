@@ -1,0 +1,331 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ───────────────────────────────────────────────
+   Bawabawa.id — Public site design tokens
+   Mirrors apps/web/src/design-system/tokens.css so the ERP and the public
+   surface share identical fonts, colors, glass primitives, and motion.
+   ─────────────────────────────────────────────── */
+
+:root {
+  color-scheme: light;
+
+  /* ── Surfaces (warm cream, sage, dark olive ink) ── */
+  --color-bg: #faf7f0;
+  --color-bg-elevated: #ffffff;
+  --color-surface-solid: #fdfbf6;
+  --color-surface-2: #f4efe4;
+  --color-text: #2a2c28;
+  --color-text-strong: #161916;
+  --color-muted: #6b6e66;
+  --color-subtle: #9ea298;
+
+  /* Glass primitives — frosted cream */
+  --glass-bg: rgba(255, 252, 244, 0.68);
+  --glass-bg-strong: rgba(255, 252, 244, 0.86);
+  --glass-bg-deep: rgba(255, 252, 244, 0.94);
+  --glass-border: rgba(42, 44, 40, 0.10);
+  --glass-border-strong: rgba(42, 44, 40, 0.18);
+  --glass-blur: 20px;
+  --glass-blur-strong: 28px;
+  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
+  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
+  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
+
+  /* Brand — sage + warm tan, earthy minimalist */
+  --brand-name: "bawabawa.id";
+  --brand-accent: #7c9885;
+  --brand-accent-2: #d4a373;
+  --brand-accent-strong: #5e7a68;
+  --brand-accent-soft: rgba(124, 152, 133, 0.14);
+  --brand-accent-ring: rgba(124, 152, 133, 0.36);
+  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
+
+  /* Status */
+  --color-success: #5e7a68;
+  --color-warning: #c08552;
+  --color-danger: #b3463f;
+  --color-info: #6b8a99;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+  --radius: var(--radius-lg);
+
+  /* Touch targets (mobile-first ≥44px) */
+  --tap-target: 44px;
+
+  /* Motion */
+  --motion-fast: 140ms cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+
+  --color-bg: #15140f;
+  --color-bg-elevated: #1d1c17;
+  --color-surface-solid: #23211b;
+  --color-surface-2: #2c2922;
+  --color-text: #f4efe4;
+  --color-text-strong: #ffffff;
+  --color-muted: #b8b3a6;
+  --color-subtle: #76726a;
+
+  --glass-bg: rgba(35, 33, 27, 0.58);
+  --glass-bg-strong: rgba(35, 33, 27, 0.76);
+  --glass-bg-deep: rgba(35, 33, 27, 0.90);
+  --glass-border: rgba(244, 239, 228, 0.10);
+  --glass-border-strong: rgba(244, 239, 228, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
+
+  --brand-accent: #a3bfa8;
+  --brand-accent-2: #e3b88a;
+  --brand-accent-strong: #7c9885;
+  --brand-accent-soft: rgba(163, 191, 168, 0.20);
+  --brand-accent-ring: rgba(163, 191, 168, 0.48);
+  --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
+}
+
+@theme inline {
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-surface: var(--color-bg-elevated);
+  --color-surface-2: var(--color-surface-2);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted);
+  --color-border: var(--glass-border-strong);
+  --color-input: var(--glass-border-strong);
+  --color-ring: var(--brand-accent-ring);
+
+  --color-primary: var(--brand-accent);
+  --color-primary-foreground: #ffffff;
+  --color-accent: var(--brand-accent-2);
+  --color-accent-foreground: #ffffff;
+
+  /* Compatibility shims so existing Tailwind utilities like `bg-sage-700`,
+     `text-emerald-500`, `border-olive-300` keep rendering. The site was
+     authored against an earlier sage/olive scale; we map them to the ERP
+     brand tokens so visual identity now matches `apps/web` exactly. */
+  --color-sage-50:  #f1f4ee;
+  --color-sage-100: #e2eadf;
+  --color-sage-200: #c7d6c2;
+  --color-sage-300: #aabfa3;
+  --color-sage-400: #8da787;
+  --color-sage-500: #7c9885;
+  --color-sage-600: #5e7a68;
+  --color-sage-700: #4d6755;
+  --color-sage-800: #2a3b30;
+  --color-sage-900: #1a2620;
+
+  --color-olive-300: #c4d2a3;
+  --color-olive-500: #9aa37b;
+  --color-olive-700: #5e6648;
+
+  --color-emerald-400: #8eb597;
+  --color-emerald-500: #5e7a68;
+  --color-emerald-600: #4a6253;
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-display), "Playfair Display", Georgia, serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
+    Menlo, monospace;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+}
+
+* {
+  border-color: var(--glass-border-strong);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.55;
+  /* Sage + cream gradient mesh — same composition as ERP web. */
+  background-image:
+    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.22) 0%, transparent 50%),
+    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.18) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(196, 213, 175, 0.18) 0%, transparent 55%),
+    radial-gradient(at 100% 80%, rgba(232, 215, 188, 0.18) 0%, transparent 50%);
+  background-attachment: fixed;
+  transition: background-color var(--motion-base), color var(--motion-base);
+}
+
+[data-theme="dark"] body,
+.dark body {
+  background-image:
+    radial-gradient(at 18% 0%, rgba(163, 191, 168, 0.22) 0%, transparent 50%),
+    radial-gradient(at 82% 0%, rgba(227, 184, 138, 0.16) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(124, 152, 133, 0.20) 0%, transparent 55%);
+}
+
+/* Display headings use Playfair, like ERP sales / cinematic surfaces. */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur-strong)) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(170%);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-lg);
+}
+.glass-deep {
+  background: var(--glass-bg-deep);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+/* ── ERP `.bb-*` shell + navbar primitives, ported verbatim so admin and
+      public surfaces feel identical when the user crosses between them. ── */
+.bb-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.bb-shell-main {
+  flex: 1; width: min(1180px, 100%); margin: 0 auto;
+  padding: clamp(16px, 4vw, 32px);
+  padding-top: clamp(96px, 12vw, 120px);
+  display: flex; flex-direction: column; gap: clamp(16px, 3vw, 24px);
+}
+.bb-navbar {
+  position: sticky; top: 12px; z-index: 40;
+  width: min(1180px, calc(100% - 24px));
+  margin: 12px auto 0;
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  transition: padding var(--motion-base), top var(--motion-base);
+}
+.bb-navbar-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 14px;
+  color: var(--color-text-strong); text-decoration: none;
+  letter-spacing: -0.01em; white-space: nowrap;
+}
+.bb-navbar-logo {
+  width: 36px; height: 36px; border-radius: 11px;
+  background: var(--brand-gradient); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+  box-shadow: 0 6px 18px var(--brand-accent-soft);
+}
+.bb-navbar-link {
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: var(--tap-target); padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  font-weight: 600; font-size: 13.5px;
+  transition: color var(--motion-fast), background var(--motion-base);
+}
+.bb-navbar-link:hover,
+.bb-navbar-link[data-active="true"] {
+  color: var(--color-text-strong);
+  background: var(--glass-bg);
+}
+
+.bb-card {
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+}
+.bb-card-hover {
+  transition: transform var(--motion-base), box-shadow var(--motion-base);
+}
+.bb-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+/* Subtle dotted texture overlay — used on hero / large sections. */
+.dot-grid {
+  background-image: radial-gradient(rgba(42, 44, 40, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.dark .dot-grid,
+[data-theme="dark"] .dot-grid {
+  background-image: radial-gradient(rgba(244, 239, 228, 0.07) 1px, transparent 1px);
+}
+
+/* Reusable focus ring matching ERP's tap target convention. */
+:where(button, a, [role="button"], [tabindex]) {
+  outline: none;
+}
+:where(button, a, [role="button"], [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px var(--brand-accent-ring);
+  border-radius: var(--radius-md);
+}
+
+/* Scrollbar — softened to match cream surfaces. */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--brand-accent-soft);
+  border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--brand-accent-ring); }
