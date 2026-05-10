@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { api } from "../../shared/api/client";
@@ -320,6 +320,15 @@ export function LoginPage() {
                 )}
               </button>
             </form>
+          )}
+
+          {allowEmailLogin && (
+            <p className="login-register">
+              Belum punya akun?{" "}
+              <Link to="/register" className="login-register-link">
+                Daftar di sini
+              </Link>
+            </p>
           )}
 
           <p className="login-note">

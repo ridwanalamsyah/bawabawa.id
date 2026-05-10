@@ -1,16 +1,16 @@
-import { EnterpriseModulePage } from "../../shared/ui/EnterpriseModulePage";
+import { ModuleShell } from "../../shared/ui/ModuleShell";
 
 export function HrPage() {
   return (
-    <EnterpriseModulePage
-      title="HR & Payroll"
-      subtitle="Employee lifecycle, attendance logging, dan payroll run."
-      points={[
-        "Employee master dan status aktif",
-        "Attendance log harian",
-        "Payroll run bulanan",
-        "Integrasi approval untuk perubahan sensitif"
-      ]}
+    <ModuleShell
+      title="SDM & Penggajian"
+      subtitle="Kelola karyawan, absensi harian, dan penggajian bulanan dalam satu sistem terintegrasi."
+      empty={{
+        icon: "👥",
+        title: "Modul SDM siap diaktifkan",
+        description:
+          "Tambahkan karyawan untuk mulai mencatat absensi, mengelola kontrak, dan menjalankan penggajian bulanan."
+      }}
     />
   );
 }

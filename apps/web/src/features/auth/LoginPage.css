@@ -506,6 +506,26 @@
   flex-shrink: 0;
 }
 
+/* ── Register link ── */
+.login-register {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-muted);
+}
+
+.login-register-link {
+  color: var(--brand-accent-strong);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.login-register-link:hover {
+  border-bottom-color: var(--brand-accent-strong);
+}
+
 /* ── Note ── */
 .login-note {
   margin: 22px 0 0;

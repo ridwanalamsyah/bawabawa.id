@@ -117,7 +117,7 @@ export function SectionsPage() {
 
   if (editing) {
     return (
-      <AdminLayout title={isNew ? "Buat section" : `Edit: ${editing.key}`} subtitle="Section bisa dipanggil di frontend lewat key.">
+      <AdminLayout title={isNew ? "Buat bagian baru" : `Edit: ${editing.key}`} subtitle="Bagian (hero, CTA, banner) yang tampil di landing page.">
         <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="admin-row two-col">
             <div className="admin-field">
@@ -168,7 +168,7 @@ export function SectionsPage() {
   }
 
   return (
-    <AdminLayout title="Sections" subtitle="Hero / CTA / banner berkunci stable section_key — dipanggil dari frontend.">
+    <AdminLayout title="Bagian Konten" subtitle="Kelola blok hero, CTA, dan banner yang tampil di landing page. Perubahan langsung ter-sinkron.">
       <div className="admin-actions" style={{ justifyContent: "flex-end" }}>
         <Button onClick={startNew}>Buat section</Button>
       </div>

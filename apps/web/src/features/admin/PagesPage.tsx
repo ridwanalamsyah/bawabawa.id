@@ -123,7 +123,7 @@ export function PagesPage() {
 
   if (editing) {
     return (
-      <AdminLayout title={isNew ? "Buat Page" : `Edit: ${editing.title}`} subtitle="Konten Tiptap rich text disimpan sebagai JSON document.">
+      <AdminLayout title={isNew ? "Buat Halaman Baru" : `Edit: ${editing.title}`} subtitle="Tulis konten halaman dengan editor kaya — heading, list, gambar, dan link.">
         <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
           <div className="admin-row two-col">
             <div className="admin-field">
@@ -174,7 +174,7 @@ export function PagesPage() {
   }
 
   return (
-    <AdminLayout title="Pages" subtitle="Halaman statis (about / kontak / terms) dengan rich text Tiptap dan publish flow.">
+    <AdminLayout title="Halaman" subtitle="Halaman statis seperti Tentang, Kontak, dan Syarat & Ketentuan — dengan alur draft dan publikasi.">
       <div className="admin-actions" style={{ justifyContent: "flex-end" }}>
         <Button onClick={startNew}>Buat page</Button>
       </div>

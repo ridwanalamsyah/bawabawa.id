@@ -10,6 +10,7 @@ import { Seo } from "../shared/seo/Seo";
  * easier inspection in network panels.
  */
 const LoginPage = lazy(() => import("../features/auth/LoginPage").then((m) => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import("../features/auth/RegisterPage").then((m) => ({ default: m.RegisterPage })));
 const DashboardPage = lazy(() => import("../features/reports/DashboardPage").then((m) => ({ default: m.DashboardPage })));
 const OrdersPage = lazy(() => import("../features/orders/OrdersPage").then((m) => ({ default: m.OrdersPage })));
 const SalesPage = lazy(() => import("../features/sales/SalesPage").then((m) => ({ default: m.SalesPage })));
@@ -68,8 +69,17 @@ export function AppRouter() {
             path="/login"
             element={
               <>
-                <Seo title="Login" noindex />
+                <Seo title="Masuk" noindex />
                 <LoginPage />
+              </>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <>
+                <Seo title="Daftar" noindex />
+                <RegisterPage />
               </>
             }
           />

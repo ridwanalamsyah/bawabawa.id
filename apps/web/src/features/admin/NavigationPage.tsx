@@ -98,7 +98,7 @@ export function NavigationPage() {
   return (
     <AdminLayout
       title="Navigation"
-      subtitle="Edit menu utama: label, link, urutan, dan permission gate. Tersimpan di tabel cms_nav_items."
+      subtitle="Edit menu utama: label, tautan, urutan, dan kontrol akses. Perubahan langsung ter-sinkron ke landing page."
     >
       <div className="admin-actions" style={{ justifyContent: "flex-end" }}>
         <Button onClick={() => setEditing({ ...EMPTY_NAV, sortOrder: (sorted.at(-1)?.sortOrder ?? 0) + 10 })}>
