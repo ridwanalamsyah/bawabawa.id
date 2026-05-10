@@ -30,7 +30,7 @@ export function Hero() {
             >
               Titip barang dari{" "}
               <span className="relative inline-block">
-                <span className="bg-gradient-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+                <span className="bg-linear-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
                   Bandung
                 </span>
                 <span className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[hsl(var(--emerald-400)/0.35)] -z-10 rounded-full" />

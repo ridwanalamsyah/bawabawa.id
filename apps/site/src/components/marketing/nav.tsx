@@ -9,11 +9,13 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+// Public-facing navigation. /admin intentionally NOT linked here — staff
+// access the panel by typing the URL directly and authenticating via
+// the existing /login flow (the layout's middleware enforces role=admin).
 const NAV = [
   { href: "/open-trip", label: "Open Trip" },
   { href: "/request", label: "Titip Sekarang" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export function MarketingNav() {

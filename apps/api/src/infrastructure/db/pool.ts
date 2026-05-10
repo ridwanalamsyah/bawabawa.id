@@ -70,8 +70,7 @@ export async function getPool(): Promise<DbClient> {
   const pool = sharedPool;
   return {
     async query<Row = any>(sql: string, params?: any[]) {
-      const result = await pool.query(sql, params);
-      return { rows: result.rows as Row[], rowCount: Number(result.rowCount ?? result.rows.length ?? 0) };
+      return normalizePgResult<Row>(await pool.query(sql, params));
     },
     async end() {
       await pool.end();
@@ -80,14 +79,35 @@ export async function getPool(): Promise<DbClient> {
       const client = await pool.connect();
       return {
         async query<Row = any>(sql: string, params?: any[]) {
-          const result = await client.query(sql, params);
-          return { rows: result.rows as Row[], rowCount: Number(result.rowCount ?? result.rows.length ?? 0) };
+          return normalizePgResult<Row>(await client.query(sql, params));
         },
         release() {
           client.release();
         }
       };
     }
+  };
+}
+
+/**
+ * `pg.Pool.query()` returns a single `Result` for one statement, but an
+ * **array** of `Result` objects when the SQL contains multiple
+ * statements separated by `;` (which migration files do). We normalise
+ * both shapes to the `{ rows, rowCount }` contract the rest of the
+ * codebase expects.
+ */
+function normalizePgResult<Row>(raw: any): DbQueryResult<Row> {
+  if (Array.isArray(raw)) {
+    const last = raw[raw.length - 1];
+    if (!last) return { rows: [], rowCount: 0 };
+    return {
+      rows: (last.rows ?? []) as Row[],
+      rowCount: Number(last.rowCount ?? last.rows?.length ?? 0)
+    };
+  }
+  return {
+    rows: (raw.rows ?? []) as Row[],
+    rowCount: Number(raw.rowCount ?? raw.rows?.length ?? 0)
   };
 }
 

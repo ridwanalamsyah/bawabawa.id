@@ -8,7 +8,7 @@ export function HeroVisual() {
     <div className="relative w-full aspect-[5/4] sm:aspect-[5/3.6] lg:aspect-[5/4.6]">
       {/* Background gradient blob */}
       <div className="absolute inset-0 -z-10 rounded-[2.5rem] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--sage-100))] via-[hsl(var(--sage-200)/0.7)] to-[hsl(var(--emerald-400)/0.18)] dark:from-[hsl(var(--sage-700)/0.35)] dark:via-[hsl(var(--sage-800)/0.45)] dark:to-[hsl(var(--emerald-600)/0.2)]" />
+        <div className="absolute inset-0 bg-linear-to-br from-[hsl(var(--sage-100))] via-[hsl(var(--sage-200)/0.7)] to-[hsl(var(--emerald-400)/0.18)] dark:from-[hsl(var(--sage-700)/0.35)] dark:via-[hsl(var(--sage-800)/0.45)] dark:to-[hsl(var(--emerald-600)/0.2)]" />
         <div className="absolute -top-12 -left-12 h-64 w-64 rounded-full bg-[hsl(var(--sage-300)/0.6)] blur-3xl" />
         <div className="absolute -bottom-16 -right-12 h-72 w-72 rounded-full bg-[hsl(var(--emerald-400)/0.35)] blur-3xl" />
         <svg className="absolute inset-0 w-full h-full opacity-[0.07] mix-blend-multiply dark:opacity-[0.12]" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -41,7 +41,7 @@ export function HeroVisual() {
           initial={{ y: "-30%" }}
           animate={{ y: "130%" }}
           transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-x-0 h-32 bg-gradient-to-b from-transparent via-white/12 to-transparent"
+          className="absolute inset-x-0 h-32 bg-linear-to-b from-transparent via-white/12 to-transparent"
         />
       </div>
 
@@ -67,7 +67,7 @@ export function HeroVisual() {
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-sm font-semibold">
+            <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-sm font-semibold">
               RM
             </div>
             <div>

@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         groups={groups}
         brandHref="/admin"
         footer={
-          <div className="rounded-xl bg-gradient-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--sage-900))] p-4 text-white">
+          <div className="rounded-xl bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--sage-900))] p-4 text-white">
             <div className="flex items-center gap-2 text-xs font-medium">
               <Sparkles className="h-3.5 w-3.5" /> Admin Console v3.0
             </div>

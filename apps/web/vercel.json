@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "cd ../.. && npm ci && npm run build --workspace @erp/web",
+  "installCommand": "echo 'install handled by buildCommand from monorepo root'",
+  "outputDirectory": "dist",
+  "github": {
+    "silent": true
+  }
+}

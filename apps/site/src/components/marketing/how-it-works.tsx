@@ -70,7 +70,7 @@ export function HowItWorks() {
               </div>
               {i < STEPS.length - 1 && (
                 <div className="hidden lg:block absolute top-12 -right-3 z-10">
-                  <div className="h-px w-6 bg-gradient-to-r from-[hsl(var(--sage-300))] to-transparent" />
+                  <div className="h-px w-6 bg-linear-to-r from-[hsl(var(--sage-300))] to-transparent" />
                 </div>
               )}
             </motion.div>

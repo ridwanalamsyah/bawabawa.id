@@ -16,7 +16,7 @@ export function FinalCTA() {
           transition={{ duration: 0.7 }}
           className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] p-10 sm:p-16 text-center"
         >
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--sage-800))] to-[hsl(var(--sage-900))]" />
+          <div className="absolute inset-0 -z-10 bg-linear-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--sage-800))] to-[hsl(var(--sage-900))]" />
           <div className="absolute inset-0 -z-10 opacity-30">
             <div className="absolute -top-32 -left-20 h-96 w-96 rounded-full bg-[hsl(var(--emerald-400))] blur-3xl" />
             <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-[hsl(var(--olive-300))] blur-3xl" />

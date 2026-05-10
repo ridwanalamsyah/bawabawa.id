@@ -26,7 +26,7 @@ export default function OpenTripPage() {
               </p>
               <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Jadwal keberangkatan{" "}
-                <span className="bg-gradient-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+                <span className="bg-linear-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
                   Bandung → Samarinda
                 </span>
               </h1>
@@ -62,7 +62,7 @@ export default function OpenTripPage() {
                   key={t.id}
                   className="group relative overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:shadow-[0_24px_60px_-30px_hsl(var(--sage-700)/0.45)] transition-all"
                 >
-                  <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-[hsl(var(--sage-200))] to-transparent dark:from-[hsl(var(--sage-700)/0.4)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-linear-to-br from-[hsl(var(--sage-200))] to-transparent dark:from-[hsl(var(--sage-700)/0.4)] opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
@@ -111,7 +111,7 @@ export default function OpenTripPage() {
 
                   <div className="mt-5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))] min-w-0">
-                      <span className="h-7 w-7 rounded-full bg-gradient-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-[10px] font-semibold">
+                      <span className="h-7 w-7 rounded-full bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-[10px] font-semibold">
                         {t.shopper.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
                       </span>
                       <div className="min-w-0">

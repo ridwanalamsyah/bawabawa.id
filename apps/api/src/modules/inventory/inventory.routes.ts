@@ -60,6 +60,67 @@ inventoryRouter.post("/adjustments", authGuard, idempotency(), (req, res, next) 
     .catch(next);
 });
 
+/**
+ * Public-facing item listing consumed by `apps/site` at /api/items.
+ * Intentionally NOT behind `authGuard` so the marketing site can render
+ * categories and popular items without an admin token. Filters: `q`,
+ * `category`, `page`, `limit`, `active`.
+ */
+inventoryRouter.get("/items", async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const offset = (page - 1) * limit;
+    const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+    const category = typeof req.query.category === "string" ? req.query.category.trim() : "";
+
+    const filters: string[] = [];
+    const params: any[] = [];
+    if (q) {
+      params.push(`%${q.toLowerCase()}%`);
+      filters.push(`LOWER(p.name) LIKE $${params.length}`);
+    }
+    if (category) {
+      params.push(category);
+      filters.push(`(c.name = $${params.length} OR c.id::text = $${params.length})`);
+    }
+    const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+    params.push(limit, offset);
+
+    const rows = await (await getPool()).query<{
+      id: string;
+      sku: string;
+      name: string;
+      category: string | null;
+      unitPrice: string;
+      currentStock: number;
+      createdAt: string;
+    }>(
+      `SELECT p.id, p.sku, p.name,
+              c.name AS category,
+              p.unit_price AS "unitPrice",
+              p.current_stock AS "currentStock",
+              p.created_at AS "createdAt"
+         FROM products p
+         LEFT JOIN categories c ON c.id = p.category_id
+         ${where}
+         ORDER BY p.created_at DESC
+         LIMIT $${params.length - 1} OFFSET $${params.length}`,
+      params
+    );
+
+    const data = rows.rows.map((row) => ({
+      ...row,
+      unitPrice: Number(row.unitPrice ?? 0),
+      currentStock: Number(row.currentStock ?? 0),
+    }));
+
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 inventoryRouter.get("/movements", authGuard, async (_req, res, next) => {
   try {
     const rows = await (await getPool()).query(
