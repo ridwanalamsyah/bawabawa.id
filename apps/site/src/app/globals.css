@@ -1,216 +1,331 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ───────────────────────────────────────────────
+   Bawabawa.id — Public site design tokens
+   Mirrors apps/web/src/design-system/tokens.css so the ERP and the public
+   surface share identical fonts, colors, glass primitives, and motion.
+   ─────────────────────────────────────────────── */
 
 :root {
-  /* Brand palette — sage green, olive, cream */
-  --bg: 56 33% 97%;             /* warm white / cream */
-  --bg-soft: 70 28% 94%;        /* cream tinted */
-  --surface: 0 0% 100%;
-  --surface-2: 60 25% 96%;
-  --foreground: 150 14% 12%;
-  --muted: 140 8% 45%;
-  --muted-foreground: 140 8% 35%;
-  --border: 90 12% 86%;
-  --input: 90 12% 90%;
-  --ring: 150 28% 38%;
+  color-scheme: light;
 
-  /* Sage / olive scale */
-  --sage-50:  100 28% 96%;
-  --sage-100: 100 25% 92%;
-  --sage-200: 95 22% 84%;
-  --sage-300: 95 22% 70%;
-  --sage-400: 100 18% 56%;
-  --sage-500: 110 18% 44%;
-  --sage-600: 130 22% 34%;
-  --sage-700: 145 24% 26%;
-  --sage-800: 150 26% 18%;
-  --sage-900: 155 28% 12%;
+  /* ── Surfaces (warm cream, sage, dark olive ink) ── */
+  --color-bg: #faf7f0;
+  --color-bg-elevated: #ffffff;
+  --color-surface-solid: #fdfbf6;
+  --color-surface-2: #f4efe4;
+  --color-text: #2a2c28;
+  --color-text-strong: #161916;
+  --color-muted: #6b6e66;
+  --color-subtle: #9ea298;
 
-  --olive-300: 70 22% 64%;
-  --olive-500: 75 28% 38%;
-  --olive-700: 80 30% 24%;
+  /* Glass primitives — frosted cream */
+  --glass-bg: rgba(255, 252, 244, 0.68);
+  --glass-bg-strong: rgba(255, 252, 244, 0.86);
+  --glass-bg-deep: rgba(255, 252, 244, 0.94);
+  --glass-border: rgba(42, 44, 40, 0.10);
+  --glass-border-strong: rgba(42, 44, 40, 0.18);
+  --glass-blur: 20px;
+  --glass-blur-strong: 28px;
+  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
+  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
+  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
 
-  --emerald-400: 152 60% 48%;
-  --emerald-500: 152 65% 38%;
-  --emerald-600: 152 70% 30%;
+  /* Brand — sage + warm tan, earthy minimalist */
+  --brand-name: "bawabawa.id";
+  --brand-accent: #7c9885;
+  --brand-accent-2: #d4a373;
+  --brand-accent-strong: #5e7a68;
+  --brand-accent-soft: rgba(124, 152, 133, 0.14);
+  --brand-accent-ring: rgba(124, 152, 133, 0.36);
+  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
 
-  --primary: 150 26% 28%;
-  --primary-foreground: 60 30% 97%;
-  --accent: 152 50% 42%;
-  --accent-foreground: 60 30% 97%;
+  /* Status */
+  --color-success: #5e7a68;
+  --color-warning: #c08552;
+  --color-danger: #b3463f;
+  --color-info: #6b8a99;
 
-  --success: 152 65% 38%;
-  --warning: 38 92% 50%;
-  --danger: 0 72% 50%;
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
 
-  --radius: 1.1rem;
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+  --radius: var(--radius-lg);
+
+  /* Touch targets (mobile-first ≥44px) */
+  --tap-target: 44px;
+
+  /* Motion */
+  --motion-fast: 140ms cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+[data-theme="dark"],
 .dark {
-  --bg: 155 22% 7%;
-  --bg-soft: 150 18% 10%;
-  --surface: 150 16% 11%;
-  --surface-2: 150 14% 14%;
-  --foreground: 60 25% 95%;
-  --muted: 130 6% 60%;
-  --muted-foreground: 130 8% 70%;
-  --border: 150 10% 20%;
-  --input: 150 10% 18%;
-  --ring: 150 36% 50%;
+  color-scheme: dark;
 
-  --primary: 145 30% 70%;
-  --primary-foreground: 150 30% 10%;
-  --accent: 152 50% 55%;
-  --accent-foreground: 150 30% 10%;
+  --color-bg: #15140f;
+  --color-bg-elevated: #1d1c17;
+  --color-surface-solid: #23211b;
+  --color-surface-2: #2c2922;
+  --color-text: #f4efe4;
+  --color-text-strong: #ffffff;
+  --color-muted: #b8b3a6;
+  --color-subtle: #76726a;
+
+  --glass-bg: rgba(35, 33, 27, 0.58);
+  --glass-bg-strong: rgba(35, 33, 27, 0.76);
+  --glass-bg-deep: rgba(35, 33, 27, 0.90);
+  --glass-border: rgba(244, 239, 228, 0.10);
+  --glass-border-strong: rgba(244, 239, 228, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
+
+  --brand-accent: #a3bfa8;
+  --brand-accent-2: #e3b88a;
+  --brand-accent-strong: #7c9885;
+  --brand-accent-soft: rgba(163, 191, 168, 0.20);
+  --brand-accent-ring: rgba(163, 191, 168, 0.48);
+  --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
 }
 
 @theme inline {
-  --color-bg: hsl(var(--bg));
-  --color-bg-soft: hsl(var(--bg-soft));
-  --color-surface: hsl(var(--surface));
-  --color-surface-2: hsl(var(--surface-2));
-  --color-background: hsl(var(--bg));
-  --color-foreground: hsl(var(--foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-success: hsl(var(--success));
-  --color-warning: hsl(var(--warning));
-  --color-danger: hsl(var(--danger));
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
+  --color-surface: var(--color-bg-elevated);
+  --color-surface-2: var(--color-surface-2);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted);
+  --color-border: var(--glass-border-strong);
+  --color-input: var(--glass-border-strong);
+  --color-ring: var(--brand-accent-ring);
 
-  --color-sage-50: hsl(var(--sage-50));
-  --color-sage-100: hsl(var(--sage-100));
-  --color-sage-200: hsl(var(--sage-200));
-  --color-sage-300: hsl(var(--sage-300));
-  --color-sage-400: hsl(var(--sage-400));
-  --color-sage-500: hsl(var(--sage-500));
-  --color-sage-600: hsl(var(--sage-600));
-  --color-sage-700: hsl(var(--sage-700));
-  --color-sage-800: hsl(var(--sage-800));
-  --color-sage-900: hsl(var(--sage-900));
+  --color-primary: var(--brand-accent);
+  --color-primary-foreground: #ffffff;
+  --color-accent: var(--brand-accent-2);
+  --color-accent-foreground: #ffffff;
 
-  --color-olive-300: hsl(var(--olive-300));
-  --color-olive-500: hsl(var(--olive-500));
-  --color-olive-700: hsl(var(--olive-700));
+  /* Compatibility shims so existing Tailwind utilities like `bg-sage-700`,
+     `text-emerald-500`, `border-olive-300` keep rendering. The site was
+     authored against an earlier sage/olive scale; we map them to the ERP
+     brand tokens so visual identity now matches `apps/web` exactly. */
+  --color-sage-50:  #f1f4ee;
+  --color-sage-100: #e2eadf;
+  --color-sage-200: #c7d6c2;
+  --color-sage-300: #aabfa3;
+  --color-sage-400: #8da787;
+  --color-sage-500: #7c9885;
+  --color-sage-600: #5e7a68;
+  --color-sage-700: #4d6755;
+  --color-sage-800: #2a3b30;
+  --color-sage-900: #1a2620;
 
-  --color-emerald-400: hsl(var(--emerald-400));
-  --color-emerald-500: hsl(var(--emerald-500));
-  --color-emerald-600: hsl(var(--emerald-600));
+  --color-olive-300: #c4d2a3;
+  --color-olive-500: #9aa37b;
+  --color-olive-700: #5e6648;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-inter), ui-sans-serif, system-ui;
+  --color-emerald-400: #8eb597;
+  --color-emerald-500: #5e7a68;
+  --color-emerald-600: #4a6253;
 
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.6rem;
-  --radius-3xl: 2rem;
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-display), "Playfair Display", Georgia, serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
+    Menlo, monospace;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--glass-border-strong);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 html, body {
-  background: hsl(var(--bg));
-  color: hsl(var(--foreground));
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 body {
+  font-size: 16px;
+  line-height: 1.55;
+  /* Sage + cream gradient mesh — same composition as ERP web. */
   background-image:
-    radial-gradient(1200px 600px at -10% -20%, hsl(var(--sage-200) / 0.55), transparent 60%),
-    radial-gradient(900px 500px at 110% 0%, hsl(var(--sage-100) / 0.7), transparent 60%),
-    radial-gradient(700px 400px at 50% 110%, hsl(var(--sage-100) / 0.5), transparent 60%);
+    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.22) 0%, transparent 50%),
+    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.18) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(196, 213, 175, 0.18) 0%, transparent 55%),
+    radial-gradient(at 100% 80%, rgba(232, 215, 188, 0.18) 0%, transparent 50%);
+  background-attachment: fixed;
+  transition: background-color var(--motion-base), color var(--motion-base);
 }
+
+[data-theme="dark"] body,
 .dark body {
   background-image:
-    radial-gradient(1200px 700px at -10% -10%, hsl(var(--sage-700) / 0.35), transparent 60%),
-    radial-gradient(900px 600px at 110% 10%, hsl(var(--emerald-600) / 0.18), transparent 60%);
+    radial-gradient(at 18% 0%, rgba(163, 191, 168, 0.22) 0%, transparent 50%),
+    radial-gradient(at 82% 0%, rgba(227, 184, 138, 0.16) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(124, 152, 133, 0.20) 0%, transparent 55%);
 }
 
-/* Glass card utilities */
+/* Display headings use Playfair, like ERP sales / cinematic surfaces. */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */
 .glass {
-  background: hsl(var(--surface) / 0.7);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid hsl(var(--border) / 0.7);
-  box-shadow:
-    0 1px 0 hsl(var(--surface) / 0.8) inset,
-    0 1px 2px hsl(var(--foreground) / 0.04),
-    0 12px 40px -12px hsl(var(--sage-700) / 0.18);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
-.dark .glass {
-  background: hsl(var(--surface) / 0.55);
-  border-color: hsl(var(--border) / 0.6);
-  box-shadow:
-    0 1px 0 hsl(var(--surface-2) / 0.4) inset,
-    0 12px 40px -12px hsl(0 0% 0% / 0.55);
-}
-
 .glass-strong {
-  background: hsl(var(--surface) / 0.92);
-  backdrop-filter: blur(18px) saturate(150%);
-  border: 1px solid hsl(var(--border));
-  box-shadow:
-    0 1px 0 hsl(var(--surface) / 0.9) inset,
-    0 18px 60px -18px hsl(var(--sage-700) / 0.25);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur-strong)) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(170%);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-lg);
+}
+.glass-deep {
+  background: var(--glass-bg-deep);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-lg);
 }
 
-/* Subtle dotted texture overlay */
+/* ── ERP `.bb-*` shell + navbar primitives, ported verbatim so admin and
+      public surfaces feel identical when the user crosses between them. ── */
+.bb-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.bb-shell-main {
+  flex: 1; width: min(1180px, 100%); margin: 0 auto;
+  padding: clamp(16px, 4vw, 32px);
+  padding-top: clamp(96px, 12vw, 120px);
+  display: flex; flex-direction: column; gap: clamp(16px, 3vw, 24px);
+}
+.bb-navbar {
+  position: sticky; top: 12px; z-index: 40;
+  width: min(1180px, calc(100% - 24px));
+  margin: 12px auto 0;
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  transition: padding var(--motion-base), top var(--motion-base);
+}
+.bb-navbar-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 14px;
+  color: var(--color-text-strong); text-decoration: none;
+  letter-spacing: -0.01em; white-space: nowrap;
+}
+.bb-navbar-logo {
+  width: 36px; height: 36px; border-radius: 11px;
+  background: var(--brand-gradient); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+  box-shadow: 0 6px 18px var(--brand-accent-soft);
+}
+.bb-navbar-link {
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: var(--tap-target); padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  font-weight: 600; font-size: 13.5px;
+  transition: color var(--motion-fast), background var(--motion-base);
+}
+.bb-navbar-link:hover,
+.bb-navbar-link[data-active="true"] {
+  color: var(--color-text-strong);
+  background: var(--glass-bg);
+}
+
+.bb-card {
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+}
+.bb-card-hover {
+  transition: transform var(--motion-base), box-shadow var(--motion-base);
+}
+.bb-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+/* Subtle dotted texture overlay — used on hero / large sections. */
 .dot-grid {
-  background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(42, 44, 40, 0.07) 1px, transparent 1px);
   background-size: 22px 22px;
 }
-
-/* Animations */
-@keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-.animate-float { animation: float-y 6s ease-in-out infinite; }
-
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--emerald-500) / 0.55); }
-  50% { box-shadow: 0 0 0 10px hsl(var(--emerald-500) / 0); }
-}
-.pulse-dot { animation: pulse-dot 2.2s ease-out infinite; }
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.shimmer {
-  background: linear-gradient(90deg,
-    transparent,
-    hsl(var(--sage-200) / 0.4),
-    transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2.4s linear infinite;
+.dark .dot-grid,
+[data-theme="dark"] .dot-grid {
+  background-image: radial-gradient(rgba(244, 239, 228, 0.07) 1px, transparent 1px);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--sage-300) / 0.5);
-  border-radius: 8px;
+/* Reusable focus ring matching ERP's tap target convention. */
+:where(button, a, [role="button"], [tabindex]) {
+  outline: none;
 }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--sage-400) / 0.7); }
-
-/* Headings */
-h1, h2, h3, h4 { letter-spacing: -0.02em; }
-
-/* Selection */
-::selection {
-  background: hsl(var(--sage-300) / 0.6);
-  color: hsl(var(--sage-900));
+:where(button, a, [role="button"], [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px var(--brand-accent-ring);
+  border-radius: var(--radius-md);
 }
+
+/* Scrollbar — softened to match cream surfaces. */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--brand-accent-soft);
+  border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--brand-accent-ring); }

@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 
-const inter = Inter({
-  variable: "--font-inter",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "600"],
   display: "swap",
 });
 
@@ -22,7 +37,7 @@ export const metadata: Metadata = {
     "personal shopper Bandung",
     "Bawabawa",
   ],
-  metadataBase: new URL("https://bawabawa.id"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id"),
   openGraph: {
     title: "Bawabawa.id — Jasa Titip Premium Bandung ke Samarinda",
     description:
@@ -32,14 +47,19 @@ export const metadata: Metadata = {
   },
 };
 
+// Inline theme init mirrors apps/web's bb_themeMode storage so a user toggling
+// dark mode in either surface keeps the same preference across the ERP and the
+// public site.
 const themeInit = `
 (function() {
   try {
-    var t = localStorage.getItem('bawabawa-theme') || 'system';
+    var stored = localStorage.getItem('bb_themeMode') || localStorage.getItem('bawabawa-theme') || 'system';
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var dark = t === 'dark' || (t === 'system' && prefersDark);
+    var dark = stored === 'dark' || (stored === 'system' && prefersDark);
+    var mode = dark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', mode);
     if (dark) document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = mode;
   } catch (e) {}
 })();
 `;
@@ -48,7 +68,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${inter.variable} antialiased`} suppressHydrationWarning>
+    <html
+      lang="id"
+      className={`${jakarta.variable} ${playfair.variable} ${mono.variable} antialiased`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
