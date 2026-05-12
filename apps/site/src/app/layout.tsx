@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { WebVitalsReporter } from "@/components/web-vitals";
+import { ErrorReporter } from "@/components/error-reporter";
 import { jsonLd, organizationSchema, localBusinessSchema } from "@/lib/seo/schema";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -94,6 +95,7 @@ export default function RootLayout({
           }}
         />
         <WebVitalsReporter />
+        <ErrorReporter />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLd(
