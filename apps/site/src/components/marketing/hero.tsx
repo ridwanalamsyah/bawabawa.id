@@ -6,11 +6,13 @@ import { ArrowRight, Sparkles, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroVisual } from "./hero-visual";
 import { LiveStats } from "./live-stats";
+import { AmbientOrbs } from "./ambient-orbs";
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28">
+      <AmbientOrbs />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6">
             <motion.div
@@ -30,7 +32,7 @@ export function Hero() {
             >
               Titip barang dari{" "}
               <span className="relative inline-block">
-                <span className="bg-gradient-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+                <span className="bg-linear-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
                   Bandung
                 </span>
                 <span className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[hsl(var(--emerald-400)/0.35)] -z-10 rounded-full" />

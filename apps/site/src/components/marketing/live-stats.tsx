@@ -66,9 +66,9 @@ function StatCard({ icon: Icon, label, base, drift, format, tone }: Stat) {
 
   return (
     <GlassCard className="p-4 sm:p-5 relative overflow-hidden">
-      <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-30 blur-2xl bg-gradient-to-br ${tone}`} />
+      <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-30 blur-2xl bg-linear-to-br ${tone}`} />
       <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
-        <span className={`h-7 w-7 rounded-xl grid place-items-center bg-gradient-to-br ${tone} text-white`}>
+        <span className={`h-7 w-7 rounded-xl grid place-items-center bg-linear-to-br ${tone} text-white`}>
           <Icon className="h-3.5 w-3.5" />
         </span>
         {label}

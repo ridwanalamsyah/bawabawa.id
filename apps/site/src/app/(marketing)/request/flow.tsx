@@ -442,7 +442,7 @@ function PaymentStep({
   if (submitted) {
     return (
       <GlassCard className="p-10 text-center">
-        <div className="mx-auto h-16 w-16 rounded-3xl bg-gradient-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
+        <div className="mx-auto h-16 w-16 rounded-3xl bg-linear-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
           <CircleCheck className="h-8 w-8" />
         </div>
         <h3 className="mt-5 text-2xl font-semibold tracking-tight">Request kamu sudah masuk!</h3>

@@ -211,7 +211,7 @@ export default function AdminOverviewPage() {
           <ul className="mt-4 space-y-3 text-sm">
             {topShoppers.map((s, i) => (
               <li key={s.name} className="flex items-center gap-3">
-                <span className="h-7 w-7 rounded-full bg-gradient-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-xs font-semibold">
+                <span className="h-7 w-7 rounded-full bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-xs font-semibold">
                   {i + 1}
                 </span>
                 <span className="flex-1 font-medium">{s.name}</span>

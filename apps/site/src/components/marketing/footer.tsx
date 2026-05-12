@@ -24,21 +24,22 @@ export function Footer() {
       ],
     },
     {
-      title: "Perusahaan",
+      title: "Kategori",
       links: [
-        { label: "Tentang Bawabawa", href: "#" },
-        { label: "Karier", href: "#" },
-        { label: "Press Kit", href: "#" },
-        { label: "Blog", href: "#" },
+        { label: "Jastip Sepatu", href: "/jastip-sepatu" },
+        { label: "Jastip Skincare", href: "/jastip-skincare" },
+        { label: "Jastip Fashion", href: "/jastip-fashion" },
+        { label: "Jastip Makanan", href: "/jastip-makanan" },
+        { label: "Jastip Elektronik", href: "/jastip-elektronik" },
       ],
     },
     {
-      title: "Bantuan",
+      title: "Perusahaan",
       links: [
-        { label: "Pusat Bantuan", href: "#" },
-        { label: "Hubungi Kami", href: "#" },
-        { label: "Status Layanan", href: "#" },
-        { label: "S&K", href: "#" },
+        { label: "Press Kit", href: "/press-kit" },
+        { label: "Blog", href: "/blog" },
+        { label: "Karier", href: "#" },
+        { label: "Hubungi Kami", href: "mailto:hello@bawabawa.id" },
       ],
     },
   ];
@@ -47,7 +48,7 @@ export function Footer() {
     <footer className="relative border-t border-[hsl(var(--border))] mt-24">
       <div className="absolute inset-0 dot-grid opacity-40 pointer-events-none" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-10">
           <div className="col-span-2">
             <Logo />
             <p className="mt-4 max-w-sm text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
@@ -88,9 +89,9 @@ export function Footer() {
             © {new Date().getFullYear()} Bawabawa.id — Made with love in Bandung 🌿 untuk Samarinda.
           </p>
           <div className="flex items-center gap-4 text-xs text-[hsl(var(--muted-foreground))]">
-            <Link href="#" className="hover:text-[hsl(var(--foreground))]">Privacy</Link>
-            <Link href="#" className="hover:text-[hsl(var(--foreground))]">Terms</Link>
-            <Link href="#" className="hover:text-[hsl(var(--foreground))]">Cookie</Link>
+            <Link href="/privacy" className="hover:text-[hsl(var(--foreground))]">Privacy</Link>
+            <Link href="/privacy#7-keamanan-data" className="hover:text-[hsl(var(--foreground))]">Terms</Link>
+            <Link href="/privacy#cookie" className="hover:text-[hsl(var(--foreground))]">Cookie</Link>
           </div>
         </div>
       </div>

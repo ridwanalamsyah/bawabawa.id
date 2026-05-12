@@ -42,8 +42,8 @@ export function Categories() {
               transition={{ duration: 0.4, delay: i * 0.04 }}
               className="group relative overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.85)] backdrop-blur p-5 text-left hover:border-[hsl(var(--sage-400))] transition-all"
             >
-              <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-25 blur-2xl bg-gradient-to-br ${c.tone} transition-opacity group-hover:opacity-40`} />
-              <div className={`relative h-10 w-10 rounded-2xl grid place-items-center text-white bg-gradient-to-br ${c.tone}`}>
+              <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-25 blur-2xl bg-linear-to-br ${c.tone} transition-opacity group-hover:opacity-40`} />
+              <div className={`relative h-10 w-10 rounded-2xl grid place-items-center text-white bg-linear-to-br ${c.tone}`}>
                 <c.icon className="h-5 w-5" />
               </div>
               <p className="mt-4 font-semibold">{c.label}</p>

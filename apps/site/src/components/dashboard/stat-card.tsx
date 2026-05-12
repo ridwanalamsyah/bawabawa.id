@@ -20,9 +20,9 @@ export function StatCard({
 }) {
   return (
     <GlassCard className="p-5 relative overflow-hidden">
-      <div className={cn("absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-25 blur-2xl bg-gradient-to-br", tone)} />
+      <div className={cn("absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-25 blur-2xl bg-linear-to-br", tone)} />
       <div className="flex items-center gap-2.5">
-        <span className={cn("h-9 w-9 rounded-2xl grid place-items-center bg-gradient-to-br text-white", tone)}>
+        <span className={cn("h-9 w-9 rounded-2xl grid place-items-center bg-linear-to-br text-white", tone)}>
           <Icon className="h-4 w-4" />
         </span>
         <p className="text-xs text-[hsl(var(--muted-foreground))]">{label}</p>

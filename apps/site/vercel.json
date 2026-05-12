@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && npm ci && npm run build --workspace @erp/site",
+  "installCommand": "echo 'install handled by buildCommand from monorepo root'",
+  "outputDirectory": ".next",
+  "github": {
+    "silent": true
+  },
+  "env": {
+    "NEXT_TELEMETRY_DISABLED": "1"
+  }
+}

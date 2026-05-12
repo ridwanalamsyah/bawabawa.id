@@ -26,7 +26,7 @@ export default function WishlistPage() {
         {ITEMS.map((it, i) => (
           <GlassCard key={i} className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white">
+              <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white">
                 <ShoppingBag className="h-5 w-5" />
               </div>
               <button className="h-8 w-8 rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.4)] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))] grid place-items-center">

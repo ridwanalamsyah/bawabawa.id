@@ -20,7 +20,7 @@ export function Progress({
     >
       <div
         className={cn(
-          "h-full rounded-full bg-gradient-to-r from-[hsl(var(--sage-500))] to-[hsl(var(--emerald-500))] transition-[width] duration-700",
+          "h-full rounded-full bg-linear-to-r from-[hsl(var(--sage-500))] to-[hsl(var(--emerald-500))] transition-[width] duration-700",
           barClassName
         )}
         style={{ width: `${v}%` }}

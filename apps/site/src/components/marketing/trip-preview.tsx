@@ -43,7 +43,7 @@ export function TripPreview() {
                 transition={{ duration: 0.5, delay: i * 0.08 }}
                 className="group relative overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:shadow-[0_24px_60px_-30px_hsl(var(--sage-700)/0.45)] transition-all"
               >
-                <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-[hsl(var(--sage-100))] to-transparent dark:from-[hsl(var(--sage-700)/0.25)]" />
+                <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-[hsl(var(--sage-100))] to-transparent dark:from-[hsl(var(--sage-700)/0.25)]" />
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>

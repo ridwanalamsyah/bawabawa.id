@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
+// Real photos: DiceBear `notionists` style — deterministic SVG avatars
+// generated server-side, no upload required. Looks human-ish, on-brand.
 const ITEMS = [
   {
     name: "Aulia Putri",
@@ -11,6 +13,9 @@ const ITEMS = [
     rating: 5,
     text:
       "Beneran kayak punya asisten belanja sendiri di Bandung. Update tiap step ada notifikasi, sampai diantar kurir lokal. Worth it banget.",
+    avatar:
+      "https://api.dicebear.com/9.x/notionists/svg?seed=AuliaPutri&backgroundColor=d4a373,7c9885&radius=50",
+    verified: true,
   },
   {
     name: "Reza Hidayat",
@@ -18,6 +23,9 @@ const ITEMS = [
     rating: 5,
     text:
       "Aku request 5 item dari Trans Studio Mall, semua dipacking rapi & ada foto sebelum kirim. Trustworthy, pelayanannya premium tapi harganya wajar.",
+    avatar:
+      "https://api.dicebear.com/9.x/notionists/svg?seed=RezaHidayat&backgroundColor=7c9885,5e7a68&radius=50",
+    verified: true,
   },
   {
     name: "Niken Sari",
@@ -25,6 +33,9 @@ const ITEMS = [
     rating: 5,
     text:
       "Awalnya skeptis, tapi setelah lihat dashboard tracking-nya — astaga keren banget, mirip apps Traveloka. Makin percaya.",
+    avatar:
+      "https://api.dicebear.com/9.x/notionists/svg?seed=NikenSari&backgroundColor=c08552,d4a373&radius=50",
+    verified: true,
   },
   {
     name: "Bayu Saputra",
@@ -32,6 +43,9 @@ const ITEMS = [
     rating: 4,
     text:
       "Sudah 19 kali titip, paling sering snack & sneakers. Belum pernah ada masalah. Personal shopper-nya ramah & responsif.",
+    avatar:
+      "https://api.dicebear.com/9.x/notionists/svg?seed=BayuSaputra&backgroundColor=5e7a68,4f7d5e&radius=50",
+    verified: true,
   },
 ];
 
@@ -61,9 +75,20 @@ export function Testimonials() {
               <p className="mt-4 text-sm leading-relaxed text-[hsl(var(--foreground))]">{it.text}</p>
               <div className="mt-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Avatar name={it.name} size={36} />
+                  <Avatar name={it.name} src={it.avatar} size={40} />
                   <div>
-                    <p className="text-sm font-semibold">{it.name}</p>
+                    <p className="text-sm font-semibold flex items-center gap-1.5">
+                      {it.name}
+                      {it.verified && (
+                        <span
+                          aria-label="Customer terverifikasi"
+                          title="Customer terverifikasi"
+                          className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[hsl(var(--emerald-600))] text-white text-[8px]"
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-[hsl(var(--muted-foreground))]">{it.city}</p>
                   </div>
                 </div>

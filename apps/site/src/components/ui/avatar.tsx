@@ -16,7 +16,7 @@ export function Avatar({
   return (
     <div
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-full overflow-hidden bg-gradient-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-600))] text-white font-medium",
+        "relative inline-flex shrink-0 items-center justify-center rounded-full overflow-hidden bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-600))] text-white font-medium",
         className
       )}
       style={{ width: size, height: size, fontSize: Math.max(11, size * 0.38) }}
