@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bawabawa ERP API</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --fg: #2a2c28;
+        --bg: #faf7f0;
+        --muted: #6b7361;
+        --accent: #7c9885;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fg: #f1efe6;
+          --bg: #1a1c19;
+          --muted: #a8aea1;
+        }
+      }
+      html,
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Plus Jakarta Sans",
+          sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      main {
+        max-width: 460px;
+        text-align: center;
+      }
+      .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent);
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      h1 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 600;
+        font-size: 28px;
+        margin: 0 0 12px;
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.6;
+        margin: 8px 0;
+      }
+      code,
+      a code {
+        background: rgba(124, 152, 133, 0.12);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p><span class="dot"></span>Service online</p>
+      <h1>Bawabawa ERP API</h1>
+      <p>
+        Endpoint privat untuk modul ERP Bawabawa.id. Tidak ada halaman publik
+        di sini.
+      </p>
+      <p>
+        Cek status: <a href="/api/v1/health"><code>/api/v1/health</code></a>
+      </p>
+      <p>
+        Frontend publik: <a href="https://bawabawa.id">bawabawa.id</a>
+      </p>
+    </main>
+  </body>
+</html>
