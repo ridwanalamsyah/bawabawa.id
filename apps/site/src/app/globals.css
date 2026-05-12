@@ -77,6 +77,46 @@
   --motion-fast: 140ms cubic-bezier(0.32, 0.72, 0, 1);
   --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
   --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* HSL channels — components consume these via `hsl(var(--token))` so the
+     value is space-separated H S% L% (no `hsl()` wrapper). Mirrors the hex
+     palette above so admin and public surfaces look identical. */
+  --bg: 42 50% 96%;
+  --bg-soft: 41 42% 93%;
+  --surface: 0 0% 100%;
+  --surface-2: 41 42% 93%;
+  --foreground: 90 5% 16%;
+  --muted-foreground: 83 4% 42%;
+  --border: 90 8% 84%;
+  --input: 90 8% 84%;
+  --ring: 139 12% 54%;
+  --primary-foreground: 0 0% 100%;
+  --warning: 28 47% 54%;
+  --danger: 4 48% 47%;
+
+  --sage-50:  90 21% 95%;
+  --sage-100: 104 21% 90%;
+  --sage-200: 105 20% 80%;
+  --sage-300: 105 18% 69%;
+  --sage-400: 109 15% 59%;
+  --sage-500: 139 12% 54%;
+  --sage-600: 141 13% 42%;
+  --sage-700: 138 14% 35%;
+  --sage-800: 141 17% 20%;
+  --sage-900: 150 19% 13%;
+
+  --olive-300: 78 34% 73%;
+  --olive-500: 74 18% 56%;
+  --olive-700: 76 17% 34%;
+
+  --emerald-400: 134 21% 63%;
+  --emerald-500: 141 13% 42%;
+  --emerald-600: 142 14% 34%;
+
+  --cream-100: 42 50% 96%;
+
+  --rose-500: 4 48% 47%;
+  --rose-700: 3 49% 32%;
 }
 
 [data-theme="dark"],
@@ -108,6 +148,18 @@
   --brand-accent-ring: rgba(163, 191, 168, 0.48);
   --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
   --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
+
+  /* HSL channel overrides for dark mode. Surfaces and borders flip to dark
+     tones; brand sage / olive / emerald scales keep their hex values so
+     gradient buttons stay legible against the warm-charcoal canvas. */
+  --bg: 47 14% 7%;
+  --bg-soft: 40 11% 11%;
+  --surface: 41 12% 12%;
+  --surface-2: 41 12% 15%;
+  --foreground: 40 39% 93%;
+  --muted-foreground: 41 13% 75%;
+  --border: 40 10% 25%;
+  --input: 40 10% 25%;
 }
 
 @theme inline {
