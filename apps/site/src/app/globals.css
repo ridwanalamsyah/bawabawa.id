@@ -381,3 +381,17 @@ h1, h2, h3, .font-display {
   border-radius: var(--radius-full);
 }
 *::-webkit-scrollbar-thumb:hover { background: var(--brand-accent-ring); }
+
+/* Top-of-page route progress bar — CSS keyframes so RouteProgress doesn't
+   need setState in an effect (Strict Mode safe). */
+@keyframes route-progress {
+  0%   { width: 0%;   opacity: 1; }
+  60%  { width: 88%;  opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+.route-progress-bar {
+  animation: route-progress 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-progress-bar { animation: none; opacity: 0; }
+}

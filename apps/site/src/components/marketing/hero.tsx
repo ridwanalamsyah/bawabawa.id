@@ -6,11 +6,13 @@ import { ArrowRight, Sparkles, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroVisual } from "./hero-visual";
 import { LiveStats } from "./live-stats";
+import { AmbientOrbs } from "./ambient-orbs";
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28">
+      <AmbientOrbs />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6">
             <motion.div

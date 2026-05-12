@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { WebVitalsReporter } from "@/components/web-vitals";
+import { jsonLd, organizationSchema, localBusinessSchema } from "@/lib/seo/schema";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -78,6 +81,35 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>{children}</ThemeProvider>
+        <Toaster
+          position="top-center"
+          richColors
+          closeButton
+          theme="system"
+          toastOptions={{
+            classNames: {
+              toast:
+                "!bg-[hsl(var(--surface))] !border-[hsl(var(--border))] !text-[hsl(var(--foreground))] !shadow-lg !backdrop-blur-md",
+            },
+          }}
+        />
+        <WebVitalsReporter />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLd(
+            organizationSchema(
+              process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id"
+            )
+          )}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLd(
+            localBusinessSchema(
+              process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id"
+            )
+          )}
+        />
       </body>
     </html>
   );
