@@ -1,6 +1,25 @@
 import { Pool } from "pg";
-import { Database } from "sqlite3";
-import { open } from "sqlite";
+
+// `sqlite3` ships a native binding that fails to load in some serverless
+// runtimes (Vercel Lambda has no shared C++ runtime by default). It's only
+// needed for local dev (no DATABASE_URL or a localhost Postgres), so we
+// defer the import to the first time a SQLite path is actually requested.
+// In production with a real DATABASE_URL the module is never touched and
+// therefore never bundled into the cold-start payload.
+type SqliteDriverModule = typeof import("sqlite3");
+type SqliteHelperModule = typeof import("sqlite");
+
+let sqliteDriver: SqliteDriverModule | null = null;
+let sqliteHelper: SqliteHelperModule | null = null;
+
+async function loadSqliteModules(): Promise<{
+  Database: SqliteDriverModule["Database"];
+  open: SqliteHelperModule["open"];
+}> {
+  if (!sqliteDriver) sqliteDriver = await import("sqlite3");
+  if (!sqliteHelper) sqliteHelper = await import("sqlite");
+  return { Database: sqliteDriver.Database, open: sqliteHelper.open };
+}
 
 let sharedPool: Pool | null = null;
 let sqliteDb: any = null;
@@ -113,6 +132,7 @@ function normalizePgResult<Row>(raw: any): DbQueryResult<Row> {
 
 async function getSqliteDb() {
   if (!sqliteDb) {
+    const { Database, open } = await loadSqliteModules();
     sqliteDb = await open({
       filename: './erp.db',
       driver: Database
