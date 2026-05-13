@@ -37,12 +37,6 @@ export default async function LoginPage({
           <Suspense>
             <LoginForm next={next} />
           </Suspense>
-          <p className="mt-6 text-xs text-[hsl(var(--muted-foreground))]">
-            Demo akun: <code className="font-mono">aulia.putri@example.com</code> /{" "}
-            <code className="font-mono">password</code> (customer) ·{" "}
-            <code className="font-mono">indra@bawabawa.id</code> /{" "}
-            <code className="font-mono">password</code> (owner).
-          </p>
         </div>
       </div>
     </main>
