@@ -21,9 +21,9 @@ import {
  * route exists — but the server-side gate is what actually keeps it
  * locked down.
  */
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  const session = verifyTokenEdge(req.cookies.get(SESSION_COOKIE)?.value);
+  const session = await verifyTokenEdge(req.cookies.get(SESSION_COOKIE)?.value);
 
   if (pathname.startsWith("/admin")) {
     if (!session) {

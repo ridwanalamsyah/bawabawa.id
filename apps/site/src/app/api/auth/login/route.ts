@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       id: email,
     };
     const role = ((erpUser.role ?? "customer") as AuthRole);
-    const sessionToken = signToken({
+    const sessionToken = await signToken({
       userId: erpUser.id ?? email,
       role,
     }, SESSION_TTL_SECONDS);
