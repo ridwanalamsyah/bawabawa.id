@@ -65,3 +65,11 @@ export function isAdminRole(role: string | null | undefined): boolean {
 }
 
 export const SESSION_COOKIE = "bb_session";
+
+/**
+ * Bearer token issued by the ERP for the signed-in user. Stored as a
+ * separate httpOnly cookie so server-side route handlers can forward it
+ * when calling protected ERP endpoints (e.g. /admin/users). The bb_session
+ * cookie alone is not enough — the ERP's authGuard checks its own JWT.
+ */
+export const ERP_TOKEN_COOKIE = "bb_erp_token";

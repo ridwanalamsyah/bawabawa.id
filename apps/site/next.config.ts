@@ -22,14 +22,19 @@ const monorepoRoot = path.resolve(process.cwd(), "..", "..");
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id";
 const ERP_API_BASE = process.env.ERP_API_BASE_URL ?? "https://bawabawa-id-api.vercel.app";
 const PLAUSIBLE_HOST = "https://plausible.io";
+// Google Identity Services origins — accounts.google.com serves the GSI
+// client script + ID token verifier UI, and the button is rendered inside
+// a same-origin iframe pointing to https://accounts.google.com/gsi/button.
+const GOOGLE_GSI = "https://accounts.google.com https://www.gstatic.com";
 
 const csp = [
   `default-src 'self'`,
-  `script-src 'self' 'unsafe-inline' ${PLAUSIBLE_HOST}`,
-  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
-  `img-src 'self' data: blob: https://api.dicebear.com https://images.unsplash.com https://*.r2.dev https://*.amazonaws.com`,
+  `script-src 'self' 'unsafe-inline' ${PLAUSIBLE_HOST} ${GOOGLE_GSI}`,
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com`,
+  `img-src 'self' data: blob: https://api.dicebear.com https://images.unsplash.com https://*.r2.dev https://*.amazonaws.com https://*.googleusercontent.com`,
   `font-src 'self' https://fonts.gstatic.com data:`,
-  `connect-src 'self' ${SITE_URL} ${ERP_API_BASE} ${PLAUSIBLE_HOST}`,
+  `connect-src 'self' ${SITE_URL} ${ERP_API_BASE} ${PLAUSIBLE_HOST} https://accounts.google.com`,
+  `frame-src 'self' https://accounts.google.com`,
   `frame-ancestors 'none'`,
   `base-uri 'self'`,
   `form-action 'self'`,
