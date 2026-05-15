@@ -395,3 +395,17 @@ h1, h2, h3, .font-display {
 @media (prefers-reduced-motion: reduce) {
   .route-progress-bar { animation: none; opacity: 0; }
 }
+
+/* Gentle vertical float — used by hero "Tiba di Samarinda" card and other
+   ambient floating glass cards. Tailwind v4 doesn't ship a `float` animation
+   utility by default, so we register the keyframe + class here. */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 4.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-float { animation: none; }
+}
