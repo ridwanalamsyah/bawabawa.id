@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Plane, MapPin, Package } from "lucide-react";
 
 const ROUTE = {
@@ -13,9 +13,33 @@ const ROUTE = {
 
 const PATH = `M ${ROUTE.origin.x} ${ROUTE.origin.y} Q ${ROUTE.transit.x} ${ROUTE.transit.y} ${ROUTE.destination.x} ${ROUTE.destination.y}`;
 
+const PACKAGE_STEPS = 60;
+
+// Sample points along the quadratic Bezier (P0,P1,P2). We use these as
+// keyframes for framer-motion instead of SVG SMIL <animateMotion>, which
+// React 19 rejects ("tag unrecognized" / "incorrect casing") because the
+// SVG namespace context is lost inside <foreignObject> and the SMIL element
+// list isn't part of React 19's DOM whitelist.
+function samplePath(steps: number) {
+  const { origin: a, transit: b, destination: c } = ROUTE;
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const mt = 1 - t;
+    xs.push(mt * mt * a.x + 2 * mt * t * b.x + t * t * c.x);
+    ys.push(mt * mt * a.y + 2 * mt * t * b.y + t * t * c.y);
+  }
+  return { xs, ys };
+}
+
 export function LiveOrderMap() {
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const { xs: packageX, ys: packageY } = useMemo(
+    () => samplePath(PACKAGE_STEPS),
+    [],
+  );
 
   return (
     <section className="py-20 sm:py-28">
@@ -115,37 +139,33 @@ export function LiveOrderMap() {
                     fill="white"
                   />
                 </motion.g>
-                {/* moving package — uses SVG <animateMotion> for path tracing */}
+                {/* moving package — animated via framer-motion keyframes
+                    sampled from the Bezier path; replaces SMIL
+                    <animateMotion> which React 19 cannot render. */}
                 {inView && (
-                  <g aria-hidden>
+                  <motion.g
+                    aria-hidden
+                    initial={{ x: packageX[0], y: packageY[0] }}
+                    animate={{ x: packageX, y: packageY }}
+                    transition={{
+                      duration: 4,
+                      ease: "linear",
+                      repeat: Infinity,
+                      repeatType: "loop",
+                    }}
+                  >
                     <circle
                       r="14"
                       fill="white"
                       stroke="hsl(var(--sage-600))"
                       strokeWidth="2"
-                    >
-                      <animateMotion
-                        dur="4s"
-                        repeatCount="indefinite"
-                        keyTimes="0;1"
-                        rotate="auto"
-                      >
-                        <mpath xlinkHref="#routePath" />
-                      </animateMotion>
-                    </circle>
+                    />
                     <foreignObject x="-9" y="-9" width="18" height="18">
                       <div className="text-[hsl(var(--sage-700))]">
                         <Package className="h-[18px] w-[18px]" />
                       </div>
-                      <animateMotion
-                        dur="4s"
-                        repeatCount="indefinite"
-                        keyTimes="0;1"
-                      >
-                        <mpath xlinkHref="#routePath" />
-                      </animateMotion>
                     </foreignObject>
-                  </g>
+                  </motion.g>
                 )}
                 <defs>
                   <linearGradient id="routeGrad" x1="0" y1="0" x2="1" y2="0">
