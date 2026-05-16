@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -10,12 +11,13 @@ import {
   ShoppingBag,
   PackageCheck,
   CreditCard,
-  Calendar,
   Sparkles,
   CircleCheck,
   Link as LinkIcon,
   Upload,
   Image as ImageIcon,
+  Truck,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/card";
@@ -24,6 +26,18 @@ import { Badge } from "@/components/ui/badge";
 import { trips } from "@/lib/mock/trips";
 import { formatDate, formatIDR } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import {
+  TIERS,
+  type TierId,
+  type PricingBreakdown,
+  estimateItemWeightKg,
+  computePricing,
+} from "@/lib/pricing";
+import {
+  saveLocalOrder,
+  generateTrackingToken,
+  type LocalOrder,
+} from "@/lib/local-orders";
 
 const CATEGORIES = ["Fashion", "Skincare", "Snack Bandung", "Sepatu", "Tas", "Hijab", "Elektronik", "Aksesoris", "Lainnya"];
 
@@ -34,22 +48,25 @@ type Item = {
   category: string;
   qty: number;
   estPrice: number;
+  weightKgOverride?: number;
   notes: string;
   imageDataUrl?: string;
 };
 
 const STEPS = [
   { id: 1, label: "Detail Barang", icon: ShoppingBag },
-  { id: 2, label: "Pilih Trip", icon: Calendar },
+  { id: 2, label: "Layanan & Trip", icon: Truck },
   { id: 3, label: "Alamat", icon: PackageCheck },
   { id: 4, label: "Pembayaran", icon: CreditCard },
 ];
 
 export function RequestFlow() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [items, setItems] = useState<Item[]>([
     { id: crypto.randomUUID(), name: "", link: "", category: "Fashion", qty: 1, estPrice: 0, notes: "" },
   ]);
+  const [tier, setTier] = useState<TierId>("batch");
   const [tripId, setTripId] = useState<string>(trips[0].id);
   const [address, setAddress] = useState({
     name: "",
@@ -61,21 +78,59 @@ export function RequestFlow() {
     notes: "",
   });
   const [payment, setPayment] = useState<"qris" | "transfer" | "ewallet">("qris");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
 
   const trip = trips.find((t) => t.id === tripId)!;
   const itemsTotal = items.reduce((s, i) => s + (i.estPrice || 0) * (i.qty || 1), 0);
-  const totalKgEstimate = Math.max(1, items.reduce((s, i) => s + i.qty, 0));
-  const jastipFee = Math.max(20000, Math.round(itemsTotal * 0.08));
-  const tripFee = trip.baseFee + trip.perKgFee * totalKgEstimate;
-  const localShipping = 22000;
-  const total = itemsTotal + jastipFee + tripFee + localShipping;
+  const totalKg = items.reduce(
+    (s, i) => s + (i.weightKgOverride ?? estimateItemWeightKg(i.category, i.qty)),
+    0,
+  );
+  const pricing: PricingBreakdown = computePricing({
+    itemsTotal,
+    totalKg,
+    tier,
+  });
 
   const canNext = useMemo(() => {
     if (step === 1) return items.every((i) => i.name.trim().length > 0 && i.qty >= 1);
     if (step === 3) return address.name && address.phone && address.street && address.city && address.postal;
     return true;
   }, [step, items, address]);
+
+  const handleSubmit = () => {
+    if (submitting || submitted) return;
+    setSubmitting(true);
+    const token = generateTrackingToken();
+    const order: LocalOrder = {
+      token,
+      code: "BWB-" + token.slice(0, 6).toUpperCase(),
+      createdAt: new Date().toISOString(),
+      tier,
+      tripCode: trip.code,
+      tripDepartAt: trip.departAt,
+      tripArriveEstimateAt: trip.arriveEstimateAt,
+      items: items.map((i) => ({
+        name: i.name,
+        category: i.category,
+        qty: i.qty,
+        estPrice: i.estPrice,
+        notes: i.notes,
+      })),
+      address,
+      payment,
+      pricing,
+      totalKg,
+      status: "pending_payment",
+    };
+    saveLocalOrder(order);
+    setTrackingToken(token);
+    setSubmitted(true);
+    setSubmitting(false);
+    router.prefetch(`/track/${token}`);
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -94,7 +149,7 @@ export function RequestFlow() {
               <ItemsStep items={items} setItems={setItems} />
             )}
             {step === 2 && (
-              <TripStep tripId={tripId} setTripId={setTripId} />
+              <TripStep tier={tier} setTier={setTier} tripId={tripId} setTripId={setTripId} />
             )}
             {step === 3 && (
               <AddressStep address={address} setAddress={setAddress} />
@@ -104,7 +159,9 @@ export function RequestFlow() {
                 payment={payment}
                 setPayment={setPayment}
                 submitted={submitted}
-                onSubmit={() => setSubmitted(true)}
+                submitting={submitting}
+                trackingToken={trackingToken}
+                onSubmit={handleSubmit}
               />
             )}
           </motion.div>
@@ -128,7 +185,7 @@ export function RequestFlow() {
                 Lanjut <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button variant="accent" onClick={() => setSubmitted(true)}>
+              <Button variant="accent" onClick={handleSubmit} disabled={submitting}>
                 Konfirmasi & Bayar <Sparkles className="h-4 w-4" />
               </Button>
             )}
@@ -139,13 +196,9 @@ export function RequestFlow() {
       <aside className="lg:col-span-4">
         <SummaryCard
           items={items}
-          itemsTotal={itemsTotal}
-          jastipFee={jastipFee}
-          tripFee={tripFee}
-          localShipping={localShipping}
-          total={total}
+          pricing={pricing}
           trip={trip}
-          totalKgEstimate={totalKgEstimate}
+          tier={tier}
         />
       </aside>
     </div>
@@ -272,6 +325,26 @@ function ItemsStep({ items, setItems }: { items: Item[]; setItems: (v: Item[]) =
                 </p>
               </div>
               <div className="sm:col-span-2 grid gap-1.5">
+                <Label>
+                  Estimasi berat (kg) <span className="text-[hsl(var(--muted-foreground))] font-normal">— opsional</span>
+                </Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.1}
+                  value={it.weightKgOverride ?? ""}
+                  onChange={(e) =>
+                    update(it.id, {
+                      weightKgOverride: e.target.value === "" ? undefined : Math.max(0, Number(e.target.value)),
+                    })
+                  }
+                  placeholder={`Auto: ${estimateItemWeightKg(it.category, it.qty).toFixed(1)} kg`}
+                />
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  Kosongkan untuk pakai estimasi otomatis berdasar kategori ({it.category}). Berat menentukan tarif kargo.
+                </p>
+              </div>
+              <div className="sm:col-span-2 grid gap-1.5">
                 <Label>Catatan tambahan</Label>
                 <Textarea
                   value={it.notes}
@@ -314,49 +387,98 @@ function ItemsStep({ items, setItems }: { items: Item[]; setItems: (v: Item[]) =
   );
 }
 
-function TripStep({ tripId, setTripId }: { tripId: string; setTripId: (v: string) => void }) {
+function TripStep({
+  tier,
+  setTier,
+  tripId,
+  setTripId,
+}: {
+  tier: TierId;
+  setTier: (v: TierId) => void;
+  tripId: string;
+  setTripId: (v: string) => void;
+}) {
   return (
-    <GlassCard className="p-6">
-      <h3 className="text-base font-semibold">Pilih jadwal trip</h3>
-      <p className="text-sm text-[hsl(var(--muted-foreground))]">
-        Tarif trip dihitung berdasarkan kapasitas yang kamu pakai.
-      </p>
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
-        {trips.filter((t) => t.status !== "in_transit" && t.status !== "closed").map((t) => {
-          const filled = Math.round((t.bookedKg / t.capacityKg) * 100);
-          const isFull = t.status === "fullbooked" || filled >= 100;
-          const active = tripId === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => !isFull && setTripId(t.id)}
-              className={cn(
-                "text-left rounded-2xl border p-4 transition-all",
-                active
-                  ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)] ring-2 ring-[hsl(var(--sage-700))]/30"
-                  : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
-                isFull && "opacity-60 cursor-not-allowed"
-              )}
-              disabled={isFull}
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
-                {isFull ? <Badge variant="warning">Fullbooked</Badge> : <Badge variant="success">Tersedia</Badge>}
-              </div>
-              <p className="mt-1.5 font-semibold">
-                {formatDate(t.departAt, { weekday: "long", day: "numeric", month: "short" })}
-              </p>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                Estimasi tiba {formatDate(t.arriveEstimateAt, { day: "numeric", month: "short" })} · {t.shopper.name} · ★ {t.shopper.rating}
-              </p>
-              <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
-                {Math.max(0, t.capacityKg - t.bookedKg)} kg slot tersisa · base fee {formatIDR(t.baseFee)} + {formatIDR(t.perKgFee)}/kg
-              </p>
-            </button>
-          );
-        })}
-      </div>
-    </GlassCard>
+    <div className="space-y-4">
+      <GlassCard className="p-6">
+        <h3 className="text-base font-semibold">Pilih tipe layanan</h3>
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          Tentukan kecepatan vs biaya. Fast Track lebih cepat tapi lebih mahal,
+          Batch Share lebih hemat tapi nunggu trip terjadwal.
+        </p>
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {(Object.values(TIERS)).map((t) => {
+            const active = tier === t.id;
+            const Icon = t.id === "fast" ? Zap : Truck;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTier(t.id)}
+                className={cn(
+                  "text-left rounded-2xl border p-5 transition-all",
+                  active
+                    ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)] ring-2 ring-[hsl(var(--sage-700))]/30"
+                    : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-9 w-9 rounded-xl bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.4)] grid place-items-center text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <p className="font-semibold">{t.label}</p>
+                  {active && <Badge variant="success" className="ml-auto">Dipilih</Badge>}
+                </div>
+                <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">{t.tagline}</p>
+                <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">ETA {t.eta}</p>
+              </button>
+            );
+          })}
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h3 className="text-base font-semibold">Pilih jadwal trip</h3>
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          Tarif trip tergantung kapasitas yang kamu pakai dan tipe layanan di atas.
+        </p>
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {trips.filter((t) => t.status !== "in_transit" && t.status !== "closed").map((t) => {
+            const filled = Math.round((t.bookedKg / t.capacityKg) * 100);
+            const isFull = t.status === "fullbooked" || filled >= 100;
+            const active = tripId === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => !isFull && setTripId(t.id)}
+                className={cn(
+                  "text-left rounded-2xl border p-4 transition-all",
+                  active
+                    ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)] ring-2 ring-[hsl(var(--sage-700))]/30"
+                    : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
+                  isFull && "opacity-60 cursor-not-allowed"
+                )}
+                disabled={isFull}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
+                  {isFull ? <Badge variant="warning">Fullbooked</Badge> : <Badge variant="success">Tersedia</Badge>}
+                </div>
+                <p className="mt-1.5 font-semibold">
+                  {formatDate(t.departAt, { weekday: "long", day: "numeric", month: "short" })}
+                </p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  Estimasi tiba {formatDate(t.arriveEstimateAt, { day: "numeric", month: "short" })} · {t.shopper.name} · ★ {t.shopper.rating}
+                </p>
+                <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
+                  {Math.max(0, t.capacityKg - t.bookedKg)} kg slot tersisa
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </GlassCard>
+    </div>
   );
 }
 
@@ -423,11 +545,15 @@ function PaymentStep({
   payment,
   setPayment,
   submitted,
+  submitting,
+  trackingToken,
   onSubmit,
 }: {
   payment: "qris" | "transfer" | "ewallet";
   setPayment: (v: "qris" | "transfer" | "ewallet") => void;
   submitted: boolean;
+  submitting: boolean;
+  trackingToken: string | null;
   onSubmit: () => void;
 }) {
   const methods = [
@@ -435,11 +561,7 @@ function PaymentStep({
     { v: "transfer" as const, label: "Transfer Bank", desc: "BCA / Mandiri / BNI / BRI" },
     { v: "ewallet" as const, label: "E-Wallet", desc: "OVO / GoPay / Dana / ShopeePay" },
   ];
-  // Stable order code generated when this component first mounts in submitted view.
-  const [orderCode] = useState(
-    () => "BWB-" + Math.random().toString(36).slice(2, 8).toUpperCase()
-  );
-  if (submitted) {
+  if (submitted && trackingToken) {
     return (
       <GlassCard className="p-10 text-center">
         <div className="mx-auto h-16 w-16 rounded-3xl bg-linear-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
@@ -447,11 +569,16 @@ function PaymentStep({
         </div>
         <h3 className="mt-5 text-2xl font-semibold tracking-tight">Request kamu sudah masuk!</h3>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] max-w-md mx-auto">
-          Kode pesanan <span className="font-mono font-semibold text-[hsl(var(--foreground))]">{orderCode}</span> · personal shopper akan dihubungi otomatis. Pantau prosesnya di Dashboard.
+          Simpan link tracking di bawah — tanpa login, kamu tetap bisa pantau
+          status pesanan. Tim kami akan kontak via WhatsApp untuk konfirmasi
+          pembayaran.
         </p>
+        <div className="mt-5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] p-3 font-mono text-xs break-all">
+          /track/{trackingToken}
+        </div>
         <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
           <Button asChild variant="primary">
-            <a href="/dashboard">Buka Dashboard</a>
+            <a href={`/track/${trackingToken}`}>Buka tracking</a>
           </Button>
           <Button asChild variant="outline">
             <a href="/open-trip">Lihat Open Trip lain</a>
@@ -485,8 +612,8 @@ function PaymentStep({
         ))}
       </div>
       <div className="mt-6 flex justify-end">
-        <Button variant="accent" onClick={onSubmit}>
-          Konfirmasi & Bayar <Sparkles className="h-4 w-4" />
+        <Button variant="accent" onClick={onSubmit} disabled={submitting}>
+          {submitting ? "Memproses…" : <>Konfirmasi & Bayar <Sparkles className="h-4 w-4" /></>}
         </Button>
       </div>
     </GlassCard>
@@ -495,22 +622,16 @@ function PaymentStep({
 
 function SummaryCard({
   items,
-  jastipFee,
-  tripFee,
-  localShipping,
-  total,
+  pricing,
   trip,
-  totalKgEstimate,
+  tier,
 }: {
   items: Item[];
-  itemsTotal: number;
-  jastipFee: number;
-  tripFee: number;
-  localShipping: number;
-  total: number;
+  pricing: PricingBreakdown;
   trip: (typeof trips)[number];
-  totalKgEstimate: number;
+  tier: TierId;
 }) {
+  const tierLabel = TIERS[tier].label;
   return (
     <div className="lg:sticky lg:top-24 space-y-4">
       <GlassCard className="p-6">
@@ -527,16 +648,22 @@ function SummaryCard({
             </div>
           ))}
           <Divider />
-          <Row label={`Fee jasa titip`} value={formatIDR(jastipFee)} />
-          <Row label={`Fee trip ${trip.code} (${totalKgEstimate} kg)`} value={formatIDR(tripFee)} />
-          <Row label="Ongkir lokal Samarinda" value={formatIDR(localShipping)} />
+          <Row label="Subtotal barang" value={formatIDR(pricing.itemsTotal)} />
+          <Row label="Fee jasa titip (8%)" value={formatIDR(pricing.jastipFee)} />
+          <Row
+            label={`Ongkir ${tierLabel} (${pricing.billingKg.toFixed(1)} kg)`}
+            value={formatIDR(pricing.shippingFee)}
+          />
+          <Row label="PPN 11%" value={formatIDR(pricing.ppn)} />
           <Divider />
           <div className="flex items-center justify-between">
             <span className="font-semibold">Total estimasi</span>
-            <span className="text-lg font-semibold tabular-nums">{formatIDR(total)}</span>
+            <span className="text-lg font-semibold tabular-nums">{formatIDR(pricing.total)}</span>
           </div>
           <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-            * Tanpa pajak impor / bea cukai. Layanan domestik 100%.
+            * Tanpa pajak impor / bea cukai. Layanan domestik 100%. Harga
+            barang akan dikonfirmasi ulang sesuai harga aktual saat shopper
+            belanja.
           </p>
         </div>
       </GlassCard>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -6,6 +7,9 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { WebVitalsReporter } from "@/components/web-vitals";
 import { ErrorReporter } from "@/components/error-reporter";
 import { jsonLd, organizationSchema, localBusinessSchema } from "@/lib/seo/schema";
+
+const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+const PLAUSIBLE_SRC = process.env.NEXT_PUBLIC_PLAUSIBLE_SRC ?? "https://plausible.io/js/script.js";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -96,6 +100,14 @@ export default function RootLayout({
         />
         <WebVitalsReporter />
         <ErrorReporter />
+        {PLAUSIBLE_DOMAIN && (
+          <Script
+            defer
+            data-domain={PLAUSIBLE_DOMAIN}
+            src={PLAUSIBLE_SRC}
+            strategy="afterInteractive"
+          />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLd(
