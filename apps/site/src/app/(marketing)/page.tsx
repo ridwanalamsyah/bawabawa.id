@@ -1,4 +1,5 @@
 import { Hero } from "@/components/marketing/hero";
+import { PromotionBanner } from "@/components/marketing/promotion-banner";
 import { TrustGrid } from "@/components/marketing/trust";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { Categories } from "@/components/marketing/categories";
@@ -16,6 +17,7 @@ import { FinalCTA } from "@/components/marketing/cta";
 export default function HomePage() {
   return (
     <>
+      <PromotionBanner />
       <Hero />
       <TrustGrid />
       <HowItWorks />

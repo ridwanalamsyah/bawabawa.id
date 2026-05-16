@@ -5,7 +5,11 @@ import { rbacRouter } from "./modules/rbac/rbac.routes";
 import { ordersRouter } from "./modules/orders/orders.routes";
 import { branchesRouter } from "./modules/orders/branches.routes";
 import { paymentsRouter } from "./modules/orders/payments.routes";
-import { applyVoucherRouter, vouchersRouter } from "./modules/orders/vouchers.routes";
+import {
+  applyVoucherRouter,
+  publicVouchersRouter,
+  vouchersRouter
+} from "./modules/orders/vouchers.routes";
 import { shippingRouter, shippingWebhookRouter } from "./modules/shipping/biteship.routes";
 import { midtransRouter, paymentsConfigRouter } from "./modules/payments/midtrans.routes";
 import { invoiceRouter } from "./modules/orders/invoice.routes";
@@ -55,6 +59,7 @@ apiRouter.use("/orders", applyVoucherRouter);
 apiRouter.use("/orders", invoiceRouter);
 apiRouter.use("/orders", chargesRouter);
 apiRouter.use("/vouchers", vouchersRouter);
+apiRouter.use("/promotions", publicVouchersRouter);
 apiRouter.use("/shipping", shippingRouter);
 apiRouter.use("/webhooks", midtransRouter);
 apiRouter.use("/webhooks", shippingWebhookRouter);
