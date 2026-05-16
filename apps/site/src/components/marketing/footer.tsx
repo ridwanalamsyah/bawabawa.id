@@ -38,8 +38,9 @@ export function Footer() {
       links: [
         { label: "Press Kit", href: "/press-kit" },
         { label: "Blog", href: "/blog" },
-        { label: "Karier", href: "#" },
-        { label: "Hubungi Kami", href: "mailto:hello@bawabawa.id" },
+        { label: "Hubungi Kami", href: "/kontak" },
+        { label: "Syarat & Ketentuan", href: "/terms" },
+        { label: "Pembatalan & Refund", href: "/refund" },
       ],
     },
   ];
@@ -60,10 +61,10 @@ export function Footer() {
               <a href="#" aria-label="Instagram" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href="#" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
+              <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER ?? "6281234567890"}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <MessageCircle className="h-4 w-4" />
               </a>
-              <a href="#" aria-label="Email" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
+              <a href="mailto:hello@bawabawa.id" aria-label="Email" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <Mail className="h-4 w-4" />
               </a>
             </div>
@@ -90,8 +91,9 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-4 text-xs text-[hsl(var(--muted-foreground))]">
             <Link href="/privacy" className="hover:text-[hsl(var(--foreground))]">Privacy</Link>
-            <Link href="/privacy#7-keamanan-data" className="hover:text-[hsl(var(--foreground))]">Terms</Link>
-            <Link href="/privacy#cookie" className="hover:text-[hsl(var(--foreground))]">Cookie</Link>
+            <Link href="/terms" className="hover:text-[hsl(var(--foreground))]">Terms</Link>
+            <Link href="/refund" className="hover:text-[hsl(var(--foreground))]">Refund</Link>
+            <Link href="/kontak" className="hover:text-[hsl(var(--foreground))]">Kontak</Link>
           </div>
         </div>
       </div>

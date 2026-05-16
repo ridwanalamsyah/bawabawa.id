@@ -1,12 +1,11 @@
 /**
- * Edge-runtime compatible token verifier. Mirrors `verifyToken` in
- * `./auth.ts` but avoids `Buffer`, so it can run inside Next.js
- * middleware (which uses the Edge runtime).
- *
- * Token shape: `<header>.<payload>.<signature>`, base64url encoded JSON.
- * Production: replace with `jose` and a real HMAC verify against a
- * shared secret.
+ * Edge-runtime session verifier. Next.js proxy/middleware runs on the
+ * Edge runtime where `jose` is supported but Node APIs (Buffer, fs) are
+ * not. This module signs nothing — it only verifies tokens issued by
+ * `lib/auth.ts` so it can authorize incoming requests in `proxy.ts`.
  */
+
+import { jwtVerify } from "jose";
 
 export type AuthRoleEdge =
   | "customer"
@@ -15,7 +14,7 @@ export type AuthRoleEdge =
   | "finance"
   | "support"
   | "shopper"
-  | "admin"; // ERP API may emit `admin` directly
+  | "admin";
 
 export type AuthSessionEdge = {
   userId: string;
@@ -31,29 +30,31 @@ const ADMIN_ROLES: AuthRoleEdge[] = [
   "admin",
 ];
 
-function fromB64url(input: string): string {
-  const pad = "=".repeat((4 - (input.length % 4)) % 4);
-  const base64 = (input + pad).replace(/-/g, "+").replace(/_/g, "/");
-  // atob exists in Edge runtime; decode UTF-8 manually.
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder().decode(bytes);
+const ISSUER = "bawabawa-site";
+const AUDIENCE = "bawabawa-session";
+
+function getSecret(): Uint8Array | null {
+  const secret = process.env.SESSION_JWT_SECRET;
+  if (!secret || secret.length < 32) return null;
+  return new TextEncoder().encode(secret);
 }
 
-export function verifyTokenEdge(
+export async function verifyTokenEdge(
   token: string | null | undefined,
-): AuthSessionEdge | null {
+): Promise<AuthSessionEdge | null> {
   if (!token) return null;
-  const parts = token.split(".");
-  if (parts.length < 2) return null;
+  const secret = getSecret();
+  if (!secret) return null;
   try {
-    const payload = JSON.parse(fromB64url(parts[1])) as AuthSessionEdge;
-    if (!payload.userId || !payload.role) return null;
-    if (typeof payload.exp === "number" && payload.exp < Math.floor(Date.now() / 1000)) {
-      return null;
-    }
-    return payload;
+    const { payload } = await jwtVerify(token, secret, {
+      issuer: ISSUER,
+      audience: AUDIENCE,
+      algorithms: ["HS256"],
+    });
+    const userId = typeof payload.userId === "string" ? payload.userId : payload.sub;
+    const role = typeof payload.role === "string" ? (payload.role as AuthRoleEdge) : null;
+    if (!userId || !role || typeof payload.exp !== "number") return null;
+    return { userId, role, exp: payload.exp };
   } catch {
     return null;
   }
@@ -64,3 +65,11 @@ export function isAdminRole(role: string | null | undefined): boolean {
 }
 
 export const SESSION_COOKIE = "bb_session";
+
+/**
+ * Bearer token issued by the ERP for the signed-in user. Stored as a
+ * separate httpOnly cookie so server-side route handlers can forward it
+ * when calling protected ERP endpoints (e.g. /admin/users). The bb_session
+ * cookie alone is not enough — the ERP's authGuard checks its own JWT.
+ */
+export const ERP_TOKEN_COOKIE = "bb_erp_token";

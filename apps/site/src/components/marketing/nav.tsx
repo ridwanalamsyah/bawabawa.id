@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,11 @@ import { cn } from "@/lib/utils";
 // Public-facing navigation. /admin intentionally NOT linked here — staff
 // access the panel by typing the URL directly and authenticating via
 // the existing /login flow (the layout's middleware enforces role=admin).
+// Dashboard intentionally not in the public nav either; users land there
+// automatically after login via the avatar/menu in the dashboard layout.
 const NAV = [
   { href: "/open-trip", label: "Open Trip" },
   { href: "/request", label: "Titip Sekarang" },
-  { href: "/dashboard", label: "Dashboard" },
 ];
 
 export function MarketingNav() {
@@ -69,9 +70,9 @@ export function MarketingNav() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle className="hidden sm:inline-flex" />
-          <Button asChild size="sm" variant="primary" className="hidden sm:inline-flex">
-            <Link href="/request">
-              <Sparkles className="h-4 w-4" /> Titip Sekarang
+          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
+            <Link href="/login">
+              <LogIn className="h-4 w-4" /> Masuk
             </Link>
           </Button>
           <button
@@ -98,9 +99,9 @@ export function MarketingNav() {
           ))}
           <div className="flex items-center justify-between pt-2">
             <ThemeToggle />
-            <Button asChild size="sm" variant="primary">
-              <Link href="/request">
-                <Sparkles className="h-4 w-4" /> Titip Sekarang
+            <Button asChild size="sm" variant="outline">
+              <Link href="/login">
+                <LogIn className="h-4 w-4" /> Masuk
               </Link>
             </Button>
           </div>
