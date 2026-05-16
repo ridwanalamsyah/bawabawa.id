@@ -51,6 +51,63 @@ ordersRouter.post("/", authGuard, requirePermission("orders:create"), idempotenc
     .catch(next);
 });
 
+// Admin entry-point for orders that came in off-platform — Instagram DM,
+// WhatsApp, phone call, walk-in. Takes a name + phone instead of a
+// pre-registered customer UUID; the service either looks up an existing
+// customer by phone or creates a new "manual" customer record.
+//
+// Intentionally bypasses the `idempotency()` middleware because the admin
+// UI is a one-shot click, not a retry-prone webhook. Each call generates
+// a unique `manual-<uuid>` idempotency key internally so we keep the same
+// uniqueness constraint without forcing the form to pre-generate one.
+const manualOrderSchema = z.object({
+  customerName: z.string().trim().min(1).max(160),
+  customerPhone: z.string().trim().min(6).max(40),
+  branchId: z.string().uuid(),
+  totalAmount: z.number().positive(),
+  sourceChannel: z.enum([
+    "web",
+    "instagram",
+    "whatsapp",
+    "dm",
+    "telepon",
+    "email",
+    "marketplace",
+    "walkin",
+    "lainnya"
+  ]),
+  notes: z.string().max(2000).optional().nullable()
+});
+
+ordersRouter.post(
+  "/manual",
+  authGuard,
+  requirePermission("orders:create"),
+  (req, res, next) => {
+    manualOrderSchema
+      .parseAsync(req.body)
+      .then(async (input) => {
+        const order = await service.createManualOrder({
+          customerName: input.customerName,
+          customerPhone: input.customerPhone,
+          branchId: input.branchId,
+          totalAmount: input.totalAmount,
+          sourceChannel: input.sourceChannel,
+          notes: input.notes ?? null
+        });
+        await logAudit({
+          actorId: req.user?.sub,
+          action: "orders.create_manual",
+          moduleName: "orders",
+          entityId: order?.id,
+          afterData: order
+        });
+        res.status(201).json({ success: true, data: order });
+      })
+      .catch(next);
+  }
+);
+
 ordersRouter.post("/:id/payments", authGuard, idempotency(), (req, res, next) => {
   try {
     const orderId = String(req.params.id);
