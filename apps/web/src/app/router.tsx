@@ -12,6 +12,7 @@ import { Seo } from "../shared/seo/Seo";
 const LoginPage = lazy(() => import("../features/auth/LoginPage").then((m) => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import("../features/reports/DashboardPage").then((m) => ({ default: m.DashboardPage })));
 const OrdersPage = lazy(() => import("../features/orders/OrdersPage").then((m) => ({ default: m.OrdersPage })));
+const VouchersPage = lazy(() => import("../features/vouchers/VouchersPage").then((m) => ({ default: m.VouchersPage })));
 const SalesPage = lazy(() => import("../features/sales/SalesPage").then((m) => ({ default: m.SalesPage })));
 const InventoryPage = lazy(() => import("../features/inventory/InventoryPage").then((m) => ({ default: m.InventoryPage })));
 const ProcurementPage = lazy(() =>
@@ -79,6 +80,15 @@ export function AppRouter() {
               <ProtectedRoute requiredPermission="orders:read">
                 <Seo title="Orders" noindex />
                 <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vouchers"
+            element={
+              <ProtectedRoute requiredPermission="orders:read">
+                <Seo title="Voucher & Promosi" noindex />
+                <VouchersPage />
               </ProtectedRoute>
             }
           />

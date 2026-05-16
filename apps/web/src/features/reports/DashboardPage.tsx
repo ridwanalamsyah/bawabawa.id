@@ -15,6 +15,7 @@ interface ModuleCard {
 const MODULES: ModuleCard[] = [
   { path: "/sales", label: "Sales", description: "Pipeline, quotation, dan target tim sales." },
   { path: "/orders", label: "Orders", description: "Buat order, alokasi stok, dan tagihan.", permission: "orders:read" },
+  { path: "/vouchers", label: "Voucher & Promosi", description: "Buat voucher, atur banner promosi publik.", permission: "orders:read" },
   { path: "/inventory", label: "Inventory", description: "Stok multi-gudang, stock take, dan adjust." },
   { path: "/procurement", label: "Procurement", description: "PR, PO, vendor, dan price book." },
   { path: "/finance", label: "Finance", description: "GL, AR, AP, dan kas-bank.", permission: "finance:manage_finance" },
