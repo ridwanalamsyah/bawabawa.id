@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
+import { erpSafe } from "@/lib/erp-client";
 
 export const metadata: Metadata = {
   title: "Blog & Tips Belanja",
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
 };
 
+// Posts curated and shipped with the site. These are the baseline
+// catalog. Admin-published posts from the ERP are merged in on top of
+// these at render time (see fetchAdminPosts below).
 const POSTS = [
   {
     slug: "panduan-belanja-pasar-baru-bandung",
@@ -48,7 +52,50 @@ const POSTS = [
   },
 ];
 
-export default function BlogPage() {
+type AdminPost = {
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  category: string | null;
+  readTime: string | null;
+  publishedAt: string | null;
+};
+
+async function fetchAdminPosts(): Promise<AdminPost[]> {
+  const erp = await erpSafe<AdminPost[]>({
+    path: "/blog-posts",
+    timeoutMs: 4000,
+  });
+  return erp.ok && Array.isArray(erp.data) ? erp.data : [];
+}
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "";
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
+export default async function BlogPage() {
+  const adminPosts = await fetchAdminPosts();
+  const merged = [
+    ...adminPosts.map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt ?? "",
+      category: p.category ?? "Artikel",
+      readTime: p.readTime ?? "5 min",
+      date: formatDate(p.publishedAt) || "baru",
+    })),
+    ...POSTS,
+  ];
+
   return (
     <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
       <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
@@ -63,7 +110,7 @@ export default function BlogPage() {
       </p>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
-        {POSTS.map((p) => (
+        {merged.map((p) => (
           <Link
             key={p.slug}
             href={`/blog/${p.slug}`}

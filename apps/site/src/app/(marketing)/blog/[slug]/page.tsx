@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { erpSafe } from "@/lib/erp-client";
 
 type Params = { slug: string };
 
@@ -80,15 +81,73 @@ const POSTS: Record<string, {
   },
 };
 
+type AdminBlogPost = {
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  contentMd: string;
+  category: string | null;
+  readTime: string | null;
+  publishedAt: string | null;
+};
+
+async function fetchAdminPost(slug: string): Promise<AdminBlogPost | null> {
+  const erp = await erpSafe<AdminBlogPost | null>({
+    path: `/blog-posts/${encodeURIComponent(slug)}`,
+    timeoutMs: 4000,
+  });
+  return erp.ok && erp.data ? erp.data : null;
+}
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "";
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
+// Render very simple Markdown -> plain paragraphs. We intentionally
+// avoid pulling a full Markdown renderer + sanitizer into the marketing
+// bundle for the soft-launch phase. Authors are admins, content is
+// trusted, and the editor in the ERP renders the same way (plain text
+// with paragraphs separated by blank lines).
+function renderMarkdown(md: string): Array<{ type: "h1" | "h2" | "li" | "p"; text: string }> {
+  const blocks: Array<{ type: "h1" | "h2" | "li" | "p"; text: string }> = [];
+  for (const raw of md.split(/\n{2,}/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith("# ")) blocks.push({ type: "h1", text: line.slice(2) });
+    else if (line.startsWith("## ")) blocks.push({ type: "h2", text: line.slice(3) });
+    else if (line.startsWith("- ")) blocks.push({ type: "li", text: line.slice(2) });
+    else blocks.push({ type: "p", text: line });
+  }
+  return blocks;
+}
+
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
   const post = POSTS[slug];
-  if (!post) return {};
+  if (post) {
+    return {
+      title: post.title,
+      description: post.description,
+      alternates: { canonical: `/blog/${slug}` },
+      openGraph: { title: post.title, description: post.description, type: "article" },
+    };
+  }
+  const admin = await fetchAdminPost(slug);
+  if (!admin) return {};
   return {
-    title: post.title,
-    description: post.description,
+    title: admin.title,
+    description: admin.excerpt ?? admin.title,
     alternates: { canonical: `/blog/${slug}` },
-    openGraph: { title: post.title, description: post.description, type: "article" },
+    openGraph: { title: admin.title, description: admin.excerpt ?? admin.title, type: "article" },
   };
 }
 
@@ -99,8 +158,73 @@ export async function generateStaticParams() {
 export default async function BlogPostPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const post = POSTS[slug];
-  if (!post) notFound();
+  if (post) {
+    return (
+      <PostShell
+        category={post.category}
+        date={post.date}
+        readTime={post.readTime}
+        title={post.title}
+      >
+        {post.paragraphs.map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </PostShell>
+    );
+  }
 
+  const admin = await fetchAdminPost(slug);
+  if (!admin) notFound();
+
+  const blocks = renderMarkdown(admin.contentMd);
+  return (
+    <PostShell
+      category={admin.category ?? "Artikel"}
+      date={formatDate(admin.publishedAt) || "baru"}
+      readTime={admin.readTime ?? "5 min"}
+      title={admin.title}
+    >
+      {blocks.map((b, i) => {
+        switch (b.type) {
+          case "h1":
+            return (
+              <h2 key={i} className="text-2xl font-semibold tracking-tight mt-8">
+                {b.text}
+              </h2>
+            );
+          case "h2":
+            return (
+              <h3 key={i} className="text-xl font-semibold tracking-tight mt-6">
+                {b.text}
+              </h3>
+            );
+          case "li":
+            return (
+              <li key={i} className="ml-6 list-disc">
+                {b.text}
+              </li>
+            );
+          default:
+            return <p key={i}>{b.text}</p>;
+        }
+      })}
+    </PostShell>
+  );
+}
+
+function PostShell({
+  category,
+  date,
+  readTime,
+  title,
+  children,
+}: {
+  category: string;
+  date: string;
+  readTime: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
       <Link
@@ -113,24 +237,22 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
 
       <div className="mt-6 flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-medium">
         <span className="rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-900))] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))] px-2 py-0.5">
-          {post.category}
+          {category}
         </span>
         <span>·</span>
         <Calendar className="h-3 w-3" />
-        {post.date}
+        {date}
         <span>·</span>
         <Clock className="h-3 w-3" />
-        {post.readTime}
+        {readTime}
       </div>
 
       <h1 className="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">
-        {post.title}
+        {title}
       </h1>
 
       <div className="mt-8 space-y-5 text-[hsl(var(--foreground))] leading-relaxed">
-        {post.paragraphs.map((p, i) => (
-          <p key={i}>{p}</p>
-        ))}
+        {children}
       </div>
     </article>
   );
