@@ -20,11 +20,30 @@ export function createApp() {
   const app = express();
   const allowedOrigins = buildAllowedOrigins();
 
-  // Helmet: allow inline scripts/styles for the single-file frontend
+  // Helmet: API serves both `/api/v1/*` JSON endpoints and the legacy
+  // single-file SPA at `apps/web/public/index.html`. The inline `<script>`
+  // blocks in that HTML require `'unsafe-inline'`, so CSP is loosened here.
+  // The new Next.js site (apps/site) sets a stricter CSP via next.config.ts
+  // headers().
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          "default-src": ["'self'"],
+          "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
+          "img-src": ["'self'", "data:", "blob:", "https:"],
+          "connect-src": ["'self'", "https:"],
+          "frame-ancestors": ["'none'"],
+          "object-src": ["'none'"],
+          "upgrade-insecure-requests": [],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+      // CORP/COEP would block the SPA's external CDN images.
+      crossOriginResourcePolicy: { policy: "cross-origin" },
     })
   );
 

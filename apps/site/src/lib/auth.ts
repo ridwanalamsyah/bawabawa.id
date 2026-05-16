@@ -1,10 +1,13 @@
 /**
- * Skeleton JWT auth helpers — wired up to mock data.
- * Production: replace `signToken` / `verifyToken` with `jose` library
- * and load secret from env (BAWABAWA_JWT_SECRET).
+ * Server-side session helpers built on top of `jose`. Used by Next.js route
+ * handlers and server components. `auth-edge.ts` mirrors the verify path
+ * for the Edge runtime (Next.js proxy/middleware) where `jose` is also
+ * supported but we keep that file dependency-free of Buffer/Node APIs.
  */
 
-export type AuthRole = "customer" | "owner" | "operations" | "finance" | "support" | "shopper";
+import { SignJWT, jwtVerify, type JWTPayload } from "jose";
+
+export type AuthRole = "customer" | "owner" | "operations" | "finance" | "support" | "shopper" | "admin";
 
 export type AuthSession = {
   userId: string;
@@ -12,48 +15,68 @@ export type AuthSession = {
   exp: number;
 };
 
-const ENC = new TextEncoder();
-
-// Lightweight base64url helpers without external deps.
-function b64url(input: string) {
-  return Buffer.from(input).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+function getSecret(): Uint8Array {
+  const secret = process.env.SESSION_JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    // Fail loudly so misconfigured prod deploys surface immediately instead
+    // of silently issuing forgeable tokens. The 32-char floor matches the
+    // length of the random secret stored in Vercel env vars.
+    throw new Error(
+      "SESSION_JWT_SECRET is missing or too short. Configure a 32+ character random value in the environment."
+    );
+  }
+  return new TextEncoder().encode(secret);
 }
-function fromB64url(input: string) {
-  const pad = "=".repeat((4 - (input.length % 4)) % 4);
-  const base64 = (input + pad).replace(/-/g, "+").replace(/_/g, "/");
-  return Buffer.from(base64, "base64").toString();
-}
 
-export function signToken(session: Omit<AuthSession, "exp">, ttlSeconds = 3600): string {
-  const header = b64url(JSON.stringify({ alg: "HS256-mock", typ: "JWT" }));
+const ISSUER = "bawabawa-site";
+const AUDIENCE = "bawabawa-session";
+
+export async function signToken(
+  session: Omit<AuthSession, "exp">,
+  ttlSeconds = 60 * 60 * 8,
+): Promise<string> {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
-  const payload = b64url(JSON.stringify({ ...session, exp }));
-  // Mock signature only — DO NOT use in production.
-  const sig = b64url(`mock.${session.userId}.${exp}`);
-  return `${header}.${payload}.${sig}`;
+  return await new SignJWT({ userId: session.userId, role: session.role })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuedAt()
+    .setIssuer(ISSUER)
+    .setAudience(AUDIENCE)
+    .setExpirationTime(exp)
+    .setSubject(session.userId)
+    .sign(getSecret());
 }
 
-export function verifyToken(token: string | null | undefined): AuthSession | null {
+export async function verifyToken(
+  token: string | null | undefined,
+): Promise<AuthSession | null> {
   if (!token) return null;
-  const [, payload] = token.split(".");
-  if (!payload) return null;
   try {
-    const decoded = JSON.parse(fromB64url(payload)) as AuthSession;
-    if (decoded.exp < Math.floor(Date.now() / 1000)) return null;
-    return decoded;
+    const { payload } = await jwtVerify(token, getSecret(), {
+      issuer: ISSUER,
+      audience: AUDIENCE,
+      algorithms: ["HS256"],
+    });
+    return payloadToSession(payload);
   } catch {
     return null;
   }
 }
 
-export function bearer(req: Request): AuthSession | null {
-  const h = req.headers.get("authorization") ?? "";
-  if (!h.toLowerCase().startsWith("bearer ")) return null;
-  return verifyToken(h.slice(7).trim());
+function payloadToSession(payload: JWTPayload): AuthSession | null {
+  const userId = typeof payload.userId === "string" ? payload.userId : payload.sub;
+  const role = typeof payload.role === "string" ? (payload.role as AuthRole) : null;
+  if (!userId || !role || typeof payload.exp !== "number") return null;
+  return { userId, role, exp: payload.exp };
 }
 
-export function requireRole(req: Request, allowed: AuthRole[]) {
-  const session = bearer(req);
+export async function bearer(req: Request): Promise<AuthSession | null> {
+  const h = req.headers.get("authorization") ?? "";
+  if (!h.toLowerCase().startsWith("bearer ")) return null;
+  return await verifyToken(h.slice(7).trim());
+}
+
+export async function requireRole(req: Request, allowed: AuthRole[]) {
+  const session = await bearer(req);
   if (!session) {
     return {
       ok: false as const,
@@ -75,10 +98,12 @@ export function requireRole(req: Request, allowed: AuthRole[]) {
   return { ok: true as const, session };
 }
 
-// HMAC stub for ERP webhooks. Replace with crypto.subtle in production.
-export function verifyWebhookSignature(body: string, signature: string | null, secret = "whsec_dev_only") {
+/**
+ * HMAC stub for ERP webhooks. Replace with a real timing-safe compare
+ * against `crypto.subtle.verify` for production webhooks issued by ERP.
+ */
+export function verifyWebhookSignature(_body: string, signature: string | null, secret = "whsec_dev_only") {
   if (!signature) return false;
-  // Constant-time comparison stub — accept anything starting with secret prefix in dev.
   return signature.startsWith(secret);
 }
 
@@ -87,8 +112,7 @@ export const audit = {
     if (process.env.NODE_ENV !== "production") {
       console.log(`[AUDIT] ${new Date().toISOString()} ${actor} ${action} ${target}`, meta);
     }
-    // Production: persist to audit_log table.
+    // Production: persist to audit_log table (TODO once admin DB schema is
+    // wired through the site).
   },
 };
-
-export { ENC };
