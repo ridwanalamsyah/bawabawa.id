@@ -18,9 +18,9 @@ export function Footer() {
       title: "Layanan",
       links: [
         { label: "Titip Sekarang", href: "/request" },
-        { label: "Open Trip", href: "/open-trip" },
+        { label: "Open Trip (kargo batch)", href: "/open-trip" },
+        { label: "Pengiriman Langsung", href: "/pengiriman-langsung" },
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Tarif & Estimasi", href: "/request" },
       ],
     },
     {
@@ -36,9 +36,9 @@ export function Footer() {
     {
       title: "Perusahaan",
       links: [
-        { label: "Press Kit", href: "/press-kit" },
+        { label: "Tentang", href: "/tentang" },
         { label: "Blog", href: "/blog" },
-        { label: "Karier", href: "#" },
+        { label: "Afiliasi / Reseller", href: "/afiliasi" },
         { label: "Hubungi Kami", href: "mailto:hello@bawabawa.id" },
       ],
     },
