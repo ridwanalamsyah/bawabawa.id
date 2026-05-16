@@ -53,7 +53,8 @@ vouchersRouter.get("/", authGuard, async (_req, res, next) => {
     const result = await db.query(
       `SELECT id, code, description, discount_type, discount_value, max_discount,
               min_order_amount, max_uses, per_user_limit, starts_at, ends_at,
-              is_active, used_count, created_at
+              is_active, is_public, banner_label, banner_priority,
+              used_count, created_at
          FROM vouchers ORDER BY created_at DESC LIMIT 200`
     );
     res.json({ success: true, data: result.rows });
@@ -199,4 +200,102 @@ applyVoucherRouter.post("/:id/voucher", authGuard, idempotency(), (req, res, nex
     .catch(next);
 });
 
-export { vouchersRouter, applyVoucherRouter };
+// Public, unauthenticated promotions feed for the marketing site banner.
+// Returns active+is_public vouchers only. Names, internal limits, and
+// usage counts are intentionally NOT exposed.
+const publicVouchersRouter = Router();
+publicVouchersRouter.get("/", async (_req, res) => {
+  try {
+    const db = await getPool();
+    const result = await db.query<{
+      code: string;
+      description: string | null;
+      discount_type: "percentage" | "fixed";
+      discount_value: string;
+      max_discount: string | null;
+      min_order_amount: string;
+      banner_label: string | null;
+      banner_priority: number;
+      ends_at: string | null;
+    }>(
+      `SELECT code, description, discount_type, discount_value, max_discount,
+              min_order_amount, banner_label, banner_priority, ends_at
+         FROM vouchers
+        WHERE is_public = TRUE
+          AND is_active = TRUE
+          AND (starts_at IS NULL OR starts_at <= NOW())
+          AND (ends_at IS NULL OR ends_at > NOW())
+        ORDER BY banner_priority DESC, created_at DESC
+        LIMIT 6`
+    );
+    res.json({
+      success: true,
+      data: result.rows.map((row) => ({
+        code: row.code,
+        description: row.description,
+        discountType: row.discount_type,
+        discountValue: Number(row.discount_value),
+        maxDiscount: row.max_discount === null ? null : Number(row.max_discount),
+        minOrderAmount: Number(row.min_order_amount),
+        bannerLabel: row.banner_label,
+        bannerPriority: row.banner_priority,
+        endsAt: row.ends_at
+      }))
+    });
+  } catch {
+    res.json({ success: true, data: [] });
+  }
+});
+
+// Admin update — toggle is_active / is_public, edit banner copy. The
+// voucher-create endpoint is the canonical write-side; this is just the
+// "manage existing voucher" sibling. Requires authed admin.
+const patchVoucherSchema = z.object({
+  isActive: z.boolean().optional(),
+  isPublic: z.boolean().optional(),
+  bannerLabel: z.string().max(120).nullable().optional(),
+  bannerPriority: z.number().int().min(0).max(1000).optional(),
+  description: z.string().max(200).nullable().optional()
+});
+
+vouchersRouter.patch("/:id", authGuard, (req, res, next) => {
+  patchVoucherSchema
+    .parseAsync(req.body)
+    .then(async (input) => {
+      const id = String(req.params.id);
+      const sets: string[] = [];
+      const values: unknown[] = [];
+      const push = (col: string, value: unknown) => {
+        values.push(value);
+        sets.push(`${col} = $${values.length}`);
+      };
+      if (input.isActive !== undefined) push("is_active", input.isActive);
+      if (input.isPublic !== undefined) push("is_public", input.isPublic);
+      if (input.bannerLabel !== undefined) push("banner_label", input.bannerLabel);
+      if (input.bannerPriority !== undefined) push("banner_priority", input.bannerPriority);
+      if (input.description !== undefined) push("description", input.description);
+      if (sets.length === 0) {
+        throw new AppError(422, "NO_FIELDS", "Tidak ada field yang diubah");
+      }
+      values.push(id);
+      const db = await getPool();
+      const result = await db.query<{ id: string }>(
+        `UPDATE vouchers SET ${sets.join(", ")} WHERE id = $${values.length} RETURNING id`,
+        values
+      );
+      if (!result.rowCount) {
+        throw new AppError(404, "VOUCHER_NOT_FOUND", "Voucher tidak ditemukan");
+      }
+      await logAudit({
+        actorId: req.user?.sub,
+        action: "vouchers.update",
+        moduleName: "orders",
+        entityId: id,
+        afterData: input
+      });
+      res.json({ success: true, data: { id } });
+    })
+    .catch(next);
+});
+
+export { vouchersRouter, applyVoucherRouter, publicVouchersRouter };
