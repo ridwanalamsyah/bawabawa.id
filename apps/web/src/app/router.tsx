@@ -30,6 +30,7 @@ const NavigationPage = lazy(() =>
 const PagesPage = lazy(() => import("../features/admin/PagesPage").then((m) => ({ default: m.PagesPage })));
 const SectionsPage = lazy(() => import("../features/admin/SectionsPage").then((m) => ({ default: m.SectionsPage })));
 const MediaPage = lazy(() => import("../features/admin/MediaPage").then((m) => ({ default: m.MediaPage })));
+const BlogAdminPage = lazy(() => import("../features/blog/BlogAdminPage").then((m) => ({ default: m.BlogAdminPage })));
 
 function RouteFallback() {
   return (
@@ -187,6 +188,15 @@ export function AppRouter() {
               <ProtectedRoute requiredPermission="cms:manage">
                 <Seo title="Media" noindex />
                 <MediaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/blog"
+            element={
+              <ProtectedRoute requiredPermission="cms:manage">
+                <Seo title="Blog Post" noindex />
+                <BlogAdminPage />
               </ProtectedRoute>
             }
           />

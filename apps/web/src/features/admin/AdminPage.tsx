@@ -108,6 +108,14 @@ export function AdminPage() {
           </div>
           <Link to="/admin/cms/media" className="admin-pill">Buka</Link>
         </li>
+        <li className="admin-list-item">
+          <span aria-hidden="true">📝</span>
+          <div className="admin-list-item-grow">
+            <strong>Blog</strong>
+            <span>Tulis artikel baru (tips belanja, customer story, panduan layanan). Post live di /blog di marketing site.</span>
+          </div>
+          <Link to="/admin/blog" className="admin-pill">Buka</Link>
+        </li>
       </ul>
     </AdminLayout>
   );
