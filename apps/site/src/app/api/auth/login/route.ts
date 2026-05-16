@@ -3,14 +3,6 @@ import { signToken, audit, type AuthRole } from "@/lib/auth";
 import { SESSION_COOKIE } from "@/lib/auth-edge";
 import { erpSafe } from "@/lib/erp-client";
 
-const MOCK_ACCOUNTS: Record<string, { id: string; password: string; role: AuthRole; name: string }> = {
-  "aulia.putri@example.com": { id: "c-1", password: "password", role: "customer", name: "Aulia Putri" },
-  "indra@bawabawa.id": { id: "u-1", password: "password", role: "owner", name: "Indra Permana" },
-  "salsa@bawabawa.id": { id: "u-2", password: "password", role: "operations", name: "Salsa Aprilia" },
-  "yoga@bawabawa.id": { id: "u-3", password: "password", role: "finance", name: "Yoga Mahendra" },
-  "rani@bawabawa.id": { id: "u-5", password: "password", role: "shopper", name: "Rani Maharani" },
-};
-
 const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8h
 
 type ErpLoginResponse = {
@@ -39,8 +31,6 @@ export async function POST(req: Request) {
     return Response.json({ error: "email & password required" }, { status: 400 });
   }
 
-  // Try ERP first; fall back to mock accounts so the site is usable in demo
-  // mode when the ERP API is offline.
   const erp = await erpSafe<ErpLoginResponse>({
     path: "/auth/login",
     method: "POST",
@@ -72,17 +62,10 @@ export async function POST(req: Request) {
     });
   }
 
-  const account = MOCK_ACCOUNTS[email];
-  if (!account || account.password !== body.password) {
-    return Response.json({ error: "invalid credentials", source: "fallback" }, { status: 401 });
-  }
-  const token = signToken({ userId: account.id, role: account.role }, SESSION_TTL_SECONDS);
-  audit.log(account.id, "auth.login", account.id);
-  await setSessionCookie(token);
-  return Response.json({
-    token,
-    user: { id: account.id, name: account.name, role: account.role },
-    expiresIn: SESSION_TTL_SECONDS,
-    source: "fallback",
-  });
+  // No fallback. If ERP rejects, surface the same generic error to the user.
+  // Demo/mock accounts have been removed from the site for production use.
+  return Response.json(
+    { error: "Email atau password salah.", source: "erp" },
+    { status: 401 }
+  );
 }

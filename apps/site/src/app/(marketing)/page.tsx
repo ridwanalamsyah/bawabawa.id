@@ -1,23 +1,24 @@
 import { Hero } from "@/components/marketing/hero";
-import { LiveFeed } from "@/components/marketing/live-feed";
 import { TrustGrid } from "@/components/marketing/trust";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { Categories } from "@/components/marketing/categories";
 import { TripPreview } from "@/components/marketing/trip-preview";
-import { LiveOrderMap } from "@/components/marketing/live-order-map";
 import { Testimonials } from "@/components/marketing/testimonials";
 import { TrustBadges } from "@/components/marketing/trust-badges";
 import { Faq } from "@/components/marketing/faq";
 import { FinalCTA } from "@/components/marketing/cta";
 
+// LiveFeed + LiveOrderMap were removed from the homepage: both relied on
+// hardcoded mock data and made claims ("137 customer online", "Streamed via
+// WebSocket · ERP sync ✓") that aren't yet backed by real telemetry. They
+// can be re-added once the SSE pipeline at /api/events/stream is wired to
+// real order activity.
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <LiveFeed />
       <TrustGrid />
       <HowItWorks />
-      <LiveOrderMap />
       <TripPreview />
       <Categories />
       <Testimonials />
