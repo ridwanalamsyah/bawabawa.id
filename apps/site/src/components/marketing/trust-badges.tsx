@@ -1,4 +1,4 @@
-import { ShieldCheck, Lock, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Lock } from "lucide-react";
 
 type Badge = { label: string; sub?: string };
 
@@ -17,8 +17,7 @@ const PAYMENT_PARTNERS: Badge[] = [
 
 const ASSURANCES: Badge[] = [
   { label: "SSL 256-bit" },
-  { label: "PCI-DSS" },
-  { label: "Garansi 30 hari" },
+  { label: "Refund jika request batal" },
 ];
 
 export function TrustBadges() {
@@ -34,11 +33,12 @@ export function TrustBadges() {
             Pembayaran aman
           </div>
           <p className="text-lg sm:text-xl font-semibold text-[hsl(var(--foreground))]">
-            Dilindungi standar perbankan & e-commerce nasional
+            Pembayaran diproses oleh gateway resmi
           </p>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Pembayaran diproses langsung oleh Midtrans (PT Midtrans), terdaftar OJK & BI.
-            Dana customer ditahan di escrow sampai barang diterima.
+            Bawabawa.id memakai Midtrans sebagai payment gateway — Midtrans terdaftar dan
+            diawasi OJK & Bank Indonesia. Pembayaran customer tidak pernah masuk ke
+            rekening pribadi, langsung diverifikasi dan diteruskan via Midtrans.
           </p>
         </div>
 
@@ -67,8 +67,7 @@ export function TrustBadges() {
               className="inline-flex items-center gap-1.5 text-xs font-medium text-[hsl(var(--muted-foreground))]"
             >
               {a.label.startsWith("SSL") && <Lock className="h-3.5 w-3.5 text-[hsl(var(--sage-600))]" />}
-              {a.label.startsWith("PCI") && <BadgeCheck className="h-3.5 w-3.5 text-[hsl(var(--sage-600))]" />}
-              {a.label.startsWith("Garansi") && <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--sage-600))]" />}
+              {a.label.startsWith("Refund") && <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--sage-600))]" />}
               {a.label}
             </div>
           ))}

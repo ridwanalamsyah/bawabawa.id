@@ -1,55 +1,47 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Quote } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Star, Quote, MessageSquare } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
-// Real photos: DiceBear `notionists` style — deterministic SVG avatars
-// generated server-side, no upload required. Looks human-ish, on-brand.
-const ITEMS = [
-  {
-    name: "Aulia Putri",
-    city: "Samarinda",
-    rating: 5,
-    text:
-      "Beneran kayak punya asisten belanja sendiri di Bandung. Update tiap step ada notifikasi, sampai diantar kurir lokal. Worth it banget.",
-    avatar:
-      "https://api.dicebear.com/9.x/notionists/svg?seed=AuliaPutri&backgroundColor=d4a373,7c9885&radius=50",
-    verified: true,
-  },
-  {
-    name: "Reza Hidayat",
-    city: "Samarinda",
-    rating: 5,
-    text:
-      "Aku request 5 item dari Trans Studio Mall, semua dipacking rapi & ada foto sebelum kirim. Trustworthy, pelayanannya premium tapi harganya wajar.",
-    avatar:
-      "https://api.dicebear.com/9.x/notionists/svg?seed=RezaHidayat&backgroundColor=7c9885,5e7a68&radius=50",
-    verified: true,
-  },
-  {
-    name: "Niken Sari",
-    city: "Samarinda",
-    rating: 5,
-    text:
-      "Awalnya skeptis, tapi setelah lihat dashboard tracking-nya — astaga keren banget, mirip apps Traveloka. Makin percaya.",
-    avatar:
-      "https://api.dicebear.com/9.x/notionists/svg?seed=NikenSari&backgroundColor=c08552,d4a373&radius=50",
-    verified: true,
-  },
-  {
-    name: "Bayu Saputra",
-    city: "Samarinda",
-    rating: 4,
-    text:
-      "Sudah 19 kali titip, paling sering snack & sneakers. Belum pernah ada masalah. Personal shopper-nya ramah & responsif.",
-    avatar:
-      "https://api.dicebear.com/9.x/notionists/svg?seed=BayuSaputra&backgroundColor=5e7a68,4f7d5e&radius=50",
-    verified: true,
-  },
-];
+type Testimonial = {
+  id: string;
+  customer_name: string;
+  city: string | null;
+  rating: number;
+  body: string;
+  avatar_url: string | null;
+  is_verified: boolean;
+};
+
+type Response = { items: Testimonial[]; source: "erp" | "fallback" };
 
 export function Testimonials() {
+  const [items, setItems] = useState<Testimonial[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/analytics/testimonials", {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const data = (await res.json()) as Response;
+        if (!cancelled) setItems(data.items ?? []);
+      } catch {
+        if (!cancelled) setItems([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const isLoading = items === null;
+  const isEmpty = !isLoading && items?.length === 0;
+
   return (
     <section className="py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -58,52 +50,85 @@ export function Testimonials() {
             Suara customer
           </p>
           <h2 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">
-            Dipercaya 12.000+ warga Samarinda untuk titipan dari Bandung.
+            {isEmpty
+              ? "Jasa titip Bandung → Samarinda yang baru meluncur."
+              : "Cerita dari customer kami di Samarinda."}
           </h2>
+          {isEmpty && (
+            <p className="mt-4 text-sm sm:text-base text-[hsl(var(--muted-foreground))] max-w-xl leading-relaxed">
+              Bawabawa.id masih di tahap soft launch — kami belum mempublikasikan review.
+              Setelah ada customer yang setuju cerita-nya ditampilkan, review akan muncul di sini.
+            </p>
+          )}
         </div>
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ITEMS.map((it, i) => (
-            <motion.div
-              key={it.name}
-              initial={{ y: 22, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="relative rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.85)] backdrop-blur p-6 h-full"
-            >
-              <Quote className="h-6 w-6 text-[hsl(var(--sage-400))]" />
-              <p className="mt-4 text-sm leading-relaxed text-[hsl(var(--foreground))]">{it.text}</p>
-              <div className="mt-5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar name={it.name} src={it.avatar} size={40} />
-                  <div>
-                    <p className="text-sm font-semibold flex items-center gap-1.5">
-                      {it.name}
-                      {it.verified && (
-                        <span
-                          aria-label="Customer terverifikasi"
-                          title="Customer terverifikasi"
-                          className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[hsl(var(--emerald-600))] text-white text-[8px]"
-                        >
-                          ✓
-                        </span>
+
+        {isEmpty && (
+          <div className="mt-10 rounded-3xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.5)] backdrop-blur p-8 sm:p-10 grid place-items-center text-center max-w-2xl mx-auto">
+            <div className="h-12 w-12 rounded-2xl bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.4)] grid place-items-center text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
+              <MessageSquare className="h-6 w-6" />
+            </div>
+            <p className="mt-4 text-sm font-medium">Belum ada review yang dipublikasikan.</p>
+            <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+              Sudah coba jasa kami? Tinggalkan review — kami akan minta izin sebelum mempublikasikan.
+            </p>
+          </div>
+        )}
+
+        {!isEmpty && (
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(items ?? []).map((it, i) => (
+              <motion.div
+                key={it.id}
+                initial={{ y: 22, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="relative rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.85)] backdrop-blur p-6 h-full"
+              >
+                <Quote className="h-6 w-6 text-[hsl(var(--sage-400))]" />
+                <p className="mt-4 text-sm leading-relaxed text-[hsl(var(--foreground))]">
+                  {it.body}
+                </p>
+                <div className="mt-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={it.customer_name}
+                      src={it.avatar_url ?? undefined}
+                      size={40}
+                    />
+                    <div>
+                      <p className="text-sm font-semibold flex items-center gap-1.5">
+                        {it.customer_name}
+                        {it.is_verified && (
+                          <span
+                            aria-label="Customer terverifikasi"
+                            title="Customer terverifikasi"
+                            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[hsl(var(--emerald-600))] text-white text-[8px]"
+                          >
+                            ✓
+                          </span>
+                        )}
+                      </p>
+                      {it.city && (
+                        <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                          {it.city}
+                        </p>
                       )}
-                    </p>
-                    <p className="text-xs text-[hsl(var(--muted-foreground))]">{it.city}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star
+                        key={idx}
+                        className={`h-3.5 w-3.5 ${idx < it.rating ? "fill-[hsl(var(--warning))] stroke-[hsl(var(--warning))]" : "stroke-[hsl(var(--muted-foreground))]/40"}`}
+                      />
+                    ))}
                   </div>
                 </div>
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <Star
-                      key={idx}
-                      className={`h-3.5 w-3.5 ${idx < it.rating ? "fill-[hsl(var(--warning))] stroke-[hsl(var(--warning))]" : "stroke-[hsl(var(--muted-foreground))]/40"}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

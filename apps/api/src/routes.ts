@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authRouter } from "./modules/auth/auth.routes";
+import { adminUsersRouter } from "./modules/admin/admin-users.routes";
 import { rbacRouter } from "./modules/rbac/rbac.routes";
 import { ordersRouter } from "./modules/orders/orders.routes";
 import { paymentsRouter } from "./modules/orders/payments.routes";
@@ -45,6 +46,7 @@ apiRouter.get("/metrics", (_req, res) => {
 });
 
 apiRouter.use("/auth", authRouter);
+apiRouter.use("/admin", adminUsersRouter);
 apiRouter.use("/rbac", rbacRouter);
 apiRouter.use("/orders", ordersRouter);
 apiRouter.use("/orders", paymentsRouter);

@@ -3,19 +3,70 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Radio } from "lucide-react";
-import { liveActivity } from "@/lib/mock/analytics";
+
+type Activity = {
+  id: string;
+  text: string;
+  status?: string;
+  at: string; // ISO timestamp from API
+};
+
+type Feed = { items: Activity[]; source: "erp" | "fallback" };
+
+function timeAgo(iso: string): string {
+  if (!iso) return "baru saja";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "baru saja";
+  const diff = Math.max(0, Date.now() - then);
+  const s = Math.floor(diff / 1000);
+  if (s < 30) return "baru saja";
+  if (s < 60) return `${s}s lalu`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m lalu`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}j lalu`;
+  const d = Math.floor(h / 24);
+  return `${d}h lalu`;
+}
 
 export function LiveFeed() {
-  const [items, setItems] = useState(liveActivity);
+  const [feed, setFeed] = useState<Feed | null>(null);
+  const [cursor, setCursor] = useState(0);
+
   useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/analytics/activity", { cache: "no-store" });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const data = (await res.json()) as Feed;
+        if (!cancelled) setFeed(data);
+      } catch {
+        if (!cancelled) setFeed({ items: [], source: "fallback" });
+      }
+    };
+    void load();
+    const reload = setInterval(() => void load(), 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(reload);
+    };
+  }, []);
+
+  // Cycle through the available items so users see motion when there are 2+
+  // activity records.
+  useEffect(() => {
+    if (!feed?.items.length) return;
     const t = setInterval(() => {
-      setItems((curr) => {
-        const head = curr[curr.length - 1];
-        return [head, ...curr.slice(0, -1)];
-      });
+      setCursor((c) => (c + 1) % feed.items.length);
     }, 3500);
     return () => clearInterval(t);
-  }, []);
+  }, [feed?.items.length]);
+
+  const items = feed?.items ?? [];
+  const current = items[cursor];
+  const isEmpty = feed !== null && items.length === 0;
+
   return (
     <section className="pb-12 sm:pb-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -28,18 +79,33 @@ export function LiveFeed() {
               Live activity
             </p>
             <div className="mt-2 relative h-7 overflow-hidden">
-              <AnimatePresence initial={false}>
-                <motion.p
-                  key={items[0].id}
-                  initial={{ y: 28, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -28, opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0 text-sm sm:text-base font-medium truncate"
-                >
-                  {items[0].text} <span className="text-[hsl(var(--muted-foreground))] font-normal">· {items[0].at}</span>
-                </motion.p>
-              </AnimatePresence>
+              {feed === null && (
+                <p className="absolute inset-0 text-sm sm:text-base text-[hsl(var(--muted-foreground))]">
+                  Memuat aktivitas dari ERP…
+                </p>
+              )}
+              {isEmpty && (
+                <p className="absolute inset-0 text-sm sm:text-base text-[hsl(var(--muted-foreground))]">
+                  Belum ada aktivitas — jadilah customer pertama kami.
+                </p>
+              )}
+              {current && (
+                <AnimatePresence initial={false}>
+                  <motion.p
+                    key={current.id}
+                    initial={{ y: 28, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -28, opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 text-sm sm:text-base font-medium truncate"
+                  >
+                    {current.text}{" "}
+                    <span className="text-[hsl(var(--muted-foreground))] font-normal">
+                      · {timeAgo(current.at)}
+                    </span>
+                  </motion.p>
+                </AnimatePresence>
+              )}
             </div>
           </div>
           <div className="hidden md:flex flex-col items-end gap-2 text-xs text-[hsl(var(--muted-foreground))]">
@@ -48,9 +114,11 @@ export function LiveFeed() {
                 <span className="absolute inset-0 rounded-full bg-[hsl(var(--emerald-500))] opacity-75 animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--emerald-500))]" />
               </span>
-              <span className="font-medium text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))]">137 customer online</span>
+              <span className="font-medium text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))]">
+                {items.length} aktivitas terbaru
+              </span>
             </span>
-            <span>Streamed via WebSocket · ERP sync ✓</span>
+            <span>Disinkron dari ERP setiap 30s</span>
           </div>
         </div>
       </div>

@@ -1,68 +1,132 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { TrendingUp, Users, PackageCheck, Activity } from "lucide-react";
+import { useEffect, useState } from "react";
+import { TrendingUp, Users, PackageCheck, Activity, Sparkles } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { formatIDR, formatNumber } from "@/lib/utils";
+
+type Summary = {
+  revenueMonth: number;
+  activeOrders: number;
+  activeCustomers: number;
+  totalOrdersAllTime: number;
+  softLaunch: boolean;
+  source: "erp" | "fallback";
+};
+
+const SOFT_LAUNCH_FALLBACK: Summary = {
+  revenueMonth: 0,
+  activeOrders: 0,
+  activeCustomers: 0,
+  totalOrdersAllTime: 0,
+  softLaunch: true,
+  source: "fallback",
+};
 
 type Stat = {
   icon: React.ElementType;
   label: string;
-  base: number;
-  drift: number;
-  format?: "idr" | "number" | "rating";
-  prefix?: string;
-  suffix?: string;
+  value: number;
+  format?: "idr" | "number";
   tone: string;
 };
 
-const STATS: Stat[] = [
-  { icon: TrendingUp, label: "Total transaksi (bulan ini)", base: 1_842_000_000, drift: 24000, format: "idr", tone: "from-[hsl(var(--sage-500))] to-[hsl(var(--emerald-500))]" },
-  { icon: Users, label: "Customer aktif", base: 12483, drift: 1, format: "number", tone: "from-[hsl(var(--olive-500))] to-[hsl(var(--sage-700))]" },
-  { icon: PackageCheck, label: "Pesanan berhasil dikirim", base: 27620, drift: 1, format: "number", tone: "from-[hsl(var(--emerald-500))] to-[hsl(var(--sage-600))]" },
-  { icon: Activity, label: "Live order saat ini", base: 137, drift: 1, format: "number", tone: "from-[hsl(var(--sage-700))] to-[hsl(var(--olive-500))]" },
-];
+function buildStats(s: Summary): Stat[] {
+  return [
+    {
+      icon: TrendingUp,
+      label: "Total transaksi (bulan ini)",
+      value: s.revenueMonth,
+      format: "idr",
+      tone: "from-[hsl(var(--sage-500))] to-[hsl(var(--emerald-500))]",
+    },
+    {
+      icon: Users,
+      label: "Customer terdaftar",
+      value: s.activeCustomers,
+      format: "number",
+      tone: "from-[hsl(var(--olive-500))] to-[hsl(var(--sage-700))]",
+    },
+    {
+      icon: PackageCheck,
+      label: "Pesanan tercatat",
+      value: s.totalOrdersAllTime,
+      format: "number",
+      tone: "from-[hsl(var(--emerald-500))] to-[hsl(var(--sage-600))]",
+    },
+    {
+      icon: Activity,
+      label: "Pesanan aktif",
+      value: s.activeOrders,
+      format: "number",
+      tone: "from-[hsl(var(--sage-700))] to-[hsl(var(--olive-500))]",
+    },
+  ];
+}
 
 export function LiveStats() {
+  const [summary, setSummary] = useState<Summary | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/analytics/overview", { cache: "no-store" });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const data = (await res.json()) as Summary;
+        if (!cancelled) setSummary(data);
+      } catch {
+        if (!cancelled) setSummary(SOFT_LAUNCH_FALLBACK);
+      }
+    };
+    void load();
+    // Light polling — counters reflect new activity within a minute without
+    // hammering the API.
+    const t = setInterval(() => void load(), 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, []);
+
+  const data = summary ?? SOFT_LAUNCH_FALLBACK;
+  const stats = buildStats(data);
+  const isEmpty =
+    data.totalOrdersAllTime === 0 &&
+    data.activeCustomers === 0 &&
+    data.revenueMonth === 0;
+
   return (
-    <div className="mt-14 sm:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {STATS.map((s, i) => (
-        <motion.div
-          key={s.label}
-          initial={{ y: 20, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, delay: i * 0.08 }}
-        >
-          <StatCard {...s} />
-        </motion.div>
-      ))}
+    <div className="mt-14 sm:mt-20">
+      {isEmpty && (
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.8)] backdrop-blur px-3 py-1 text-xs text-[hsl(var(--muted-foreground))]">
+          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--sage-600))]" />
+          Soft launch — angka di bawah ini akan terisi otomatis dari ERP setelah ada pesanan masuk.
+        </div>
+      )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ y: 20, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+          >
+            <StatCard {...s} loading={summary === null} />
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, base, drift, format, tone }: Stat) {
-  const [val, setVal] = useState(base);
-  const lastDir = useRef<1 | -1>(1);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVal((v) => {
-        const dir = Math.random() > 0.25 ? 1 : -1;
-        lastDir.current = dir;
-        const change = drift * (1 + Math.floor(Math.random() * 3));
-        return Math.max(0, v + dir * change);
-      });
-    }, 2400 + Math.random() * 1500);
-    return () => clearInterval(interval);
-  }, [drift]);
+type StatCardProps = Stat & { loading?: boolean };
 
+function StatCard({ icon: Icon, label, value, format, tone, loading }: StatCardProps) {
   const formatted =
-    format === "idr"
-      ? formatIDR(val)
-      : format === "rating"
-      ? val.toFixed(2)
-      : formatNumber(val);
+    format === "idr" ? formatIDR(value) : formatNumber(value);
 
   return (
     <GlassCard className="p-4 sm:p-5 relative overflow-hidden">
@@ -73,15 +137,20 @@ function StatCard({ icon: Icon, label, base, drift, format, tone }: Stat) {
         </span>
         {label}
       </div>
-      <p className="mt-3 text-2xl sm:text-[1.7rem] font-semibold tracking-tight tabular-nums">
-        {formatted}
+      <p
+        className="mt-3 text-2xl sm:text-[1.7rem] font-semibold tracking-tight tabular-nums"
+        aria-live="polite"
+      >
+        {loading ? "—" : formatted}
       </p>
       <div className="mt-2 flex items-center gap-1.5 text-[11px]">
         <span className="relative inline-flex h-1.5 w-1.5">
           <span className="absolute inset-0 rounded-full bg-[hsl(var(--emerald-500))] opacity-75 animate-ping" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--emerald-500))]" />
         </span>
-        <span className="text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] font-medium">Live update</span>
+        <span className="text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] font-medium">
+          Sinkron dengan ERP
+        </span>
       </div>
     </GlassCard>
   );

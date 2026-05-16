@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { LoginForm } from "./login-form";
+import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
 export const metadata = {
   title: "Masuk · Bawabawa.id",
@@ -14,6 +15,7 @@ export default async function LoginPage({
   const params = await searchParams;
   const next = sanitizeNext(params.next);
   const reason = params.reason;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
   return (
     <main className="relative flex min-h-svh items-center justify-center px-4 py-12">
@@ -34,15 +36,29 @@ export default async function LoginPage({
               Akun ini tidak punya akses ke halaman tersebut. Silakan masuk ulang dengan akun staff/admin.
             </div>
           )}
+          {reason === "pending" && (
+            <div className="mb-4 rounded-xl border border-[hsl(var(--amber-500)/0.4)] bg-[hsl(var(--amber-500)/0.08)] p-3 text-sm text-[hsl(var(--amber-700))]">
+              Akun kamu sudah terdaftar dan menunggu persetujuan admin. Kami akan kontak via email.
+            </div>
+          )}
+
           <Suspense>
-            <LoginForm next={next} />
+            <GoogleSignInButton next={next} clientId={googleClientId} />
           </Suspense>
-          <p className="mt-6 text-xs text-[hsl(var(--muted-foreground))]">
-            Demo akun: <code className="font-mono">aulia.putri@example.com</code> /{" "}
-            <code className="font-mono">password</code> (customer) ·{" "}
-            <code className="font-mono">indra@bawabawa.id</code> /{" "}
-            <code className="font-mono">password</code> (owner).
-          </p>
+
+          <details className="mt-6 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface-2))] p-3">
+            <summary className="cursor-pointer text-sm font-medium text-[hsl(var(--muted-foreground))]">
+              Punya kredensial email/password lama?
+            </summary>
+            <div className="mt-3">
+              <Suspense>
+                <LoginForm next={next} />
+              </Suspense>
+              <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
+                Login email/password hanya tersedia di mode demo. Production gunakan Google Sign-In.
+              </p>
+            </div>
+          </details>
         </div>
       </div>
     </main>
