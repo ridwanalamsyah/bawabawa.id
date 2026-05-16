@@ -27,6 +27,7 @@ const groups: SidebarGroup[] = [
     items: [
       { href: "/admin/cms", label: "CMS", icon: "file" },
       { href: "/admin/support", label: "Customer Support", icon: "support" },
+      { href: "/admin/users", label: "Tim & Admin", icon: "users" },
       { href: "/admin/roles", label: "Role & Permission", icon: "shield" },
       { href: "/admin/settings", label: "Pengaturan", icon: "settings" },
     ],
