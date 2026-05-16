@@ -28,7 +28,7 @@ export function Categories() {
             </h2>
           </div>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Update otomatis dari sistem ERP Bawabawa setiap minggu.
+            Kategori jasa titip yang sering diminta customer kami.
           </p>
         </div>
 

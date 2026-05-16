@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, ShieldCheck, Star } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroVisual } from "./hero-visual";
 import { LiveStats } from "./live-stats";
@@ -78,8 +78,8 @@ export function Hero() {
                 Garansi barang aman
               </div>
               <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 fill-[hsl(var(--warning))] stroke-[hsl(var(--warning))]" />
-                <span>4.96 dari 1.2k+ ulasan</span>
+                <BadgeCheck className="h-4 w-4 text-[hsl(var(--sage-600))]" />
+                <span>Soft launch — early customer welcome</span>
               </div>
             </motion.div>
           </div>
