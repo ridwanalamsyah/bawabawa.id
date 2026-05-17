@@ -4,22 +4,24 @@ import { Sidebar, type SidebarGroup } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Button } from "@/components/ui/button";
 
+// Sidebar removed: "ERP Integration" entry (system-language leak) and the
+// hardcoded badge counts on Pesanan/Pembayaran (those were faking activity
+// before the admin loads the actual list).
 const groups: SidebarGroup[] = [
   {
-    label: "Operations",
+    label: "Operasional",
     items: [
       { href: "/admin", label: "Overview", icon: "dashboard" },
-      { href: "/admin/orders", label: "Pesanan", icon: "package", badge: "12" },
+      { href: "/admin/orders", label: "Pesanan", icon: "package" },
       { href: "/admin/trips", label: "Open Trip", icon: "plane" },
       { href: "/admin/customers", label: "Customer", icon: "users" },
-      { href: "/admin/payments", label: "Pembayaran", icon: "card", badge: "3" },
+      { href: "/admin/payments", label: "Pembayaran", icon: "card" },
     ],
   },
   {
     label: "Analytics",
     items: [
       { href: "/admin/reports", label: "Laporan & Analytics", icon: "chart" },
-      { href: "/admin/erp", label: "ERP Integration", icon: "cable" },
     ],
   },
   {
@@ -43,10 +45,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         footer={
           <div className="rounded-xl bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--sage-900))] p-4 text-white">
             <div className="flex items-center gap-2 text-xs font-medium">
-              <Sparkles className="h-3.5 w-3.5" /> Admin Console v3.0
+              <Sparkles className="h-3.5 w-3.5" /> Admin Bawabawa
             </div>
             <p className="mt-1 text-[11px] opacity-80">
-              Tersinkron 2-arah dengan ERP. Last sync: 12 detik lalu.
+              Kelola pesanan, customer, dan konten dari satu tempat.
             </p>
           </div>
         }
@@ -54,9 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           title="Admin Console"
-          subtitle="Realtime ops · Bandung HQ"
-          user={{ name: "Indra Permana", role: "Owner" }}
-          notifications={5}
+          subtitle="Bawabawa Bandung"
         />
         <div className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
           <div className="lg:hidden mb-4 flex items-center gap-2">

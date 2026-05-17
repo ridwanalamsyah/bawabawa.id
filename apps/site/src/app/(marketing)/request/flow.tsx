@@ -403,8 +403,8 @@ function TripStep({
       <GlassCard className="p-6">
         <h3 className="text-base font-semibold">Pilih tipe layanan</h3>
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Tentukan kecepatan vs biaya. Fast Track lebih cepat tapi lebih mahal,
-          Batch Share lebih hemat tapi nunggu trip terjadwal.
+          Tentukan kecepatan vs biaya. Reguler lebih cepat tapi lebih mahal,
+          Kargo lebih hemat tapi nunggu trip terjadwal.
         </p>
         <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
           {(Object.values(TIERS)).map((t) => {

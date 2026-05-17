@@ -3,17 +3,23 @@
  *
  * Two shipping tiers (per Bawabawa.id operations):
  *
- * 1. **Fast Track** — dedicated cargo, 1–3 hari kerja Bandung→Samarinda.
- *    Tarif Rp 43.000 / kg, dibulatkan ke atas per 0.5 kg.
+ * 1. **Reguler** — pengiriman ekspedisi reguler (JNE / SiCepat / J&T),
+ *    3–4 hari kerja Bandung→Samarinda. Tarif Rp 43.000 / kg, dibulatkan
+ *    ke atas per 0.5 kg.
  *
- * 2. **Batch Share** — gabungan dengan trip terjadwal (min. 50kg per
- *    container). Customer membayar flat Rp 200.000 untuk slot batch
- *    apapun ≤ 50kg; di atas 50kg, ditagih per-kg dengan fast-track rate.
+ * 2. **Kargo** — gabungan dengan trip kargo terjadwal (min. 50kg per
+ *    container). Customer membayar flat Rp 200.000 untuk slot ≤50kg;
+ *    di atas 50kg, ditagih per-kg dengan tarif reguler. Estimasi 10
+ *    hari kerja.
  *
  * Plus PPN 11% (PMK 131/2024). Jastip fee tetap 8% dari subtotal barang,
  * dengan minimum Rp 20.000.
  */
 
+// TierId values are stable across the codebase: `fast` = the faster
+// reguler-ekspedisi tier; `batch` = the cheaper kargo-sharing tier.
+// We keep the keys to avoid migrating stored orders; only labels & ETA
+// strings shown to users were corrected.
 export type TierId = "fast" | "batch";
 
 export const TIERS: Record<TierId, {
@@ -24,15 +30,15 @@ export const TIERS: Record<TierId, {
 }> = {
   fast: {
     id: "fast",
-    label: "Fast Track",
-    tagline: "Kargo dedikasi 43rb/kg, sampai 1–3 hari kerja.",
-    eta: "1–3 hari kerja",
+    label: "Reguler",
+    tagline: "Ekspedisi reguler 43rb/kg, sampai 3–4 hari kerja.",
+    eta: "3–4 hari kerja",
   },
   batch: {
     id: "batch",
-    label: "Batch Share",
-    tagline: "Gabung trip terjadwal, flat 200rb untuk slot ≤50kg.",
-    eta: "3–7 hari kerja",
+    label: "Kargo",
+    tagline: "Gabung kargo terjadwal, flat 200rb untuk slot ≤50kg.",
+    eta: "10 hari kerja",
   },
 };
 
@@ -96,7 +102,7 @@ export function computePricing({ itemsTotal, totalKg, tier }: PricingInput): Pri
   if (tier === "fast") {
     shippingFee = FAST_TRACK_PER_KG * billingKg;
   } else {
-    // Batch share: flat for ≤50kg, fast-track rate beyond that.
+    // Kargo: flat for ≤50kg, per-kg reguler rate beyond that.
     shippingFee =
       billingKg <= BATCH_CAPACITY_KG
         ? BATCH_FLAT_FEE

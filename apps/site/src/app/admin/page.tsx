@@ -5,9 +5,11 @@ import { GlassCard, Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// All values render from real ERP data once wired (see Phase D in the
-// operations plan). Until then, we show empty states rather than mock
-// numbers so the dashboard reflects the actual production state.
+// Numbers degrade to em-dash and tables to empty-state until real orders
+// land — that way the dashboard reflects production state, not fake demo
+// data. The wiring to live counters is intentionally minimal to stay below
+// the fold of the ERP integration; see /admin/trips & /admin/customers for
+// the data-driven flows already moved over.
 export default function AdminOverviewPage() {
   const stats = {
     revenue: null,
@@ -97,13 +99,13 @@ export default function AdminOverviewPage() {
 
         <GlassCard className="lg:col-span-6 p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-            Sinkronisasi sistem
+            Log otomatisasi
           </p>
-          <h3 className="mt-1 font-semibold">Webhook log</h3>
+          <h3 className="mt-1 font-semibold">Notifikasi & status pengiriman</h3>
           <EmptyState
             icon={Activity}
             title="Belum ada event"
-            hint="Webhook dari payment gateway dan kurir akan ter-log di sini."
+            hint="Status pembayaran dan update kurir akan ter-log di sini."
             compact
           />
         </GlassCard>

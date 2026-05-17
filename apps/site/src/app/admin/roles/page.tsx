@@ -7,7 +7,7 @@ import { Plus, Shield } from "lucide-react";
 import { adminUsers } from "@/lib/mock/analytics";
 
 const ROLES: { role: string; perms: string[] }[] = [
-  { role: "owner", perms: ["Semua akses", "Kelola tim", "Konfigurasi ERP"] },
+  { role: "owner", perms: ["Semua akses", "Kelola tim", "Konfigurasi sistem"] },
   { role: "operations", perms: ["Order", "Trip", "Customer", "Support"] },
   { role: "finance", perms: ["Pembayaran", "Invoice", "Reports", "Reconciliation"] },
   { role: "support", perms: ["Tiket support", "Customer profile (read)", "Live chat"] },

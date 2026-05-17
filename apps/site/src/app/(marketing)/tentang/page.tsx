@@ -51,8 +51,9 @@ export default function TentangPage() {
             disiapkan.
           </li>
           <li>
-            Customer pertama akan kami layani secara personal — admin masuk
-            langsung lewat DM Instagram / WhatsApp dan input ke ERP.
+            Customer pertama akan kami layani secara personal — admin merespons
+            langsung lewat DM Instagram / WhatsApp dan mencatat pesanan ke
+            dashboard internal.
           </li>
           <li>
             Pembayaran melalui Midtrans (registered di OJK) sebagai payment
