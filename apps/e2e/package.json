@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "playwright test",
+    "test": "echo \"e2e suite is opt-in — run \\\"npm run test:e2e\\\" (requires \\\"npm run install:browsers\\\" first)\" && exit 0",
+    "test:e2e": "playwright test",
     "test:ui": "playwright test --ui",
     "install:browsers": "playwright install --with-deps chromium"
   },
