@@ -28,6 +28,7 @@ import { cmsRouter } from "./modules/cms/cms.routes";
 import { publicBlogRouter, adminBlogRouter } from "./modules/cms/blog.routes";
 import { emailsRouter, emailsWebhookRouter } from "./modules/email/resend.routes";
 import { fonnteRouter, fonnteWebhookRouter } from "./modules/whatsapp/fonnte.routes";
+import { uploadsRouter } from "./modules/uploads/uploads.routes";
 import { pingDatabase } from "./infrastructure/db/pool";
 import { getMetricsSnapshot } from "./common/observability/metrics";
 
@@ -82,3 +83,4 @@ apiRouter.use("/erp", erpRouter);
 apiRouter.use("/cms", cmsRouter);
 apiRouter.use("/blog-posts", publicBlogRouter);
 apiRouter.use("/admin/blog-posts", adminBlogRouter);
+apiRouter.use("/uploads", uploadsRouter);
