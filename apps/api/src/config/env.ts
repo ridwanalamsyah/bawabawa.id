@@ -157,7 +157,15 @@ const envSchema = z.object({
     .string()
     .url()
     .optional()
-    .default("https://api.fonnte.com")
+    .default("https://api.fonnte.com"),
+
+  // Vercel Blob storage. Required for the /api/v1/uploads endpoint. When
+  // unset, uploads return 503 (fail closed) so a misconfigured deploy
+  // can't silently accept image uploads it can't store. Create a Blob
+  // store at https://vercel.com/dashboard/stores → Blob, then connect it
+  // to the project so the token is auto-injected. Tokens start with
+  // `vercel_blob_rw_`.
+  BLOB_READ_WRITE_TOKEN: z.string().min(20).optional()
 }).superRefine((env, ctx) => {
   // Production deployments must use Google OAuth — no demo accounts allowed.
   if (env.NODE_ENV === "production") {

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { AdminLayout } from "./AdminLayout";
 import { Button } from "../../shared/ui/primitives";
 import { AlertDialog } from "../../shared/ui/primitives/Dialog";
+import { FileUploader, type UploadedFile } from "../../shared/ui/primitives/FileUploader";
 import {
   createMedia,
   deleteMedia,
@@ -27,13 +28,27 @@ const EMPTY: MediaFormShape = {
   mimeType: "image/png"
 };
 
+function deriveFilenameFromPath(pathname: string): string {
+  const last = pathname.split("/").pop() ?? "";
+  return last || pathname;
+}
+
 export function MediaPage() {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const { register, handleSubmit, reset, formState: { isSubmitting, errors } } = useForm<MediaFormShape>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { isSubmitting, errors } } = useForm<MediaFormShape>({
     defaultValues: EMPTY
   });
+  const publicUrl = watch("publicUrl");
+
+  function handleUploaded(file: UploadedFile) {
+    setValue("publicUrl", file.url, { shouldDirty: true });
+    setValue("storagePath", file.pathname, { shouldDirty: true });
+    setValue("mimeType", file.contentType, { shouldDirty: true });
+    setValue("filename", deriveFilenameFromPath(file.pathname), { shouldDirty: true });
+    toast.success("Gambar terunggah, tinggal isi alt text & simpan");
+  }
 
   async function refresh() {
     setLoading(true);
@@ -97,9 +112,18 @@ export function MediaPage() {
     >
       <h2 className="admin-section-title">Tambah media</h2>
       <p className="admin-section-subtitle">
-        Tempel URL publik (CDN, S3, Supabase Storage, dsb). Backend hanya menyimpan referensi — upload binary
-        akan ditangani oleh integrasi storage di deploy production.
+        Upload langsung ke Vercel Blob (admin only, dengan permission cms:manage). Field URL & storage path
+        otomatis terisi setelah upload selesai — Anda tinggal isi alt text dan simpan. URL eksternal masih
+        bisa ditempel manual kalau gambar sudah hosted di tempat lain.
       </p>
+      <div className="admin-field" style={{ marginBottom: 16 }}>
+        <FileUploader
+          folder="media"
+          onUpload={handleUploaded}
+          buttonLabel="Upload gambar"
+          hint="Sukses upload akan otomatis isi Public URL, Storage path, MIME type & Filename di form di bawah."
+        />
+      </div>
       <form className="admin-form" onSubmit={handleSubmit(onSubmit)} style={{ marginBottom: 28 }}>
         <div className="admin-row two-col">
           <div className="admin-field">
@@ -116,6 +140,16 @@ export function MediaPage() {
           <label htmlFor="m-url">Public URL</label>
           <input id="m-url" type="url" placeholder="https://…" {...register("publicUrl", { required: true })} />
           {errors.publicUrl ? <span className="admin-field-hint" style={{ color: "#b91c1c" }}>URL wajib</span> : null}
+          {publicUrl ? (
+            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 12 }}>
+              <img
+                src={publicUrl}
+                alt="Preview upload"
+                style={{ height: 56, width: "auto", borderRadius: 6, border: "1px solid var(--color-border, #d1d5db)" }}
+              />
+              <span style={{ fontSize: 12, color: "var(--color-muted)" }}>Preview</span>
+            </div>
+          ) : null}
         </div>
         <div className="admin-field">
           <label htmlFor="m-storage">Storage path (optional)</label>
