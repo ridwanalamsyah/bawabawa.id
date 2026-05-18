@@ -20,6 +20,7 @@ import {
   Heart,
   MapPin,
   Receipt,
+  Wallet,
   MessageSquare,
   type LucideIcon,
 } from "lucide-react";
@@ -43,6 +44,7 @@ export type SidebarIconName =
   | "heart"
   | "pin"
   | "receipt"
+  | "wallet"
   | "chat";
 
 const ICONS: Record<SidebarIconName, LucideIcon> = {
@@ -62,6 +64,7 @@ const ICONS: Record<SidebarIconName, LucideIcon> = {
   heart: Heart,
   pin: MapPin,
   receipt: Receipt,
+  wallet: Wallet,
   chat: MessageSquare,
 };
 

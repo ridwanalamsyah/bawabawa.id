@@ -308,4 +308,29 @@ export class OrdersService {
     );
     return Promise.all(rows.rows.map((row) => this.toOrder(row)));
   }
+
+  async listByCreatedBy(userId: string, limit = 50) {
+    const pool = await getPool();
+    const rows = await pool.query<{
+      id: string;
+      order_number: string;
+      customer_id: string;
+      branch_id: string;
+      total_amount: string;
+      payment_status: "pending" | "dp" | "paid";
+      status: OrderStatus;
+      idempotency_key: string;
+      source_channel: string | null;
+      notes: string | null;
+      created_at: string;
+    }>(
+      `SELECT id, order_number, customer_id, branch_id, total_amount, payment_status, status, idempotency_key, source_channel, notes, created_at
+       FROM orders
+       WHERE created_by = $1
+       ORDER BY created_at DESC
+       LIMIT $2`,
+      [userId, limit]
+    );
+    return Promise.all(rows.rows.map((row) => this.toOrder(row)));
+  }
 }

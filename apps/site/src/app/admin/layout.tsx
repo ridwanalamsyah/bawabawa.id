@@ -16,11 +16,14 @@ const groups: SidebarGroup[] = [
       { href: "/admin/trips", label: "Open Trip", icon: "plane" },
       { href: "/admin/customers", label: "Customer", icon: "users" },
       { href: "/admin/payments", label: "Pembayaran", icon: "card" },
+      { href: "/admin/invoices", label: "Invoice", icon: "receipt" },
+      { href: "/admin/pos", label: "POS / Order Manual", icon: "package" },
     ],
   },
   {
-    label: "Analytics",
+    label: "Keuangan",
     items: [
+      { href: "/admin/bagi-hasil", label: "Bagi Hasil", icon: "wallet" },
       { href: "/admin/reports", label: "Laporan & Analytics", icon: "chart" },
     ],
   },

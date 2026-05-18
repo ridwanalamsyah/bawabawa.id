@@ -1,24 +1,21 @@
-import { trips } from "@/lib/mock/trips";
 import { erpSafe } from "@/lib/erp-client";
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const status = url.searchParams.get("status");
-
-  // Open Trip schedules live alongside shipping in the ERP. We attempt the
-  // ERP first; if it isn't available we fall back to the bundled mock dataset
-  // so the Open Trip page keeps rendering for marketing previews.
-  const search = new URLSearchParams();
-  if (status) search.set("status", status);
-  const query = search.toString() ? `?${search.toString()}` : "";
+/**
+ * Public-facing Open Trip list. Calls the ERP `/trips` endpoint (which itself
+ * returns only `is_published = true AND status != 'closed'` rows), so the
+ * marketing /open-trip page and /request flow both see exactly what the admin
+ * has explicitly published. No mock-data fallback — if the API is unreachable
+ * we return an empty list so the UI shows its empty-state instead of
+ * mock trip codes that don't actually exist.
+ */
+export async function GET() {
   const erp = await erpSafe<unknown[]>({
-    path: `/shipping/trips${query}`,
+    path: "/trips",
     timeoutMs: 3000,
+    cache: "no-store",
   });
   if (erp.ok && Array.isArray(erp.data)) {
-    return Response.json({ data: erp.data, total: erp.data.length, source: "erp" });
+    return Response.json({ success: true, data: erp.data });
   }
-
-  const filtered = status ? trips.filter((t) => t.status === status) : trips;
-  return Response.json({ data: filtered, total: filtered.length, source: "fallback" });
+  return Response.json({ success: true, data: [] });
 }
