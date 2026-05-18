@@ -18,12 +18,31 @@ const groups: SidebarGroup[] = [
       { href: "/admin/payments", label: "Pembayaran", icon: "card" },
       { href: "/admin/invoices", label: "Invoice", icon: "receipt" },
       { href: "/admin/pos", label: "POS / Order Manual", icon: "package" },
+      { href: "/admin/approvals", label: "Approvals", icon: "shield" },
     ],
   },
   {
-    label: "Keuangan",
+    label: "Inventory & Logistik",
+    items: [
+      { href: "/admin/inventory", label: "Stok produk", icon: "package" },
+      { href: "/admin/procurement", label: "Purchase Order", icon: "card" },
+      { href: "/admin/imports", label: "Import CSV", icon: "file" },
+    ],
+  },
+  {
+    label: "CRM & Marketing",
+    items: [
+      { href: "/admin/leads", label: "Leads", icon: "users" },
+      { href: "/admin/vouchers", label: "Voucher & Promo", icon: "receipt" },
+      { href: "/admin/whatsapp", label: "WhatsApp Outbox", icon: "chat" },
+      { href: "/admin/emails", label: "Email Outbox", icon: "bell" },
+    ],
+  },
+  {
+    label: "Keuangan & HR",
     items: [
       { href: "/admin/bagi-hasil", label: "Bagi Hasil", icon: "wallet" },
+      { href: "/admin/hr", label: "Pegawai & Absensi", icon: "users" },
       { href: "/admin/reports", label: "Laporan & Analytics", icon: "chart" },
     ],
   },

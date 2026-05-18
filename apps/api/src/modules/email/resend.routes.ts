@@ -6,6 +6,7 @@ import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { loadEnv } from "../../config/env";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
+import { getPool } from "../../infrastructure/db/pool";
 import {
   applyEmailWebhook,
   enqueueEmail,
@@ -47,6 +48,23 @@ const sendSchema = z.object({
 });
 
 const emailsRouter = Router();
+
+emailsRouter.get("/", authGuard, async (_req, res, next) => {
+  try {
+    const rows = await (await getPool()).query(
+      `SELECT id, to_email AS "toEmail", template_key AS "templateKey",
+              status, scheduled_at AS "scheduledAt", sent_at AS "sentAt",
+              attempts, last_error AS "lastError",
+              related_entity AS "relatedEntity", related_id AS "relatedId"
+         FROM email_outbox
+         ORDER BY scheduled_at DESC NULLS LAST
+         LIMIT 200`
+    );
+    res.json({ success: true, data: rows.rows });
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * POST /api/v1/emails/send — enqueue + immediately try to send.

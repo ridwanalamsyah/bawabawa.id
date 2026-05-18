@@ -93,4 +93,37 @@ hrRouter.post(
   }
 );
 
+hrRouter.get("/employees", authGuard, async (_req, res, next) => {
+  try {
+    const rows = await (await getPool()).query(
+      `SELECT id, user_id AS "userId", employee_code AS "employeeCode",
+              position_title AS "positionTitle", salary_base AS "salaryBase",
+              joined_at AS "joinedAt", status
+         FROM employees
+         ORDER BY joined_at DESC NULLS LAST
+         LIMIT 500`
+    );
+    res.json({ success: true, data: rows.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
+hrRouter.get("/attendance", authGuard, async (_req, res, next) => {
+  try {
+    const rows = await (await getPool()).query(
+      `SELECT a.id, a.employee_id AS "employeeId", a.attendance_date AS "attendanceDate",
+              a.status, a.check_in_at AS "checkInAt",
+              e.employee_code AS "employeeCode", e.position_title AS "positionTitle"
+         FROM attendance_logs a
+         LEFT JOIN employees e ON e.id = a.employee_id
+         ORDER BY a.attendance_date DESC
+         LIMIT 200`
+    );
+    res.json({ success: true, data: rows.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export { hrRouter };
