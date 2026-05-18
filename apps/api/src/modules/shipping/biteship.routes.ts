@@ -126,7 +126,7 @@ const shippingWebhookRouter = Router();
 
 /**
  * Constant-time comparison helper. Same pattern as
- * `verifyMidtransSignature` — guards against timing oracles even though
+ * `verifyDokuSignature` — guards against timing oracles even though
  * the secret is short.
  */
 function constantTimeEqual(a: string, b: string): boolean {

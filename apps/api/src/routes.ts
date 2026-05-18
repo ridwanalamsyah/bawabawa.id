@@ -11,7 +11,7 @@ import {
   vouchersRouter
 } from "./modules/orders/vouchers.routes";
 import { shippingRouter, shippingWebhookRouter } from "./modules/shipping/biteship.routes";
-import { midtransRouter, paymentsConfigRouter } from "./modules/payments/midtrans.routes";
+import { dokuRouter, paymentsConfigRouter } from "./modules/payments/doku.routes";
 import { invoiceRouter } from "./modules/orders/invoice.routes";
 import { chargesRouter } from "./modules/orders/charges.routes";
 import { inventoryRouter } from "./modules/inventory/inventory.routes";
@@ -63,7 +63,7 @@ apiRouter.use("/orders", chargesRouter);
 apiRouter.use("/vouchers", vouchersRouter);
 apiRouter.use("/promotions", publicVouchersRouter);
 apiRouter.use("/shipping", shippingRouter);
-apiRouter.use("/webhooks", midtransRouter);
+apiRouter.use("/webhooks", dokuRouter);
 apiRouter.use("/webhooks", shippingWebhookRouter);
 apiRouter.use("/webhooks", emailsWebhookRouter);
 apiRouter.use("/webhooks", fonnteWebhookRouter);

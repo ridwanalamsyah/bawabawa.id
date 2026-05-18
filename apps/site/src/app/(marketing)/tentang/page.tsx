@@ -55,7 +55,7 @@ export default function TentangPage() {
             langsung lewat DM Instagram / WhatsApp dan input ke ERP.
           </li>
           <li>
-            Pembayaran melalui Midtrans (registered di OJK) sebagai payment
+            Pembayaran melalui DOKU (registered di OJK) sebagai payment
             gateway. Bawabawa sendiri belum punya lisensi finansial.
           </li>
           <li>

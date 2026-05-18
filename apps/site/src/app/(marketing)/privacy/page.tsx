@@ -30,7 +30,7 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
       <ul className="list-disc pl-5 space-y-1">
         <li><strong>Data identitas:</strong> nama, nomor telepon, email, alamat pengiriman.</li>
         <li><strong>Data transaksi:</strong> detail request, harga barang, riwayat pembayaran.</li>
-        <li><strong>Data pembayaran:</strong> diproses oleh Midtrans (kami tidak menyimpan nomor kartu kredit).</li>
+        <li><strong>Data pembayaran:</strong> diproses oleh DOKU (kami tidak menyimpan nomor kartu kredit).</li>
         <li><strong>Data teknis:</strong> alamat IP, jenis perangkat, browser, untuk keamanan & analitik agregat.</li>
         <li><strong>Cookie:</strong> esensial (sesi login, keranjang) & analitik (opsional, dengan persetujuan).</li>
       </ul>
@@ -54,7 +54,7 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
       <p>
         Kami hanya berbagi data dengan: (a) personal shopper yang ditugaskan ke
         request kamu (hanya nama, alamat tujuan, dan rincian barang), (b)
-        penyedia pembayaran (Midtrans), (c) kurir pengiriman (Biteship, JNE, dll.),
+        penyedia pembayaran (DOKU), (c) kurir pengiriman (Biteship, JNE, dll.),
         dan (d) otoritas berwenang jika diwajibkan oleh hukum. Kami{" "}
         <strong>tidak pernah menjual data kamu</strong> ke pihak iklan atau marketplace lain.
       </p>

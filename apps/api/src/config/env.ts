@@ -115,14 +115,16 @@ const envSchema = z.object({
     .optional()
     .default("https://api.biteship.com"),
 
-  // Midtrans payment gateway. Server key is used to verify webhook
-  // signatures; client key is exposed to the frontend Snap SDK. Both
-  // optional — when unset the webhook endpoint returns 503 and Snap is not
-  // mounted on the storefront. Sandbox keys start with `SB-Mid-` while
-  // production keys start with `Mid-`.
-  MIDTRANS_SERVER_KEY: z.string().min(20).optional(),
-  MIDTRANS_CLIENT_KEY: z.string().min(20).optional(),
-  MIDTRANS_IS_PRODUCTION: z
+  // DOKU payment gateway. Secret key verifies the HMAC-SHA256 signature
+  // DOKU places on each webhook delivery; client id identifies the
+  // merchant and is exposed to the frontend (it isn't sensitive on its
+  // own). Both optional — when unset the webhook endpoint returns 503
+  // and the storefront falls back to a "payment unavailable" notice.
+  // Sandbox client ids look like `BRN-0000-XXXXXXXXXX` and the
+  // dashboard URL is https://sandbox.doku.com/.
+  DOKU_CLIENT_ID: z.string().min(8).optional(),
+  DOKU_SECRET_KEY: z.string().min(20).optional(),
+  DOKU_IS_PRODUCTION: z
     .union([z.string(), z.boolean()])
     .optional()
     .transform((value) => value === true || value === "true" || value === "1"),

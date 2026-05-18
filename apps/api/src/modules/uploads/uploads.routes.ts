@@ -43,7 +43,7 @@ const uploadsRouter = Router();
  *   - 401/403 when not authenticated or missing `cms:manage` permission.
  *   - 503 when `BLOB_READ_WRITE_TOKEN` is not configured (fail closed so
  *     misconfigured deploys never silently accept uploads). Matches the
- *     same defensive pattern as Midtrans/Biteship integrations.
+ *     same defensive pattern as DOKU/Biteship integrations.
  *   - 400/413/415 for malformed bodies, oversize files, disallowed MIMEs.
  *   - 502 if the Blob upstream fails.
  *

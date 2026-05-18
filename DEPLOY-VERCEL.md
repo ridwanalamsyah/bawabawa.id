@@ -73,9 +73,10 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    # CORS_ALLOWED_ORIGINS=https://bawabawa-site.vercel.app,https://bawabawa-web.vercel.app
 
    # Optional integrations (leave empty for MVP):
-   # MIDTRANS_SERVER_KEY=
-   # MIDTRANS_CLIENT_KEY=
-   # MIDTRANS_IS_PRODUCTION=false
+   # DOKU_CLIENT_ID=
+   # DOKU_SECRET_KEY=
+   # DOKU_IS_PRODUCTION=false
+   # BLOB_READ_WRITE_TOKEN=vercel_blob_rw_…
    # RESEND_API_KEY=
    # RESEND_FROM_EMAIL=
    # FONNTE_DEVICE_TOKEN=
@@ -163,7 +164,8 @@ After all four services are live:
 ## What's NOT set up yet (Phase 3+ work)
 
 - **Google OAuth** — placeholder client ID is in env. Real users can't self-register until you create a Google Cloud OAuth client and replace `GOOGLE_OAUTH_CLIENT_ID`.
-- **Midtrans Snap** — payment routes are wired but keys are empty. UI shows mock checkout. Provide sandbox keys when ready.
+- **DOKU Checkout** — payment routes are wired but keys are empty. UI shows mock checkout. Provide DOKU sandbox `CLIENT_ID` + `SECRET_KEY` when ready.
+- **Vercel Blob** — admin uploads return 503 until `BLOB_READ_WRITE_TOKEN` is set (Vercel Dashboard → Storage → Blob → Connect Project).
 - **Resend (email)** + **Fonnte (WhatsApp)** — same pattern; transactional notifications skip until keys are present.
 - **Biteship (shipping)** — same pattern; tracking webhooks no-op until key is present.
 

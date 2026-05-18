@@ -5,7 +5,7 @@ import { ShieldCheck, Lock, Headphones, Wallet, BadgeCheck, RefreshCcw } from "l
 
 const ITEMS = [
   { icon: ShieldCheck, title: "Garansi barang aman", desc: "Setiap titipan dijamin hingga Rp 5.000.000" },
-  { icon: Lock, title: "Pembayaran via Midtrans", desc: "Diproses gateway resmi yang diawasi OJK" },
+  { icon: Lock, title: "Pembayaran via DOKU", desc: "Diproses gateway resmi yang diawasi OJK" },
   { icon: BadgeCheck, title: "Personal shopper terverifikasi", desc: "Identitas & alamat tervalidasi" },
   { icon: Headphones, title: "Live chat 24/7", desc: "Tim support dari kantor Bandung" },
   { icon: Wallet, title: "Tarif transparan", desc: "Tanpa biaya tersembunyi" },

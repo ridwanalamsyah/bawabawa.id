@@ -25,7 +25,7 @@ export const FAQS = [
   },
   {
     q: "Bagaimana sistem pembayarannya?",
-    a: "Kami menerima QRIS, transfer Virtual Account (BCA, Mandiri, BNI, BRI), e-wallet (GoPay, OVO, ShopeePay, DANA), dan kartu kredit. Pembayaran diproses oleh Midtrans — gateway resmi yang terdaftar di OJK — sehingga dana customer tidak pernah masuk rekening pribadi.",
+    a: "Kami menerima QRIS, transfer Virtual Account (BCA, Mandiri, BNI, BRI), e-wallet (GoPay, OVO, ShopeePay, DANA), dan kartu kredit. Pembayaran diproses oleh DOKU — gateway resmi yang terdaftar di OJK — sehingga dana customer tidak pernah masuk rekening pribadi.",
   },
   {
     q: "Apakah ada garansi barang aman?",
