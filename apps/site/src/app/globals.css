@@ -409,3 +409,70 @@ h1, h2, h3, .font-display {
 @media (prefers-reduced-motion: reduce) {
   .animate-float { animation: none; }
 }
+
+/* Hero entrance animations — CSS-only fallback so above-the-fold copy
+   doesn't depend on framer-motion hydration. Previously the hero h1/p/cta
+   stack used `motion.*` with `initial={{ opacity: 0 }}` which SSR-rendered
+   them at opacity:0 and waited on JS hydration to animate them in. If the
+   JS chunks failed or hydrated late the entire hero text stayed invisible.
+   Registering the keyframes in CSS means the animation runs on first paint
+   without any JS, and the `forwards` fill mode keeps the final state. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-rise-lg {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-slide-in-left {
+  from { opacity: 0; transform: translate(-40px, 30px); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes hero-slide-in-right {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-hero-rise {
+  animation: hero-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-rise-lg {
+  animation: hero-rise-lg 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-pop {
+  animation: hero-pop 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-left {
+  animation: hero-slide-in-left 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-right {
+  animation: hero-slide-in-right 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-rise,
+  .animate-hero-rise-lg,
+  .animate-hero-pop,
+  .animate-hero-slide-in-left,
+  .animate-hero-slide-in-right {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Continuous scan-line sweep used by HeroVisual. Replaces a framer-motion
+   loop so the effect still plays even if framer-motion fails to load. */
+@keyframes hero-scan {
+  0%   { transform: translateY(-30%); }
+  100% { transform: translateY(130%); }
+}
+.animate-hero-scan {
+  animation: hero-scan 8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-scan { animation: none; }
+}

@@ -3,7 +3,7 @@ import { ShieldCheck, Lock } from "lucide-react";
 type Badge = { label: string; sub?: string };
 
 const PAYMENT_PARTNERS: Badge[] = [
-  { label: "Midtrans", sub: "Payment Gateway" },
+  { label: "DOKU", sub: "Payment Gateway" },
   { label: "QRIS", sub: "Bank Indonesia" },
   { label: "BCA", sub: "Virtual Account" },
   { label: "Mandiri", sub: "Virtual Account" },
@@ -36,9 +36,9 @@ export function TrustBadges() {
             Pembayaran diproses oleh gateway resmi
           </p>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Bawabawa.id memakai Midtrans sebagai payment gateway — Midtrans terdaftar dan
+            Bawabawa.id memakai DOKU sebagai payment gateway — DOKU terdaftar dan
             diawasi OJK & Bank Indonesia. Pembayaran customer tidak pernah masuk ke
-            rekening pribadi, langsung diverifikasi dan diteruskan via Midtrans.
+            rekening pribadi, langsung diverifikasi dan diteruskan via DOKU.
           </p>
         </div>
 

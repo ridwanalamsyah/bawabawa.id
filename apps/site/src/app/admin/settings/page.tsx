@@ -28,7 +28,7 @@ export default function AdminSettingsPage() {
           <div className="mt-4 grid gap-4">
             <Field label="ERP base URL" defaultValue="https://erp.bawabawa.id/api/v3" />
             <Field label="Webhook signing secret" defaultValue="whsec_••••••••••••••••" />
-            <Field label="Payment gateway" defaultValue="Midtrans Snap" />
+            <Field label="Payment gateway" defaultValue="DOKU Checkout" />
             <Field label="Push provider" defaultValue="OneSignal" />
           </div>
           <div className="mt-5 flex justify-end gap-2">

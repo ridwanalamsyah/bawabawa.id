@@ -1,8 +1,12 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Package, MapPin, Plane, ShoppingBag, Sparkles } from "lucide-react";
 
+// HeroVisual no longer relies on framer-motion for first-paint visibility.
+// The plane, personal-shopper, scan-line, and "Tiba di Samarinda" cards now
+// use the `animate-hero-*` CSS keyframes defined in `globals.css` so they
+// appear even when the JS bundle hasn't hydrated yet. Before this change
+// production was serving these cards at opacity:0 on first paint and only
+// animating them in once framer-motion mounted — a race that intermittently
+// left the hero blank.
 export function HeroVisual() {
   return (
     <div className="relative w-full aspect-[5/4] sm:aspect-[5/3.6] lg:aspect-[5/4.6]">
@@ -35,35 +39,29 @@ export function HeroVisual() {
           <path opacity="0.85" fill="currentColor" d="M0 190 Q200 160 400 185 T800 180 L800 200 L0 200 Z" />
         </svg>
 
-        {/* Subtle scan line */}
-        <motion.div
+        {/* Subtle scan line — CSS animation so it keeps running even if
+            framer-motion isn't loaded. */}
+        <div
           aria-hidden
-          initial={{ y: "-30%" }}
-          animate={{ y: "130%" }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-x-0 h-32 bg-linear-to-b from-transparent via-white/12 to-transparent"
+          className="animate-hero-scan absolute inset-x-0 h-32 bg-linear-to-b from-transparent via-white/12 to-transparent"
         />
       </div>
 
       {/* Plane */}
-      <motion.div
-        initial={{ x: -40, y: 30, opacity: 0 }}
-        animate={{ x: 0, y: 0, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.4 }}
-        className="absolute top-6 left-6 sm:top-10 sm:left-10"
+      <div
+        className="animate-hero-slide-in-left absolute top-6 left-6 sm:top-10 sm:left-10"
+        style={{ animationDelay: "0.4s" }}
       >
         <div className="glass rounded-2xl px-3 py-2 flex items-center gap-2 text-xs font-medium">
           <Plane className="h-4 w-4 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]" />
           BDG → SMD · Hari ini 09:30
         </div>
-      </motion.div>
+      </div>
 
       {/* Personal shopper card */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.5 }}
-        className="absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 w-[58%] sm:w-[60%] lg:w-[58%] glass-strong rounded-3xl p-4 sm:p-5"
+      <div
+        className="animate-hero-slide-in-right absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 w-[58%] sm:w-[60%] lg:w-[58%] glass-strong rounded-3xl p-4 sm:p-5"
+        style={{ animationDelay: "0.5s" }}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -100,35 +98,34 @@ export function HeroVisual() {
           <Step icon={Package} label="Packing" />
           <Step icon={Plane} label="Kirim" />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Floating package */}
-      <motion.div
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.7 }}
-        className="absolute bottom-6 left-4 sm:bottom-10 sm:left-10 glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float"
+      {/* Floating package — `animate-hero-rise` reveals it; the inner
+          `animate-float` (defined in globals.css) keeps the gentle bob. */}
+      <div
+        className="animate-hero-rise absolute bottom-6 left-4 sm:bottom-10 sm:left-10"
+        style={{ animationDelay: "0.7s" }}
       >
-        <div className="h-9 w-9 rounded-xl bg-[hsl(var(--emerald-500)/0.15)] grid place-items-center">
-          <MapPin className="h-4 w-4 text-[hsl(var(--emerald-600))]" />
+        <div className="glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float">
+          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--emerald-500)/0.15)] grid place-items-center">
+            <MapPin className="h-4 w-4 text-[hsl(var(--emerald-600))]" />
+          </div>
+          <div>
+            <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Tiba di Samarinda</p>
+            <p className="text-sm font-semibold">3 hari · Door-to-door</p>
+          </div>
         </div>
-        <div>
-          <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Tiba di Samarinda</p>
-          <p className="text-sm font-semibold">3 hari · Door-to-door</p>
-        </div>
-      </motion.div>
+      </div>
 
       {/* Sparkle accent */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.9, duration: 0.6 }}
-        className="absolute -top-1 right-1/3 hidden sm:block"
+      <div
+        className="animate-hero-pop absolute -top-1 right-1/3 hidden sm:block"
+        style={{ animationDelay: "0.9s" }}
       >
         <div className="rounded-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-2 shadow-md">
           <Sparkles className="h-4 w-4 text-[hsl(var(--sage-600))]" />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

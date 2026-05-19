@@ -11,7 +11,7 @@ import {
   vouchersRouter
 } from "./modules/orders/vouchers.routes";
 import { shippingRouter, shippingWebhookRouter } from "./modules/shipping/biteship.routes";
-import { midtransRouter, paymentsConfigRouter } from "./modules/payments/midtrans.routes";
+import { dokuRouter, paymentsConfigRouter } from "./modules/payments/doku.routes";
 import { invoiceRouter } from "./modules/orders/invoice.routes";
 import { chargesRouter } from "./modules/orders/charges.routes";
 import { inventoryRouter } from "./modules/inventory/inventory.routes";
@@ -28,6 +28,7 @@ import { cmsRouter } from "./modules/cms/cms.routes";
 import { publicBlogRouter, adminBlogRouter } from "./modules/cms/blog.routes";
 import { emailsRouter, emailsWebhookRouter } from "./modules/email/resend.routes";
 import { fonnteRouter, fonnteWebhookRouter } from "./modules/whatsapp/fonnte.routes";
+import { uploadsRouter } from "./modules/uploads/uploads.routes";
 import { pingDatabase } from "./infrastructure/db/pool";
 import { getMetricsSnapshot } from "./common/observability/metrics";
 
@@ -62,7 +63,7 @@ apiRouter.use("/orders", chargesRouter);
 apiRouter.use("/vouchers", vouchersRouter);
 apiRouter.use("/promotions", publicVouchersRouter);
 apiRouter.use("/shipping", shippingRouter);
-apiRouter.use("/webhooks", midtransRouter);
+apiRouter.use("/webhooks", dokuRouter);
 apiRouter.use("/webhooks", shippingWebhookRouter);
 apiRouter.use("/webhooks", emailsWebhookRouter);
 apiRouter.use("/webhooks", fonnteWebhookRouter);
@@ -82,3 +83,4 @@ apiRouter.use("/erp", erpRouter);
 apiRouter.use("/cms", cmsRouter);
 apiRouter.use("/blog-posts", publicBlogRouter);
 apiRouter.use("/admin/blog-posts", adminBlogRouter);
+apiRouter.use("/uploads", uploadsRouter);

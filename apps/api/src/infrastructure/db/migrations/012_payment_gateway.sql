@@ -1,6 +1,6 @@
 -- Payment gateway integration columns on `payments`. Lets webhook deliveries
 -- be processed idempotently using the gateway's own transaction ID (so the
--- same Midtrans `transaction_id` arriving twice is a no-op).
+-- same DOKU `original_request_id` arriving twice is a no-op).
 
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway VARCHAR(30);
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS external_ref VARCHAR(120);

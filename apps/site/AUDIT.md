@@ -22,7 +22,7 @@ on-demand revalidation. It is the single source of truth for the
 | --- | --- | --- | --- |
 | User login | `POST /api/auth/login` | `POST /api/v1/auth/login` | proxied |
 | Update order | `PATCH /api/orders/[id]` | `PATCH /api/v1/orders/{id}` | proxied |
-| Initiate payment | `POST /api/payments` | `POST /api/v1/payments/midtrans/charge` | proxied |
+| Initiate payment | `POST /api/payments` | `POST /api/v1/payments/doku/charge` | proxied |
 
 When the ERP is unreachable each handler falls back to the bundled mock
 dataset under `src/lib/mock/*` so pages still render in demo mode.
@@ -80,7 +80,7 @@ updates, the webhook makes the next reload show fresh data.
 | `apps/site/src/app/api/cms/route.ts` | `apps/api/src/modules/cms/cms.routes.ts` |
 | `apps/site/src/app/api/trips/route.ts` | `apps/api/src/modules/shipping/biteship.routes.ts` |
 | `apps/site/src/app/api/tracking/[id]/route.ts` | `apps/api/src/modules/shipping/biteship.routes.ts` |
-| `apps/site/src/app/api/payments/route.ts` | `apps/api/src/modules/payments/midtrans.routes.ts` |
+| `apps/site/src/app/api/payments/route.ts` | `apps/api/src/modules/payments/doku.routes.ts` |
 | `apps/site/src/app/api/customers/route.ts` | `apps/api/src/modules/crm/crm.routes.ts` |
 | `apps/site/src/app/api/analytics/overview/route.ts` | `apps/api/src/modules/reports/reports.routes.ts` |
 | `apps/site/src/app/api/webhooks/erp/route.ts` | ERP outbox / webhook dispatcher |

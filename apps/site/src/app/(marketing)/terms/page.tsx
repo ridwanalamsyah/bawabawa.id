@@ -30,7 +30,7 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
         <li>Pembayaran dilakukan di muka sebelum personal shopper memulai belanja.</li>
         <li>Total ditagih = harga barang (estimasi) + jastip fee + ongkir + PPN (jika berlaku) + biaya tambahan opsional (asuransi, kemasan).</li>
         <li>Jika harga aktual barang berbeda dari estimasi, selisih akan ditagih/dikembalikan ke wallet customer setelah konfirmasi.</li>
-        <li>Pembayaran via Midtrans (kartu kredit, transfer bank, e-wallet, QRIS) — Bawabawa.id tidak menyimpan data kartu.</li>
+        <li>Pembayaran via DOKU (kartu kredit, transfer bank, e-wallet, QRIS) — Bawabawa.id tidak menyimpan data kartu.</li>
       </ul>
     ),
   },
