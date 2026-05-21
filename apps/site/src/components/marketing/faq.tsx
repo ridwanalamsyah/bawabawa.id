@@ -9,7 +9,7 @@ import { jsonLd, faqPageSchema } from "@/lib/seo/schema";
 export const FAQS = [
   {
     q: "Berapa lama estimasi pengiriman dari Bandung ke Samarinda?",
-    a: "Standar 3–4 hari kerja sejak barang diterima personal shopper. Estimasi spesifik akan ditampilkan saat kamu memilih slot Open Trip pada form request.",
+    a: "Tergantung tipe yang dipilih: Reguler (ekspedisi reguler — JNE/SiCepat) 3–4 hari kerja, atau Kargo (kargo sharing min. 50kg) 10 hari kerja. Pilihan ini muncul saat kamu mengisi form request.",
   },
   {
     q: "Bagaimana kalau harga barang berubah saat shopper belanja?",

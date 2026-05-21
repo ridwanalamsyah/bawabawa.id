@@ -58,6 +58,24 @@ financeRouter.post(
   }
 );
 
+financeRouter.get("/invoices", authGuard, async (_req, res, next) => {
+  try {
+    const result = await (await getPool()).query(
+      `SELECT i.id, i.invoice_number AS "invoiceNumber", i.order_id AS "orderId",
+              i.status, i.issued_at AS "issuedAt", i.posted_at AS "postedAt",
+              o.order_number AS "orderNumber", o.total_amount AS "totalAmount",
+              o.payment_status AS "paymentStatus", o.created_at AS "createdAt"
+         FROM invoices i
+         LEFT JOIN orders o ON o.id = i.order_id
+         ORDER BY i.issued_at DESC NULLS LAST, o.created_at DESC NULLS LAST
+         LIMIT 200`
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
 financeRouter.get("/transactions", authGuard, async (_req, res, next) => {
   try {
     const transactions = await (await getPool()).query(

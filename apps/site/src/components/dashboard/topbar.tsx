@@ -11,11 +11,11 @@ export function Topbar({
   title,
   subtitle,
   user,
-  notifications = 3,
+  notifications = 0,
 }: {
   title: string;
   subtitle?: string;
-  user: { name: string; role?: string };
+  user?: { name: string; role?: string };
   notifications?: number;
 }) {
   const [openNotif, setOpenNotif] = useState(false);
@@ -72,13 +72,15 @@ export function Topbar({
               )}
             </AnimatePresence>
           </div>
-          <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-[hsl(var(--border))]">
-            <Avatar name={user.name} size={32} />
-            <div className="leading-tight">
-              <p className="text-sm font-medium">{user.name}</p>
-              {user.role && <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{user.role}</p>}
+          {user && (
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-[hsl(var(--border))]">
+              <Avatar name={user.name} size={32} />
+              <div className="leading-tight">
+                <p className="text-sm font-medium">{user.name}</p>
+                {user.role && <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{user.role}</p>}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </header>

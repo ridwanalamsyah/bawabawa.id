@@ -3,13 +3,14 @@ import { Sidebar, type SidebarGroup } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { callErpAsCustomer, readSession } from "@/lib/customer-bff";
 
 const groups: SidebarGroup[] = [
   {
     label: "Overview",
     items: [
       { href: "/dashboard", label: "Beranda", icon: "dashboard" },
-      { href: "/dashboard/orders", label: "Pesanan", icon: "package", badge: "3" },
+      { href: "/dashboard/orders", label: "Pesanan", icon: "package" },
       { href: "/dashboard/tracking", label: "Live Tracking", icon: "truck" },
     ],
   },
@@ -18,7 +19,7 @@ const groups: SidebarGroup[] = [
     items: [
       { href: "/dashboard/invoice", label: "Invoice", icon: "receipt" },
       { href: "/dashboard/wishlist", label: "Wishlist", icon: "heart" },
-      { href: "/dashboard/chat", label: "Live Chat Admin", icon: "chat", badge: "1" },
+      { href: "/dashboard/chat", label: "Live Chat Admin", icon: "chat" },
       { href: "/dashboard/notifications", label: "Notifikasi", icon: "bell" },
     ],
   },
@@ -31,7 +32,31 @@ const groups: SidebarGroup[] = [
   },
 ];
 
-export default function UserDashboardLayout({ children }: { children: React.ReactNode }) {
+type ErpMe = {
+  user?: {
+    id: string;
+    fullName?: string | null;
+    email?: string | null;
+    division?: string | null;
+  };
+};
+
+export default async function UserDashboardLayout({ children }: { children: React.ReactNode }) {
+  // Pull the signed-in user's display info from the ERP so the topbar
+  // shows their real name + role, not a hardcoded "Aulia Putri" mock.
+  // If the ERP is unreachable we still render the layout (with a
+  // neutral fallback) so /dashboard stays accessible.
+  const session = await readSession();
+  const me = await callErpAsCustomer<ErpMe>({ path: "/auth/me" });
+  const userName =
+    me?.user?.fullName?.trim() ||
+    me?.user?.email?.split("@")[0] ||
+    (session?.role === "customer" ? "Customer" : "Pengguna");
+  const userRole =
+    session?.role === "customer" || me?.user?.division === "customer"
+      ? "Customer"
+      : "Staff Bawabawa.id";
+
   return (
     <div className="flex min-h-svh">
       <Sidebar
@@ -49,8 +74,8 @@ export default function UserDashboardLayout({ children }: { children: React.Reac
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           title="Dashboard"
-          subtitle="Selamat datang kembali, Aulia ✨"
-          user={{ name: "Aulia Putri", role: "Customer · Samarinda" }}
+          subtitle={`Halo ${userName.split(" ")[0]}, pantau titipanmu di sini.`}
+          user={{ name: userName, role: userRole }}
         />
         <div className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
           <div className="lg:hidden mb-4 flex items-center gap-2">

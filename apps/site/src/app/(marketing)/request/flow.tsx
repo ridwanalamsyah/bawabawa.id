@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -23,8 +23,25 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/card";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { trips } from "@/lib/mock/trips";
 import { formatDate, formatIDR } from "@/lib/utils";
+
+// Real trip schedule rows that match the admin-curated /admin/trips CRUD.
+// We fetch live from /api/v1/trips (public, only published+non-closed).
+type TripRow = {
+  id: string;
+  code: string;
+  origin: string;
+  destination: string;
+  departAt: string;
+  arriveEstimateAt: string | null;
+  capacityKg: number;
+  bookedKg: number;
+  baseFee: number;
+  perKgFee: number;
+  status: string;
+  popularCategories: string[] | null;
+  isPublished: boolean;
+};
 import { cn } from "@/lib/utils";
 import {
   TIERS,
@@ -67,7 +84,30 @@ export function RequestFlow() {
     { id: crypto.randomUUID(), name: "", link: "", category: "Fashion", qty: 1, estPrice: 0, notes: "" },
   ]);
   const [tier, setTier] = useState<TierId>("batch");
-  const [tripId, setTripId] = useState<string>(trips[0].id);
+  const [trips, setTrips] = useState<TripRow[]>([]);
+  const [tripId, setTripId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/trips", { cache: "no-store" });
+        if (!res.ok) return;
+        const json = (await res.json()) as { success?: boolean; data?: TripRow[] };
+        if (cancelled) return;
+        const rows = Array.isArray(json.data) ? json.data : [];
+        setTrips(rows);
+        if (rows.length > 0 && tripId === null) setTripId(rows[0].id);
+      } catch {
+        // Open Trip is optional — if API is unreachable we leave the
+        // schedule empty; customers still see the Reguler tier and a clear
+        // empty-state for Kargo ("belum ada trip dijadwalkan").
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tripId]);
   const [address, setAddress] = useState({
     name: "",
     phone: "",
@@ -82,7 +122,7 @@ export function RequestFlow() {
   const [submitted, setSubmitted] = useState(false);
   const [trackingToken, setTrackingToken] = useState<string | null>(null);
 
-  const trip = trips.find((t) => t.id === tripId)!;
+  const trip = tier === "batch" ? trips.find((t) => t.id === tripId) ?? null : null;
   const itemsTotal = items.reduce((s, i) => s + (i.estPrice || 0) * (i.qty || 1), 0);
   const totalKg = items.reduce(
     (s, i) => s + (i.weightKgOverride ?? estimateItemWeightKg(i.category, i.qty)),
@@ -96,9 +136,12 @@ export function RequestFlow() {
 
   const canNext = useMemo(() => {
     if (step === 1) return items.every((i) => i.name.trim().length > 0 && i.qty >= 1);
+    // Kargo butuh pilih trip; Reguler boleh skip (langsung pakai
+    // ekspedisi reguler JNE/SiCepat, tidak nunggu jadwal Open Trip).
+    if (step === 2 && tier === "batch") return trips.length === 0 ? false : tripId !== null;
     if (step === 3) return address.name && address.phone && address.street && address.city && address.postal;
     return true;
-  }, [step, items, address]);
+  }, [step, tier, items, trips.length, tripId, address]);
 
   const handleSubmit = () => {
     if (submitting || submitted) return;
@@ -109,9 +152,9 @@ export function RequestFlow() {
       code: "BWB-" + token.slice(0, 6).toUpperCase(),
       createdAt: new Date().toISOString(),
       tier,
-      tripCode: trip.code,
-      tripDepartAt: trip.departAt,
-      tripArriveEstimateAt: trip.arriveEstimateAt,
+      tripCode: trip?.code,
+      tripDepartAt: trip?.departAt,
+      tripArriveEstimateAt: trip?.arriveEstimateAt ?? undefined,
       items: items.map((i) => ({
         name: i.name,
         category: i.category,
@@ -149,7 +192,13 @@ export function RequestFlow() {
               <ItemsStep items={items} setItems={setItems} />
             )}
             {step === 2 && (
-              <TripStep tier={tier} setTier={setTier} tripId={tripId} setTripId={setTripId} />
+              <TripStep
+                tier={tier}
+                setTier={setTier}
+                trips={trips}
+                tripId={tripId}
+                setTripId={setTripId}
+              />
             )}
             {step === 3 && (
               <AddressStep address={address} setAddress={setAddress} />
@@ -390,21 +439,26 @@ function ItemsStep({ items, setItems }: { items: Item[]; setItems: (v: Item[]) =
 function TripStep({
   tier,
   setTier,
+  trips,
   tripId,
   setTripId,
 }: {
   tier: TierId;
   setTier: (v: TierId) => void;
-  tripId: string;
+  trips: TripRow[];
+  tripId: string | null;
   setTripId: (v: string) => void;
 }) {
+  // Reguler tier doesn't need a trip pick — it ships via reguler ekspedisi
+  // (JNE/SiCepat reguler) directly, with its own 3–4-day ETA. Open Trip
+  // selector below only renders when the user picks Kargo.
   return (
     <div className="space-y-4">
       <GlassCard className="p-6">
         <h3 className="text-base font-semibold">Pilih tipe layanan</h3>
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Tentukan kecepatan vs biaya. Fast Track lebih cepat tapi lebih mahal,
-          Batch Share lebih hemat tapi nunggu trip terjadwal.
+          Reguler lebih cepat tapi lebih mahal, Kargo lebih hemat tapi nunggu
+          jadwal Open Trip berikutnya.
         </p>
         <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
           {(Object.values(TIERS)).map((t) => {
@@ -437,47 +491,74 @@ function TripStep({
         </div>
       </GlassCard>
 
-      <GlassCard className="p-6">
-        <h3 className="text-base font-semibold">Pilih jadwal trip</h3>
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Tarif trip tergantung kapasitas yang kamu pakai dan tipe layanan di atas.
-        </p>
-        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {trips.filter((t) => t.status !== "in_transit" && t.status !== "closed").map((t) => {
-            const filled = Math.round((t.bookedKg / t.capacityKg) * 100);
-            const isFull = t.status === "fullbooked" || filled >= 100;
-            const active = tripId === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => !isFull && setTripId(t.id)}
-                className={cn(
-                  "text-left rounded-2xl border p-4 transition-all",
-                  active
-                    ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)] ring-2 ring-[hsl(var(--sage-700))]/30"
-                    : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
-                  isFull && "opacity-60 cursor-not-allowed"
-                )}
-                disabled={isFull}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
-                  {isFull ? <Badge variant="warning">Fullbooked</Badge> : <Badge variant="success">Tersedia</Badge>}
-                </div>
-                <p className="mt-1.5 font-semibold">
-                  {formatDate(t.departAt, { weekday: "long", day: "numeric", month: "short" })}
-                </p>
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                  Estimasi tiba {formatDate(t.arriveEstimateAt, { day: "numeric", month: "short" })} · {t.shopper.name} · ★ {t.shopper.rating}
-                </p>
-                <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
-                  {Math.max(0, t.capacityKg - t.bookedKg)} kg slot tersisa
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </GlassCard>
+      {tier === "fast" ? (
+        <GlassCard className="p-6">
+          <div className="flex items-start gap-3">
+            <span className="h-10 w-10 rounded-xl bg-[hsl(var(--emerald-500)/0.15)] grid place-items-center text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))]">
+              <Zap className="h-5 w-5" />
+            </span>
+            <div>
+              <h3 className="text-base font-semibold">Reguler tidak butuh Open Trip</h3>
+              <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+                Pengiriman pakai ekspedisi reguler (JNE / SiCepat reguler) langsung dari
+                shopper. Estimasi 3–4 hari kerja tiba di Samarinda, tanpa nunggu jadwal
+                trip mingguan. Resi akan kamu terima begitu shopper selesai packing.
+              </p>
+            </div>
+          </div>
+        </GlassCard>
+      ) : (
+        <GlassCard className="p-6">
+          <h3 className="text-base font-semibold">Pilih jadwal Open Trip (Kargo)</h3>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            Kargo dijalankan per batch — estimasi 10 hari kerja, tarif flat 200rb / 50 kg.
+            Pilih trip yang sudah dipublish admin.
+          </p>
+          {trips.length === 0 ? (
+            <div className="mt-5 rounded-2xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 text-sm text-[hsl(var(--muted-foreground))]">
+              Belum ada jadwal Open Trip yang dipublish. Coba lagi nanti atau pilih tipe layanan <strong>Reguler</strong>.
+            </div>
+          ) : (
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+              {trips.filter((t) => t.status !== "in_transit" && t.status !== "closed").map((t) => {
+                const filled = t.capacityKg > 0 ? Math.round((t.bookedKg / t.capacityKg) * 100) : 0;
+                const isFull = t.status === "fullbooked" || filled >= 100;
+                const active = tripId === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => !isFull && setTripId(t.id)}
+                    className={cn(
+                      "text-left rounded-2xl border p-4 transition-all",
+                      active
+                        ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)] ring-2 ring-[hsl(var(--sage-700))]/30"
+                        : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
+                      isFull && "opacity-60 cursor-not-allowed",
+                    )}
+                    disabled={isFull}
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
+                      {isFull ? <Badge variant="warning">Fullbooked</Badge> : <Badge variant="success">Tersedia</Badge>}
+                    </div>
+                    <p className="mt-1.5 font-semibold">
+                      {formatDate(t.departAt, { weekday: "long", day: "numeric", month: "short" })}
+                    </p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                      {t.arriveEstimateAt
+                        ? `Estimasi tiba ${formatDate(t.arriveEstimateAt, { day: "numeric", month: "short" })}`
+                        : "Estimasi tiba ditentukan saat booking penuh"}
+                    </p>
+                    <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
+                      {Math.max(0, t.capacityKg - t.bookedKg)} kg slot tersisa
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </GlassCard>
+      )}
     </div>
   );
 }
@@ -628,7 +709,7 @@ function SummaryCard({
 }: {
   items: Item[];
   pricing: PricingBreakdown;
-  trip: (typeof trips)[number];
+  trip: TripRow | null;
   tier: TierId;
 }) {
   const tierLabel = TIERS[tier].label;
@@ -675,7 +756,11 @@ function SummaryCard({
           <div className="text-sm">
             <p className="font-semibold">Estimasi tiba</p>
             <p className="text-[hsl(var(--muted-foreground))]">
-              {formatDate(trip.arriveEstimateAt, { weekday: "long", day: "numeric", month: "short" })}
+              {tier === "fast"
+                ? "3–4 hari kerja setelah shopper packing & resi keluar"
+                : trip?.arriveEstimateAt
+                  ? formatDate(trip.arriveEstimateAt, { weekday: "long", day: "numeric", month: "short" })
+                  : "Tergantung jadwal Open Trip yang kamu pilih"}
             </p>
           </div>
         </div>

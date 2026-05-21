@@ -30,9 +30,12 @@ export type LocalOrder = {
   code: string;
   createdAt: string;
   tier: TierId;
-  tripCode: string;
-  tripDepartAt: string;
-  tripArriveEstimateAt: string;
+  // For tier=fast (Reguler) we ship via ekspedisi reguler directly, so
+  // there is no Open Trip attached — these fields stay undefined and the
+  // tracking page degrades gracefully.
+  tripCode?: string;
+  tripDepartAt?: string;
+  tripArriveEstimateAt?: string;
   items: Array<{
     name: string;
     category: string;

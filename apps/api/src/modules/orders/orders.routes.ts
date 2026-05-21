@@ -20,6 +20,25 @@ ordersRouter.get("/", authGuard, async (_req, res, next) => {
   }
 });
 
+/**
+ * Customer-scoped list. Returns only the orders the signed-in user
+ * created (created_by = req.user.sub). Used by /dashboard to render the
+ * customer's own pesanan without exposing the global feed.
+ */
+ordersRouter.get("/mine", authGuard, async (req, res, next) => {
+  try {
+    const userId = String(req.user?.sub ?? "");
+    if (!userId) {
+      res.json({ success: true, data: [] });
+      return;
+    }
+    const data = await service.listByCreatedBy(userId);
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
 ordersRouter.post("/", authGuard, requirePermission("orders:create"), idempotency(), (req, res, next) => {
   z.object({
     customerId: z.string().uuid(),

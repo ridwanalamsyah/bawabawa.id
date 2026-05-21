@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Filter, Download } from "lucide-react";
+import { Search, Filter, Download, Plus } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,16 @@ export default function AdminOrdersPage() {
         eyebrow="Operations"
         title="Manajemen pesanan"
         description="Kelola semua titipan, approve perubahan harga, dan assign personal shopper."
-        actions={<Button variant="outline"><Download className="h-4 w-4" /> Export CSV</Button>}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button asChild variant="primary">
+              <Link href="/admin/pos">
+                <Plus className="h-4 w-4" /> Order manual (IG/WA)
+              </Link>
+            </Button>
+            <Button variant="outline"><Download className="h-4 w-4" /> Export CSV</Button>
+          </div>
+        }
       />
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="relative flex-1">

@@ -81,7 +81,7 @@ export function LiveFeed() {
             <div className="mt-2 relative h-7 overflow-hidden">
               {feed === null && (
                 <p className="absolute inset-0 text-sm sm:text-base text-[hsl(var(--muted-foreground))]">
-                  Memuat aktivitas dari ERP…
+                  Memuat aktivitas…
                 </p>
               )}
               {isEmpty && (
@@ -118,7 +118,7 @@ export function LiveFeed() {
                 {items.length} aktivitas terbaru
               </span>
             </span>
-            <span>Disinkron dari ERP setiap 30s</span>
+            <span>Diperbarui setiap 30 detik</span>
           </div>
         </div>
       </div>
