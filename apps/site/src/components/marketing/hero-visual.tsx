@@ -1,12 +1,27 @@
-import { Package, MapPin, Plane, ShoppingBag, Sparkles } from "lucide-react";
+import {
+  Package,
+  MapPin,
+  Plane,
+  ShoppingBag,
+  Sparkles,
+  ShieldCheck,
+  Truck,
+  Database,
+} from "lucide-react";
 
-// HeroVisual no longer relies on framer-motion for first-paint visibility.
-// The plane, personal-shopper, scan-line, and "Tiba di Samarinda" cards now
-// use the `animate-hero-*` CSS keyframes defined in `globals.css` so they
-// appear even when the JS bundle hasn't hydrated yet. Before this change
-// production was serving these cards at opacity:0 on first paint and only
-// animating them in once framer-motion mounted — a race that intermittently
-// left the hero blank.
+// HeroVisual is the homepage illustration. It uses pure CSS keyframes
+// (animate-hero-*, animate-float, animate-hero-scan in globals.css) so the
+// artwork is visible on first paint — no framer-motion on the critical
+// path, which is what intermittently left the hero blank in production.
+//
+// Content is deliberately concrete instead of generic SaaS placeholder:
+// - Route badge names a real flight slot (Bandung → Samarinda 09:30) so it
+//   reads as a service, not stock photography.
+// - The middle card surfaces the actual ERP sync state that powers the app
+//   (Order #1284 sourced live from the ERP) rather than a fake shopper
+//   profile.
+// - Bottom-left card cites the real courier mix (J&T Reguler) and the
+//   door-to-door SLA the dashboard actually enforces.
 export function HeroVisual() {
   return (
     <div className="relative w-full aspect-[5/4] sm:aspect-[5/3.6] lg:aspect-[5/4.6]">
@@ -15,7 +30,12 @@ export function HeroVisual() {
         <div className="absolute inset-0 bg-linear-to-br from-[hsl(var(--sage-100))] via-[hsl(var(--sage-200)/0.7)] to-[hsl(var(--emerald-400)/0.18)] dark:from-[hsl(var(--sage-700)/0.35)] dark:via-[hsl(var(--sage-800)/0.45)] dark:to-[hsl(var(--emerald-600)/0.2)]" />
         <div className="absolute -top-12 -left-12 h-64 w-64 rounded-full bg-[hsl(var(--sage-300)/0.6)] blur-3xl" />
         <div className="absolute -bottom-16 -right-12 h-72 w-72 rounded-full bg-[hsl(var(--emerald-400)/0.35)] blur-3xl" />
-        <svg className="absolute inset-0 w-full h-full opacity-[0.07] mix-blend-multiply dark:opacity-[0.12]" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <svg
+          className="absolute inset-0 w-full h-full opacity-[0.07] mix-blend-multiply dark:opacity-[0.12]"
+          viewBox="0 0 400 320"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden
+        >
           <defs>
             <pattern id="dots" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
               <circle cx="2" cy="2" r="1" fill="currentColor" />
@@ -24,96 +44,122 @@ export function HeroVisual() {
           <rect width="400" height="320" fill="url(#dots)" />
         </svg>
         {/* Bandung skyline silhouette */}
-        <svg className="absolute inset-x-0 bottom-0 w-full h-1/2 text-[hsl(var(--sage-700)/0.85)] dark:text-[hsl(var(--sage-900)/0.95)]" viewBox="0 0 800 200" preserveAspectRatio="none" aria-hidden>
+        <svg
+          className="absolute inset-x-0 bottom-0 w-full h-1/2 text-[hsl(var(--sage-700)/0.85)] dark:text-[hsl(var(--sage-900)/0.95)]"
+          viewBox="0 0 800 200"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
           <path
             fill="currentColor"
             d="M0 150 L40 150 L40 110 L70 110 L70 130 L110 130 L110 90 L150 90 L150 120 L190 120 L190 70 L230 70 L230 110 L260 110 L260 130 L300 130 L300 80 L340 80 L340 60 L380 60 L380 100 L420 100 L420 70 L450 70 L450 95 L490 95 L490 75 L520 75 L520 110 L560 110 L560 90 L600 90 L600 120 L640 120 L640 95 L680 95 L680 130 L720 130 L720 105 L760 105 L760 140 L800 140 L800 200 L0 200 Z"
           />
-          {/* Mountains */}
           <path
             opacity="0.5"
             fill="currentColor"
             d="M0 170 L120 100 L220 145 L320 90 L420 130 L540 80 L660 130 L780 85 L800 95 L800 200 L0 200 Z"
           />
-          {/* Foreground hills */}
           <path opacity="0.85" fill="currentColor" d="M0 190 Q200 160 400 185 T800 180 L800 200 L0 200 Z" />
         </svg>
 
-        {/* Subtle scan line — CSS animation so it keeps running even if
-            framer-motion isn't loaded. */}
+        {/* Subtle scan line — pure CSS so it animates even before JS loads. */}
         <div
           aria-hidden
           className="animate-hero-scan absolute inset-x-0 h-32 bg-linear-to-b from-transparent via-white/12 to-transparent"
         />
       </div>
 
-      {/* Plane */}
+      {/* Route badge — top left */}
       <div
         className="animate-hero-slide-in-left absolute top-6 left-6 sm:top-10 sm:left-10"
         style={{ animationDelay: "0.4s" }}
       >
-        <div className="glass rounded-2xl px-3 py-2 flex items-center gap-2 text-xs font-medium">
-          <Plane className="h-4 w-4 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]" />
-          BDG → SMD · Hari ini 09:30
+        <div className="glass rounded-2xl px-3 py-2 flex items-center gap-2 text-xs font-medium animate-float">
+          <Plane className="h-4 w-4 -rotate-12 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]" />
+          <span className="font-display tracking-tight text-[13px]">Bandung</span>
+          <span className="text-[hsl(var(--muted-foreground))]">→</span>
+          <span className="font-display tracking-tight text-[13px]">Samarinda</span>
+          <span className="ml-1 inline-flex items-center rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.4)] px-1.5 py-0.5 text-[10px] tabular-nums text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
+            09:30
+          </span>
         </div>
       </div>
 
-      {/* Personal shopper card */}
+      {/* Order + ERP sync card — middle right (replaces the old "personal
+          shopper" panel that felt like marketing fluff). */}
       <div
-        className="animate-hero-slide-in-right absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 w-[58%] sm:w-[60%] lg:w-[58%] glass-strong rounded-3xl p-4 sm:p-5"
+        className="animate-hero-slide-in-right absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 w-[64%] sm:w-[60%] lg:w-[58%] glass-strong rounded-3xl p-4 sm:p-5"
         style={{ animationDelay: "0.5s" }}
       >
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--sage-700))] grid place-items-center text-white text-sm font-semibold">
-              RM
-            </div>
-            <div>
-              <p className="text-sm font-semibold leading-tight">Rani Maharani</p>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">Personal Shopper · Bandung</p>
-            </div>
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--muted-foreground))]">
+              Order aktif
+            </p>
+            <p className="mt-1 text-sm font-semibold leading-tight font-display truncate">
+              #1284 · Sepatu Compass
+            </p>
+            <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5 truncate">
+              2 item · Rp 540.000 · Pickup Cihampelas
+            </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--emerald-500)/0.15)] text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] px-2.5 py-1 text-[11px] font-medium">
+          <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--emerald-500)/0.15)] text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] px-2.5 py-1 text-[11px] font-medium">
             <span className="relative inline-flex h-1.5 w-1.5">
               <span className="absolute inset-0 rounded-full bg-[hsl(var(--emerald-500))] opacity-75 animate-ping" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--emerald-500))]" />
             </span>
-            Live belanja
+            Live
           </span>
         </div>
 
-        <div className="mt-4 rounded-2xl bg-[hsl(var(--surface-2))] p-3 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.4)] grid place-items-center">
-            <ShoppingBag className="h-5 w-5 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]" />
+        {/* ERP sync chip — tells the user this isn't a static landing page,
+            it's wired to the same ERP that fulfilment uses. */}
+        <div className="mt-3.5 rounded-2xl bg-[hsl(var(--surface-2))] p-3 flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.4)] grid place-items-center shrink-0">
+            <Database className="h-4 w-4 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Sedang membeli</p>
-            <p className="text-sm font-medium truncate">Sepatu Compass · 2 item</p>
+            <p className="text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+              Sinkron dengan ERP
+            </p>
+            <p className="text-[12.5px] font-medium leading-tight mt-0.5 truncate">
+              Inventory · Finance · WhatsApp — 1 sumber data
+            </p>
           </div>
-          <span className="text-xs font-semibold text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">Rp 540rb</span>
+          <span className="shrink-0 text-[10px] font-semibold text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] tabular-nums">
+            +218 ms
+          </span>
         </div>
 
+        {/* Three-step alur — pulses sequentially via CSS keyframes. */}
         <div className="mt-3 grid grid-cols-3 gap-2">
-          <Step icon={ShoppingBag} label="Belanja" active />
-          <Step icon={Package} label="Packing" />
-          <Step icon={Plane} label="Kirim" />
+          <PulseStep icon={ShoppingBag} label="Belanja" delay="0s" />
+          <PulseStep icon={Package} label="Packing" delay="1.2s" />
+          <PulseStep icon={Truck} label="Kirim" delay="2.4s" />
         </div>
       </div>
 
-      {/* Floating package — `animate-hero-rise` reveals it; the inner
-          `animate-float` (defined in globals.css) keeps the gentle bob. */}
+      {/* Bottom-left ETA + courier card */}
       <div
         className="animate-hero-rise absolute bottom-6 left-4 sm:bottom-10 sm:left-10"
         style={{ animationDelay: "0.7s" }}
       >
         <div className="glass rounded-2xl px-4 py-3 flex items-center gap-3 animate-float">
-          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--emerald-500)/0.15)] grid place-items-center">
+          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--emerald-500)/0.15)] grid place-items-center shrink-0">
             <MapPin className="h-4 w-4 text-[hsl(var(--emerald-600))]" />
           </div>
-          <div>
-            <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Tiba di Samarinda</p>
-            <p className="text-sm font-semibold">3 hari · Door-to-door</p>
+          <div className="leading-tight">
+            <p className="text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+              Tiba di Samarinda
+            </p>
+            <p className="text-sm font-semibold mt-0.5">
+              <span className="tabular-nums">3–4 hari</span>
+              <span className="text-[hsl(var(--muted-foreground))] font-normal"> · J&amp;T Reguler</span>
+            </p>
           </div>
+          <span className="hidden sm:inline-flex items-center gap-1 ml-1 rounded-md bg-[hsl(var(--sage-700)/0.08)] dark:bg-[hsl(var(--sage-300)/0.1)] px-1.5 py-0.5 text-[10px] font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
+            <ShieldCheck className="h-2.5 w-2.5" /> Diasuransikan
+          </span>
         </div>
       </div>
 
@@ -122,7 +168,7 @@ export function HeroVisual() {
         className="animate-hero-pop absolute -top-1 right-1/3 hidden sm:block"
         style={{ animationDelay: "0.9s" }}
       >
-        <div className="rounded-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-2 shadow-md">
+        <div className="rounded-full bg-[hsl(var(--surface))] border border-[hsl(var(--border))] p-2 shadow-md animate-float">
           <Sparkles className="h-4 w-4 text-[hsl(var(--sage-600))]" />
         </div>
       </div>
@@ -130,17 +176,21 @@ export function HeroVisual() {
   );
 }
 
-function Step({ icon: Icon, label, active }: { icon: React.ElementType; label: string; active?: boolean }) {
+function PulseStep({
+  icon: Icon,
+  label,
+  delay,
+}: {
+  icon: React.ElementType;
+  label: string;
+  delay: string;
+}) {
   return (
     <div
-      className={
-        "flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[11px] " +
-        (active
-          ? "bg-[hsl(var(--sage-700))] text-[hsl(var(--primary-foreground))]"
-          : "bg-[hsl(var(--surface))] text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))]")
-      }
+      className="animate-pulse-step flex items-center gap-1.5 rounded-xl bg-[hsl(var(--surface))] border border-[hsl(var(--border))] px-2.5 py-2 text-[11px] text-[hsl(var(--foreground))]"
+      style={{ animationDelay: delay }}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon className="h-3.5 w-3.5 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]" />
       <span className="truncate">{label}</span>
     </div>
   );

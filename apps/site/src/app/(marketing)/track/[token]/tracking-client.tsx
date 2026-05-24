@@ -109,7 +109,8 @@ export function TrackingClient({ token }: { token: string }) {
           </div>
           <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
             Dibuat {formatDate(order.createdAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-            {" · "}Trip {order.tripCode}{" · "}Tipe {tier.label}
+            {order.tripCode ? <>{" · "}Trip {order.tripCode}</> : null}
+            {" · "}Tipe {tier.label}
           </p>
 
           <ol className="mt-6 space-y-3">

@@ -155,4 +155,20 @@ approvalRouter.post(
   }
 );
 
+approvalRouter.get("/", authGuard, async (_req, res, next) => {
+  try {
+    const rows = await (await getPool()).query(
+      `SELECT id, module_name AS "moduleName", entity_id AS "entityId",
+              level_required AS "levelRequired", current_level AS "currentLevel",
+              status, requested_by AS "requestedBy"
+         FROM approval_requests
+         ORDER BY id DESC
+         LIMIT 200`
+    );
+    res.json({ success: true, data: rows.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export { approvalRouter };

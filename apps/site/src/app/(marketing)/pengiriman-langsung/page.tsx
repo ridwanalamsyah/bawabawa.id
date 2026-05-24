@@ -116,9 +116,9 @@ export default function PengirimanLangsungPage() {
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-[hsl(var(--muted-foreground))]">
               Kontak tim Bawabawa lewat WhatsApp untuk dapat quote tarif &amp;
-              jadwal yang sesuai. Order yang sudah disepakati akan masuk ke
-              pipeline ERP yang sama dengan order web — invoice, payment,
-              tracking, semua satu sistem.
+              jadwal yang sesuai. Order yang sudah disepakati tetap diberi
+              invoice, link pembayaran, dan tracking yang sama seperti
+              pemesanan dari web.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Button asChild>

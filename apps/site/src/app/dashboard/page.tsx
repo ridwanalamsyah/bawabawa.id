@@ -1,25 +1,66 @@
 import Link from "next/link";
-import { ArrowRight, Package, Wallet, Truck, Heart, ShoppingBag, Plane } from "lucide-react";
+import { ArrowRight, Package, Wallet, Truck, ShoppingBag } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { Card, GlassCard } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrackingTimeline } from "@/components/dashboard/tracking-timeline";
-import { orders, ORDER_STATUS_LABEL } from "@/lib/mock/orders";
-import { trips } from "@/lib/mock/trips";
+import { callErpAsCustomer } from "@/lib/customer-bff";
 import { formatIDR, formatDate } from "@/lib/utils";
 
-export default function DashboardPage() {
-  const liveOrder = orders.find((o) => o.status === "in_transit") ?? orders[0];
+type ErpOrder = {
+  id: string;
+  code?: string;
+  orderNumber?: string;
+  status?: string;
+  totalAmount?: number | string;
+  tier?: string;
+  createdAt?: string;
+  itemCount?: number;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  pending_payment: "Menunggu pembayaran",
+  paid: "Dibayar",
+  shopping: "Dibelanjakan",
+  packed: "Dikemas",
+  in_transit: "Dalam perjalanan",
+  delivered: "Diterima",
+  cancelled: "Dibatalkan",
+};
+
+function statusLabel(s: string | undefined) {
+  if (!s) return "—";
+  return STATUS_LABEL[s] ?? s;
+}
+
+function totalToNumber(v: number | string | undefined): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string") return Number(v) || 0;
+  return 0;
+}
+
+export default async function DashboardPage() {
+  // Customer-scoped order list. The ERP filters /orders/mine to the
+  // signed-in customer's rows. Errors return null and the page shows
+  // its empty-state instead of crashing.
+  const list = await callErpAsCustomer<ErpOrder[]>({ path: "/orders/mine" });
+  const orders = Array.isArray(list) ? list : [];
+
+  const active = orders.filter(
+    (o) => o.status && o.status !== "delivered" && o.status !== "cancelled",
+  );
+  const inTransit = orders.filter((o) => o.status === "in_transit");
+  const monthSpend = orders.reduce((s, o) => s + totalToNumber(o.totalAmount), 0);
+  const liveOrder = active[0] ?? null;
   const recent = orders.slice(0, 4);
-  const upcomingTrip = trips.find((t) => t.status !== "in_transit") ?? trips[0];
+
   return (
     <>
       <PageHeader
         eyebrow="Beranda"
-        title="Halo, Aulia 👋"
-        description="Pantau titipanmu dari Bandung dan jadwal trip berikutnya di sini."
+        title="Pantau titipanmu di sini"
+        description="Order kamu di Bawabawa.id tampil real-time. Kalau kosong, buat request pertamamu di bawah."
         actions={
           <Button asChild variant="primary">
             <Link href="/request">
@@ -30,142 +71,126 @@ export default function DashboardPage() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={Package} label="Pesanan aktif" value="3" delta="+1" trend="up" />
-        <StatCard icon={Truck} label="Sedang dalam perjalanan" value="1" delta="0" trend="up" tone="from-[hsl(var(--olive-300))] to-[hsl(var(--olive-700))]" />
-        <StatCard icon={Wallet} label="Total titipan bulan ini" value={formatIDR(2_360_000)} delta="+18%" trend="up" tone="from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))]" />
-        <StatCard icon={Heart} label="Item di wishlist" value="12" tone="from-[hsl(var(--sage-400))] to-[hsl(var(--olive-700))]" />
+        <StatCard icon={Package} label="Pesanan aktif" value={String(active.length)} />
+        <StatCard
+          icon={Truck}
+          label="Sedang dalam perjalanan"
+          value={String(inTransit.length)}
+          tone="from-[hsl(var(--olive-300))] to-[hsl(var(--olive-700))]"
+        />
+        <StatCard
+          icon={Wallet}
+          label="Total titipan"
+          value={formatIDR(monthSpend)}
+          tone="from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))]"
+        />
+        <StatCard
+          icon={ShoppingBag}
+          label="Total pesanan"
+          value={String(orders.length)}
+          tone="from-[hsl(var(--sage-400))] to-[hsl(var(--olive-700))]"
+        />
       </div>
 
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
         <GlassCard className="lg:col-span-7 p-6">
-          <div className="flex items-start justify-between gap-3 mb-5">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-                Live Tracking
-              </p>
-              <h3 className="mt-1 font-semibold flex items-center gap-2">
-                {liveOrder.code}
-                <Badge variant="info">{ORDER_STATUS_LABEL[liveOrder.status]}</Badge>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+            Live tracking
+          </p>
+          {liveOrder ? (
+            <div className="mt-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                {liveOrder.code ?? liveOrder.orderNumber ?? liveOrder.id}
+                <Badge variant="info">{statusLabel(liveOrder.status)}</Badge>
               </h3>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                {liveOrder.items.length} item · estimasi tiba {formatDate(trips[0].arriveEstimateAt)}
+              <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                Dibuat{" "}
+                {liveOrder.createdAt
+                  ? formatDate(liveOrder.createdAt, {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "—"}
               </p>
+              <div className="mt-4">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/dashboard/orders`}>
+                    Lihat semua pesanan <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <Button asChild size="sm" variant="outline">
-              <Link href={`/dashboard/orders/${liveOrder.id}`}>
-                Detail <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <TrackingTimeline order={liveOrder} />
+          ) : (
+            <EmptyState
+              title="Belum ada pesanan aktif"
+              description="Buat request pertamamu lewat halaman Titip Sekarang — kamu bisa pilih Reguler (3–4 hari) atau Kargo (10 hari)."
+              actionHref="/request"
+              actionLabel="Buat request"
+            />
+          )}
         </GlassCard>
 
-        <div className="lg:col-span-5 grid gap-4">
-          <GlassCard className="p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-              Trip berikutnya
+        <GlassCard className="lg:col-span-5 p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+            Riwayat singkat
+          </p>
+          {recent.length === 0 ? (
+            <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
+              Riwayat pesananmu akan muncul di sini.
             </p>
-            <h3 className="mt-1 font-semibold">{upcomingTrip.origin} → {upcomingTrip.destination}</h3>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">
-              {upcomingTrip.code} · {formatDate(upcomingTrip.departAt, { weekday: "long", day: "numeric", month: "short" })}
-            </p>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-              <Mini label="Slot tersisa" value={`${Math.max(0, upcomingTrip.capacityKg - upcomingTrip.bookedKg)} kg`} />
-              <Mini label="Estimasi tiba" value={formatDate(upcomingTrip.arriveEstimateAt, { day: "numeric", month: "short" })} />
-              <Mini label="Personal shopper" value={upcomingTrip.shopper.name.split(" ")[0]} />
-            </div>
-            <Button asChild className="mt-5 w-full" variant="primary">
-              <Link href={`/request?trip=${upcomingTrip.id}`}>
-                <Plane className="h-4 w-4" /> Pesan slot trip ini
-              </Link>
-            </Button>
-          </GlassCard>
-
-          <GlassCard className="p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-              Tip hari ini
-            </p>
-            <p className="mt-2 text-sm">
-              <span className="font-semibold">Pasar Baru</span> menyediakan banyak grosir hijab & batik dengan
-              harga lebih murah. Tambahkan kategori <span className="font-semibold">Hijab</span> di request
-              kamu agar shopper otomatis mengarah ke sana.
-            </p>
-          </GlassCard>
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <Card className="p-0 overflow-hidden">
-          <div className="flex items-center justify-between p-5 border-b border-[hsl(var(--border))]">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-                Pesanan terbaru
-              </p>
-              <h3 className="mt-1 font-semibold">Riwayat pesanan kamu</h3>
-            </div>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/dashboard/orders">
-                Lihat semua <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-[hsl(var(--muted-foreground))] bg-[hsl(var(--surface-2))]">
-                <tr>
-                  <Th>Kode</Th>
-                  <Th>Item</Th>
-                  <Th>Status</Th>
-                  <Th>Tanggal</Th>
-                  <Th className="text-right">Total</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((o) => (
-                  <tr key={o.id} className="border-t border-[hsl(var(--border))] hover:bg-[hsl(var(--surface-2))]">
-                    <Td>
-                      <Link href={`/dashboard/orders/${o.id}`} className="font-mono font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
-                        {o.code}
-                      </Link>
-                    </Td>
-                    <Td>
-                      <div className="flex items-center gap-2">
-                        <ShoppingBag className="h-3.5 w-3.5 text-[hsl(var(--muted-foreground))]" />
-                        <span className="truncate max-w-[18rem]">
-                          {o.items.map((i) => i.name).join(", ")}
-                        </span>
-                      </div>
-                    </Td>
-                    <Td>
-                      <Badge variant={o.status === "delivered" ? "success" : o.status === "in_transit" ? "info" : "default"}>
-                        {ORDER_STATUS_LABEL[o.status]}
-                      </Badge>
-                    </Td>
-                    <Td className="text-[hsl(var(--muted-foreground))]">{formatDate(o.createdAt)}</Td>
-                    <Td className="text-right tabular-nums font-medium">{formatIDR(o.total)}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {recent.map((o) => (
+                <li
+                  key={o.id}
+                  className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-xs">
+                      {o.code ?? o.orderNumber ?? o.id}
+                    </span>
+                    <Badge variant={o.status === "delivered" ? "success" : "info"}>
+                      {statusLabel(o.status)}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    {o.createdAt ? formatDate(o.createdAt, { day: "numeric", month: "short" }) : ""}
+                    {o.totalAmount ? ` · ${formatIDR(totalToNumber(o.totalAmount))}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </GlassCard>
       </div>
     </>
   );
 }
 
-function Mini({ label, value }: { label: string; value: string }) {
+function EmptyState({
+  title,
+  description,
+  actionHref,
+  actionLabel,
+}: {
+  title: string;
+  description: string;
+  actionHref: string;
+  actionLabel: string;
+}) {
   return (
-    <div className="rounded-xl bg-[hsl(var(--surface-2))] p-2.5">
-      <p className="text-[10px] text-[hsl(var(--muted-foreground))] truncate">{label}</p>
-      <p className="text-sm font-semibold truncate">{value}</p>
+    <div className="mt-3 rounded-2xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6">
+      <p className="font-semibold">{title}</p>
+      <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{description}</p>
+      <div className="mt-4">
+        <Button asChild size="sm" variant="primary">
+          <Link href={actionHref}>
+            {actionLabel} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
     </div>
   );
-}
-
-function Th({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <th className={"text-left font-medium px-5 py-3 " + (className ?? "")}>{children}</th>;
-}
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={"px-5 py-3 " + (className ?? "")}>{children}</td>;
 }

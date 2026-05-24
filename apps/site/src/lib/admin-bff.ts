@@ -47,7 +47,7 @@ export async function requireAdminContext(): Promise<
     return {
       ok: false,
       response: Response.json(
-        { error: "ERP session expired. Sign out & sign in again." },
+        { error: "Sesi kamu kedaluwarsa. Silakan logout dan login ulang." },
         { status: 401 },
       ),
     };
@@ -93,7 +93,7 @@ export async function callErpAsAdmin<T>(opts: {
     }
     return {
       ok: false,
-      response: Response.json({ error: "ERP request failed" }, { status: 502 }),
+      response: Response.json({ error: "Permintaan gagal. Coba lagi sebentar." }, { status: 502 }),
     };
   }
 }

@@ -9,6 +9,7 @@
     "migrate": "tsx src/infrastructure/db/migrate.ts",
     "lint": "echo \"configure api lint\"",
     "test": "vitest run",
+    "test:integration": "bash scripts/run-integration-tests.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

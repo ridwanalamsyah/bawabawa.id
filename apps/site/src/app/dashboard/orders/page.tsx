@@ -38,7 +38,7 @@ export default function OrdersPage() {
       <PageHeader
         eyebrow="Pesanan"
         title="Semua titipan kamu"
-        description="Pesanan yang dibuat dari perangkat ini muncul di sini. Begitu data ERP terhubung, riwayat lengkap akan ditampilkan otomatis."
+        description="Pesanan yang dibuat dari perangkat ini muncul di sini. Riwayat lengkap akan ditampilkan saat akun kamu terhubung."
         actions={
           <Button asChild variant="primary">
             <Link href="/request">
@@ -56,8 +56,8 @@ export default function OrdersPage() {
           <h2 className="mt-4 text-xl font-semibold tracking-tight">Belum ada pesanan</h2>
           <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] max-w-md mx-auto">
             Buat request pertama kamu — pesanan akan disimpan secara lokal dan
-            dapat dipantau lewat halaman tracking, atau muncul di sini ketika
-            akun kamu sinkron dengan ERP.
+            dapat dipantau lewat halaman tracking. Login pakai akun kamu untuk
+            melihat riwayat lengkap.
           </p>
           <Button asChild variant="primary" className="mt-6">
             <Link href="/request">

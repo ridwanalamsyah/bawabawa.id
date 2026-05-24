@@ -51,7 +51,7 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
     body: (
       <ul className="list-disc pl-5 space-y-1">
         <li>Pengiriman dari Bandung ke Samarinda menggunakan kurir mitra (Biteship/JNE/SiCepat) sesuai opsi yang dipilih customer.</li>
-        <li>Estimasi waktu pengiriman: 3–7 hari kerja untuk batch reguler, 1–3 hari kerja untuk fast track.</li>
+        <li>Estimasi waktu pengiriman: 3–4 hari kerja untuk Reguler (ekspedisi reguler), 10 hari kerja untuk Kargo (kargo sharing min. 50kg).</li>
         <li>Nomor resi akan dikirim ke email & WhatsApp customer begitu paket diserahterimakan ke kurir.</li>
         <li>Risiko kehilangan/kerusakan selama pengiriman diatur oleh kebijakan kurir; opsi asuransi tambahan tersedia di checkout.</li>
       </ul>

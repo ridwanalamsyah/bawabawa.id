@@ -551,8 +551,13 @@ export class AuthService {
     pictureUrl: string | null;
   }> {
     const flags = authFlags();
-    const baseRoles = ["admin"];
-    const basePermissions = [
+    // Permission profiles — separates the back-office (admin) from
+    // public customers who sign up via /login. New Google signups that
+    // weren't pre-invited as admin land as `division = 'customer'` with
+    // only the read-only `dashboard:view` permission, so the same /login
+    // page can serve both audiences without granting admin powers.
+    const adminRoles = ["admin"];
+    const adminPermissions = [
       "orders:create",
       "orders:read",
       "orders:update",
@@ -562,6 +567,12 @@ export class AuthService {
       "reports:export",
       "cms:manage"
     ];
+    const customerRoles = ["customer"];
+    const customerPermissions = ["dashboard:view"];
+    const resolveProfile = (division: string) =>
+      division === "customer"
+        ? { roles: customerRoles, permissions: customerPermissions }
+        : { roles: adminRoles, permissions: adminPermissions };
 
     if (flags.demoMode) {
       const existing = demoUsers.get(args.email);
@@ -577,14 +588,17 @@ export class AuthService {
           pictureUrl: args.pictureUrl
         };
       }
+      // Demo mode — default new signups to customer; admins must be
+      // pre-seeded in demoUsers via env or invite flow.
+      const profile = resolveProfile("customer");
       const created: DemoUser = {
         id: randomUUID(),
         email: args.email,
         passwordHash: "",
         fullName: args.fullName,
-        division: "general",
-        roles: baseRoles,
-        permissions: basePermissions
+        division: "customer",
+        roles: profile.roles,
+        permissions: profile.permissions
       };
       demoUsers.set(args.email, created);
       return { ...created, status: "active", pictureUrl: args.pictureUrl };
@@ -621,32 +635,40 @@ export class AuthService {
           WHERE id = $3`,
         [args.sub, args.pictureUrl, row.id]
       );
+      const profile = resolveProfile(row.division);
       return {
         id: row.id,
         email: row.email,
         fullName: row.full_name,
         division: row.division,
-        roles: baseRoles,
-        permissions: basePermissions,
+        roles: profile.roles,
+        permissions: profile.permissions,
         status: row.status ?? "active",
         pictureUrl: args.pictureUrl
       };
     }
 
+    // Brand new Google signup that wasn't pre-invited as admin —
+    // treat as a customer account so /dashboard becomes accessible
+    // (read-only on their own orders). Customers do NOT require
+    // approval since they need /dashboard immediately to track the
+    // order they just placed.
     const id = randomUUID();
+    const newDivision = "customer";
+    const profile = resolveProfile(newDivision);
     await (pool as any).query(
       `INSERT INTO users (id, full_name, email, password_hash, division, oauth_provider, oauth_subject, picture_url, status, is_active)
        VALUES ($1, $2, $3, NULL, $4, 'google', $5, $6, $7, TRUE)`,
-      [id, args.fullName, args.email, "general", args.sub, args.pictureUrl, args.initialStatus]
+      [id, args.fullName, args.email, newDivision, args.sub, args.pictureUrl, "active"]
     );
     return {
       id,
       email: args.email,
       fullName: args.fullName,
-      division: "general",
-      roles: baseRoles,
-      permissions: basePermissions,
-      status: args.initialStatus,
+      division: newDivision,
+      roles: profile.roles,
+      permissions: profile.permissions,
+      status: "active",
       pictureUrl: args.pictureUrl
     };
   }

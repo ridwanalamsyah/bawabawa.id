@@ -476,3 +476,19 @@ h1, h2, h3, .font-display {
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-scan { animation: none; }
 }
+
+/* Sequential pulse used by the hero "Belanja → Packing → Kirim" pipeline.
+   Each step shares the same 3.6s animation but with staggered delays so
+   the brightening sweeps across the row like an actual progress bar — no
+   framer-motion required. */
+@keyframes pulse-step {
+  0%, 100% { opacity: 0.55; }
+  35%      { opacity: 1;    }
+  70%      { opacity: 0.55; }
+}
+.animate-pulse-step {
+  animation: pulse-step 3.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-step { animation: none; opacity: 1; }
+}

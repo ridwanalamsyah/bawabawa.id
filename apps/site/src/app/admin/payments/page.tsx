@@ -8,7 +8,7 @@ import { formatIDR, formatDate } from "@/lib/utils";
 export default function AdminPaymentsPage() {
   return (
     <>
-      <PageHeader eyebrow="Pembayaran" title="Pembayaran & rekonsiliasi" description="Approve pembayaran masuk dan pastikan rekonsiliasi ERP." />
+      <PageHeader eyebrow="Pembayaran" title="Pembayaran & rekonsiliasi" description="Approve pembayaran masuk dan pastikan rekonsiliasinya." />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <GlassCard className="p-5">
           <p className="text-xs text-[hsl(var(--muted-foreground))]">Saldo escrow</p>

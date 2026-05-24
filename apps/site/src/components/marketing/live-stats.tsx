@@ -102,7 +102,7 @@ export function LiveStats() {
       {isEmpty && (
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.8)] backdrop-blur px-3 py-1 text-xs text-[hsl(var(--muted-foreground))]">
           <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--sage-600))]" />
-          Soft launch — angka di bawah ini akan terisi otomatis dari ERP setelah ada pesanan masuk.
+          Soft launch — angka di bawah ini akan terisi otomatis setelah ada pesanan masuk.
         </div>
       )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -149,7 +149,7 @@ function StatCard({ icon: Icon, label, value, format, tone, loading }: StatCardP
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--emerald-500))]" />
         </span>
         <span className="text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] font-medium">
-          Sinkron dengan ERP
+          Diperbarui realtime
         </span>
       </div>
     </GlassCard>
