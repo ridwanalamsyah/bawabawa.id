@@ -37,9 +37,13 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
-      - key: MIDTRANS_SERVER_KEY
+      - key: DOKU_CLIENT_ID
         sync: false
-      - key: MIDTRANS_CLIENT_KEY
+      - key: DOKU_SECRET_KEY
+        sync: false
+      - key: DOKU_IS_PRODUCTION
+        sync: false
+      - key: BLOB_READ_WRITE_TOKEN
         sync: false
       - key: BITESHIP_API_KEY
         sync: false

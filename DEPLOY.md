@@ -37,7 +37,8 @@ The whole stack costs **Rp 0/month** at MVP scale. Two caveats:
    - `ALLOWED_ORIGINS` — comma-separated list of frontend URLs, e.g. `https://bawabawa-site.vercel.app,https://bawabawa-web.vercel.app`
    - `WEBHOOK_SECRET` — any random string ≥ 32 chars (used to sign webhooks fired toward the public site)
    - `BAWABAWA_SITE_WEBHOOK_URL` — the public site's webhook receiver, e.g. `https://bawabawa-site.vercel.app/api/webhooks/erp`
-   - `MIDTRANS_SERVER_KEY` / `MIDTRANS_CLIENT_KEY` — from the Midtrans sandbox dashboard (set to `sandbox_dummy` if you want to skip payments for now)
+   - `DOKU_CLIENT_ID` / `DOKU_SECRET_KEY` — from the DOKU sandbox dashboard (https://sandbox.doku.com/). Leave unset to disable payments — the API returns 503 from `/api/v1/webhooks/doku` until configured.
+   - `BLOB_READ_WRITE_TOKEN` — from a Vercel Blob store (Dashboard → Storage → Blob → Connect Project). Leave unset to disable uploads — the API returns 503 from `/api/v1/uploads` until configured.
    - `BITESHIP_API_KEY`, `FONNTE_TOKEN`, `RESEND_API_KEY` — optional integrations; leave blank to disable
 6. Click **Save Changes** → Render redeploys
 7. Run the migration once: in Render → **Shell** tab, run `node /app/apps/api/dist/infrastructure/db/migrate.js`. Subsequent deploys do not need this — only the very first time, or when new migration files are added.

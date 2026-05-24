@@ -56,7 +56,7 @@ export default function TentangPage() {
             dashboard internal.
           </li>
           <li>
-            Pembayaran melalui Midtrans (registered di OJK) sebagai payment
+            Pembayaran melalui DOKU (registered di OJK) sebagai payment
             gateway. Bawabawa sendiri belum punya lisensi finansial.
           </li>
           <li>

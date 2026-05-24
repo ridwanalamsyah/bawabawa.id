@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { AppShell } from "../../shared/ui/shell/AppShell";
 import { Button, Dialog, GlassCard } from "../../shared/ui/primitives";
+import { FileUploader } from "../../shared/ui/primitives/FileUploader";
 import { api } from "../../shared/api/client";
 
 /**
@@ -471,12 +472,35 @@ function PostFormDialog({
           </Field>
         </div>
 
-        <Field label="Hero image URL (opsional)">
+        <Field
+          label="Hero image (opsional)"
+          hint="Upload langsung ke Vercel Blob, atau paste URL kalau gambar sudah hosted di tempat lain."
+        >
           <input
             type="url"
             {...register("heroImageUrl")}
             placeholder="https://images.unsplash.com/..."
           />
+          <div style={{ marginTop: 8 }}>
+            <FileUploader
+              folder="blog"
+              filename={watch("slug") || undefined}
+              onUpload={(file) => {
+                setValue("heroImageUrl", file.url, { shouldDirty: true });
+                toast.success("Hero image terunggah");
+              }}
+              buttonLabel="Upload hero image"
+            />
+          </div>
+          {watch("heroImageUrl") ? (
+            <div style={{ marginTop: 8 }}>
+              <img
+                src={watch("heroImageUrl")}
+                alt="Preview hero"
+                style={{ maxHeight: 120, borderRadius: 8, border: "1px solid var(--color-border, #d1d5db)" }}
+              />
+            </div>
+          ) : null}
         </Field>
 
         <Field
