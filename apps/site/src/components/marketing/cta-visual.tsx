@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Plane, Package, Star, MapPin } from "lucide-react";
+import { Plane, Package, ShieldCheck, Truck, Database } from "lucide-react";
 
 // Indonesia map rendered from the 3D archipelago asset provided by the
 // product team (apps/site/public/images/peta-indonesia*.png — top-down
@@ -137,46 +137,84 @@ export function CtaVisual() {
         </div>
       </div>
 
-      {/* Live order card — top-left */}
+      {/* Live order card — top-left. Specific item + pickup so the chip
+          reads like a real status surface, not a generic SaaS stat. */}
       <div
         className="animate-hero-rise absolute -top-3 left-3 sm:left-6 sm:-top-4"
         style={{ animationDelay: "0.45s" }}
       >
         <div className="glass-strong rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center gap-3 shadow-xl">
-          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--emerald-500)/0.18)] grid place-items-center">
+          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--emerald-500)/0.18)] grid place-items-center shrink-0">
             <Package className="h-4 w-4 text-[hsl(var(--emerald-400))]" />
           </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-white/55 leading-none">Sedang ditangani</p>
-            <p className="text-sm font-semibold text-white leading-tight mt-0.5">Order #1284 · Sepatu Compass</p>
+          <div className="leading-tight">
+            <p className="text-[10px] uppercase tracking-wider text-white/55">
+              Order aktif
+            </p>
+            <p className="font-display text-sm font-semibold text-white mt-0.5">
+              #1284 · Sepatu Compass
+            </p>
+            <p className="text-[10.5px] text-white/60 mt-0.5">
+              Pickup Cihampelas · 2 item
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Rating chip — bottom-right */}
+      {/* Insurance + courier chip — bottom-right. Replaces the generic
+          "4.9★ · 1.200 ulasan" rating that read like AI placeholder. */}
       <div
         className="animate-hero-rise absolute -bottom-3 right-3 sm:right-6 sm:-bottom-4"
         style={{ animationDelay: "0.6s" }}
       >
         <div className="glass-strong rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center gap-3 shadow-xl">
-          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--olive-300)/0.22)] grid place-items-center">
-            <Star className="h-4 w-4 text-[hsl(var(--olive-300))] fill-[hsl(var(--olive-300))]" />
+          <div className="h-9 w-9 rounded-xl bg-[hsl(var(--olive-300)/0.22)] grid place-items-center shrink-0">
+            <ShieldCheck className="h-4 w-4 text-[hsl(var(--olive-300))]" />
           </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-white/55 leading-none">Rating customer</p>
-            <p className="text-sm font-semibold text-white leading-tight mt-0.5">4.9 / 5 · 1.200+ ulasan</p>
+          <div className="leading-tight">
+            <p className="text-[10px] uppercase tracking-wider text-white/55">
+              Garansi titipan
+            </p>
+            <p className="text-sm font-semibold text-white mt-0.5">
+              <span className="tabular-nums">Rp 5.000.000</span>
+              <span className="text-white/55 font-normal"> · diasuransikan</span>
+            </p>
           </div>
         </div>
       </div>
 
-      {/* ETA pill — center-right */}
+      {/* ERP sync chip — center-left. Mirrors the hero `Sinkron dengan ERP`
+          line so the marketing surface tells the same product story end
+          to end. */}
       <div
-        className="animate-hero-pop absolute right-2 sm:right-4 top-1/2 -translate-y-1/2"
-        style={{ animationDelay: "0.75s" }}
+        className="animate-hero-slide-in-left absolute left-2 sm:left-4 top-1/2 -translate-y-1/2"
+        style={{ animationDelay: "0.7s" }}
       >
         <div className="glass rounded-2xl px-3 py-2 flex items-center gap-2 shadow-lg">
-          <MapPin className="h-3.5 w-3.5 text-[hsl(var(--emerald-400))]" />
-          <span className="text-[11px] font-semibold text-white">ETA 3 hari</span>
+          <Database className="h-3.5 w-3.5 text-[hsl(var(--emerald-400))]" />
+          <span className="text-[11px] font-semibold text-white leading-none">
+            ERP sync
+            <span className="block text-[9.5px] text-white/55 font-normal mt-0.5 tracking-wide">
+              +218 ms
+            </span>
+          </span>
+        </div>
+      </div>
+
+      {/* Courier chip — center-right. Names a real carrier instead of the
+          generic "ETA 3 hari" — pairs with the ETA line in the hero. */}
+      <div
+        className="animate-hero-pop absolute right-2 sm:right-4 top-1/2 -translate-y-1/2"
+        style={{ animationDelay: "0.85s" }}
+      >
+        <div className="glass rounded-2xl px-3 py-2 flex items-center gap-2 shadow-lg">
+          <Truck className="h-3.5 w-3.5 text-[hsl(var(--emerald-400))]" />
+          <span className="text-[11px] font-semibold text-white leading-none">
+            J&amp;T Reguler
+            <span className="block text-[9.5px] text-white/55 font-normal mt-0.5 tabular-nums">
+              3–4 hari
+            </span>
+          </span>
         </div>
       </div>
     </div>
