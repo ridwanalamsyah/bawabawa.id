@@ -28,7 +28,7 @@ export const FAQS = [
   },
   {
     q: "Bagaimana cara melacak pesanan?",
-    a: "Setiap pesanan punya link tracking pribadi yang dikirim ke WhatsApp-mu dan bisa dibuka dari perangkat mana pun tanpa login. Kalau kamu login, semua pesanan juga tampil di Dashboard.",
+    a: "Setiap pesanan punya link tracking pribadi yang dikirim ke WhatsApp-mu dan bisa dibuka dari perangkat mana pun tanpa login.",
   },
   {
     q: "Bisakah saya membatalkan pesanan?",

@@ -1,4 +1,5 @@
 import { Hero } from "@/components/marketing/hero";
+import { CategoryMarquee } from "@/components/marketing/category-marquee";
 import { PromotionBanner } from "@/components/marketing/promotion-banner";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { Pricing } from "@/components/marketing/pricing";
@@ -16,6 +17,7 @@ export default function HomePage() {
     <>
       <PromotionBanner />
       <Hero />
+      <CategoryMarquee />
       <HowItWorks />
       <Pricing />
       <TripPreview />

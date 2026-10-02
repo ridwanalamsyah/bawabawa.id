@@ -103,6 +103,29 @@ demoUsers.set("admin@erp.com", {
   ]
 });
 
+
+/**
+ * Accounts are for the team only: shoppers order and track without logging
+ * in. Unless PUBLIC_SIGNUP=true, a Google sign-in that doesn't match a
+ * pre-added staff user (Admin → Tim & Admin) — or matches a leftover
+ * customer account — is refused instead of creating a customer login.
+ */
+export function publicSignupEnabled(): boolean {
+  const raw = process.env.PUBLIC_SIGNUP;
+  return raw === "true" || raw === "1";
+}
+
+export function assertStaffLogin(division: string | null): void {
+  if (publicSignupEnabled()) return;
+  if (!division || division === "customer") {
+    throw new AppError(
+      403,
+      "STAFF_ONLY",
+      "Login hanya untuk tim Bawabawa. Minta admin menambahkan email kamu di Tim & Admin."
+    );
+  }
+}
+
 export class AuthService {
   async getUserById(userId: string) {
     if (authFlags().demoMode) {
@@ -582,6 +605,7 @@ export class AuthService {
     if (flags.demoMode) {
       const existing = demoUsers.get(args.email);
       if (existing) {
+        assertStaffLogin(existing.division);
         return {
           id: existing.id,
           email: existing.email,
@@ -595,6 +619,7 @@ export class AuthService {
       }
       // Demo mode — default new signups to customer; admins must be
       // pre-seeded in demoUsers via env or invite flow.
+      assertStaffLogin(null);
       const profile = await resolveProfile("customer");
       const created: DemoUser = {
         id: randomUUID(),
@@ -632,6 +657,7 @@ export class AuthService {
 
     if (existing.rowCount) {
       const row = existing.rows[0];
+      assertStaffLogin(row.division);
       await (pool as any).query(
         `UPDATE users
             SET oauth_provider = 'google',
@@ -658,6 +684,7 @@ export class AuthService {
     // (read-only on their own orders). Customers do NOT require
     // approval since they need /dashboard immediately to track the
     // order they just placed.
+    assertStaffLogin(null);
     const id = randomUUID();
     const newDivision = "customer";
     const profile = await resolveProfile(newDivision);

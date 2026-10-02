@@ -13,7 +13,7 @@ const TIMELINE: Array<{ stage: string; refund: string; note: string }> = [
   {
     stage: "Sebelum personal shopper mulai belanja",
     refund: "100% refund",
-    note: "Dapat dibatalkan dari /dashboard/orders. Dana kembali ke metode pembayaran asli dalam 3–7 hari kerja.",
+    note: "Dapat dibatalkan dari halaman tracking pesanan. Dana kembali ke metode pembayaran asli dalam 3–7 hari kerja.",
   },
   {
     stage: "Personal shopper sudah belanja sebagian/seluruh barang",
@@ -103,7 +103,7 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
     title: "6. Cara Mengajukan Pembatalan/Refund",
     body: (
       <ul className="list-disc pl-5 space-y-1">
-        <li>Buka <strong>/dashboard/orders</strong> → pilih order → tombol &ldquo;Batalkan&rdquo;.</li>
+        <li>Buka link tracking pesanan (dikirim ke WhatsApp) → tombol &ldquo;Batalkan&rdquo;.</li>
         <li>Atau hubungi <strong>support@bawabawa.id</strong> dengan menyertakan kode order.</li>
         <li>Atau chat WhatsApp ke nomor CS resmi Bawabawa.id.</li>
       </ul>

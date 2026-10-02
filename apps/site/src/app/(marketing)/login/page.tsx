@@ -3,8 +3,9 @@ import { LoginForm } from "./login-form";
 import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
 export const metadata = {
-  title: "Masuk · Bawabawa.id",
-  description: "Masuk ke dashboard customer atau admin Bawabawa.id.",
+  title: "Login tim · Bawabawa.id",
+  description: "Login untuk tim Bawabawa.id.",
+  robots: { index: false, follow: false },
 };
 
 export default async function LoginPage({
@@ -26,9 +27,9 @@ export default async function LoginPage({
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 shadow-[0_24px_64px_-24px_hsl(var(--sage-700)/0.18)]">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight">Masuk ke Bawabawa.id</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Login tim Bawabawa</h1>
             <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-              Customer akan diarahkan ke dashboard, staff & admin akan diarahkan ke konsol internal.
+              Khusus tim. Untuk pesan atau lacak titipan tidak perlu akun — cukup pakai link tracking dari WhatsApp.
             </p>
           </div>
           {reason === "forbidden" && (
@@ -67,7 +68,7 @@ export default async function LoginPage({
 
 // Only allow internal absolute paths starting with `/` to avoid open-redirect.
 function sanitizeNext(raw: string | undefined): string {
-  if (!raw) return "/dashboard";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+  if (!raw) return "/admin";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/admin";
   return raw;
 }

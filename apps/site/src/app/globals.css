@@ -503,6 +503,25 @@ h1, h2, h3 {
   animation-delay: var(--d, 0s);
 }
 
+/* Category strip under the hero. */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.animate-marquee { animation: marquee 38s linear infinite; }
+
+/* Request success: circle + check draw in. */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.animate-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 0.6s var(--ease-out-soft, ease-out) forwards; animation-delay: var(--d, 0s); }
+
+/* Tracking timeline connector fills down to the current step. */
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.animate-grow-y { animation: grow-y 0.5s var(--ease-out-soft, ease-out) both; animation-delay: var(--d, 0s); }
+
+/* Cart icon bump when an item is added. */
+@keyframes bump {
+  0%, 100% { transform: scale(1); }
+  40%      { transform: scale(1.25) rotate(-8deg); }
+}
+.animate-bump { animation: bump 0.45s var(--ease-out-soft, ease-out); }
+
 /* Brand gradient for one highlighted word in a headline. */
 .text-gradient-brand {
   background-image: linear-gradient(135deg, hsl(var(--sage-700)), hsl(var(--olive-500)), hsl(var(--emerald-600)));

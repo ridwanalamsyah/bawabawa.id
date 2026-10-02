@@ -11,7 +11,7 @@
 import { cookies } from "next/headers";
 import { signToken, audit, type AuthRole } from "@/lib/auth";
 import { SESSION_COOKIE } from "@/lib/auth-edge";
-import { erpSafe } from "@/lib/erp-client";
+import { erpFetch, ErpError } from "@/lib/erp-client";
 import {
   ERP_REFRESH_COOKIE,
   ERP_TOKEN_COOKIE,
@@ -66,27 +66,35 @@ export async function POST(req: Request) {
     return Response.json({ error: "Google credential required" }, { status: 400 });
   }
 
-  const erp = await erpSafe<ErpGoogleResponse>({
-    path: "/auth/google",
-    method: "POST",
-    body: JSON.stringify({ idToken: credential }),
-    timeoutMs: 6000,
-  });
-
-  if (!erp.ok) {
-    return Response.json({ error: erp.error || "Google sign-in ditolak.", source: "erp" }, { status: 502 });
+  let data: ErpGoogleResponse;
+  try {
+    data = await erpFetch<ErpGoogleResponse>({
+      path: "/auth/google",
+      method: "POST",
+      body: JSON.stringify({ idToken: credential }),
+      timeoutMs: 6000,
+    });
+  } catch (error) {
+    // Pass through refusals the user can act on (STAFF_ONLY,
+    // PENDING_APPROVAL, EMAIL_NOT_VERIFIED); anything else is a 502.
+    if (error instanceof ErpError && (error.status === 401 || error.status === 403)) {
+      const message = (error.body as { error?: { message?: string } } | null)?.error?.message;
+      return Response.json({ error: message ?? "Google sign-in ditolak.", source: "erp" }, { status: error.status });
+    }
+    const message = error instanceof Error ? error.message : "Google sign-in ditolak.";
+    return Response.json({ error: message, source: "erp" }, { status: 502 });
   }
-  if (!erp.data.accessToken || !erp.data.user) {
+  if (!data.accessToken || !data.user) {
     return Response.json({ error: "Google sign-in ditolak.", source: "erp" }, { status: 401 });
   }
 
-  const user = erp.data.user;
+  const user = data.user;
   const role = mapRolesToAuthRole(user.roles);
   const sessionToken = await signToken(
     { userId: user.id, role },
     SESSION_TTL_SECONDS,
   );
-  await setSessionCookies(sessionToken, erp.data.accessToken, erp.data.refreshToken);
+  await setSessionCookies(sessionToken, data.accessToken, data.refreshToken);
   audit.log(user.id, "auth.login.google", user.email ?? user.id);
 
   // Tokens stay in httpOnly cookies; the browser only needs the profile.
@@ -103,3 +111,4 @@ export async function POST(req: Request) {
     source: "erp",
   });
 }
+

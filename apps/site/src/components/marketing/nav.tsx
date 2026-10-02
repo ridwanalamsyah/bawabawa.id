@@ -3,18 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LogIn } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { delay } from "@/lib/motion";
 
-// Public-facing navigation. /admin intentionally NOT linked here — staff
-// access the panel by typing the URL directly and authenticating via
-// the existing /login flow (the layout's middleware enforces role=admin).
-// Dashboard intentionally not in the public nav either; users land there
-// automatically after login via the avatar/menu in the dashboard layout.
+// Public-facing navigation. No login button: shoppers order and track
+// without an account, and staff reach the panel by opening /admin (which
+// redirects to /login).
 const NAV = [
   { href: "/katalog", label: "Katalog" },
   { href: "/request", label: "Titip Barang" },
@@ -73,11 +71,6 @@ export function MarketingNav() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle className="hidden sm:inline-flex" />
-          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
-            <Link href="/login">
-              <LogIn className="h-4 w-4" /> Masuk
-            </Link>
-          </Button>
           <button
             onClick={() => setOpen((s) => !s)}
             className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]"
@@ -103,9 +96,9 @@ export function MarketingNav() {
           ))}
           <div className="flex items-center justify-between pt-2">
             <ThemeToggle />
-            <Button asChild size="sm" variant="outline">
-              <Link href="/login">
-                <LogIn className="h-4 w-4" /> Masuk
+            <Button asChild size="sm">
+              <Link href="/request" onClick={() => setOpen(false)}>
+                Titip barang
               </Link>
             </Button>
           </div>
