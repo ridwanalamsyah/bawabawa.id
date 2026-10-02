@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { track } from "@/lib/analytics";
 
 import { WA_NUMBER } from "@/lib/contact";
 const DEFAULT_MSG =
@@ -25,6 +26,7 @@ export function WhatsAppFloat() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 220, damping: 24 }}
       href={href}
+      onClick={() => track("whatsapp_click", { from: "float" })}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat WhatsApp Bawabawa"

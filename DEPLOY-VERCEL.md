@@ -84,6 +84,15 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    PAYMENT_INSTRUCTIONS=Transfer BCA ... a.n. ...
    PPN_ENABLED=false
 
+   # Kilat (air via Balikpapan). Leave empty until the cargo rate is signed;
+   # the tier stays hidden and the API refuses tier "air" while unset.
+   # KILAT_PER_KG=
+   # KILAT_MIN_KG=1
+   # Pickup point shown to customers who choose "ambil sendiri"
+   # PICKUP_POINT_ADDRESS=
+   # Daily cron (vercel.json → /api/v1/cron/run): quote reminders + outbox flush
+   CRON_SECRET=<run: openssl rand -hex 32>
+
    # Optional integrations (leave empty for MVP):
    # DOKU_CLIENT_ID=
    # DOKU_SECRET_KEY=
@@ -96,7 +105,9 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    ```
 
 7. Click **Deploy**. Vercel runs the build (~2–4 min). Once green, copy the production URL — looks like `https://bawabawa-api.vercel.app`.
-8. Smoke-test: `https://bawabawa-api.vercel.app/api/v1/health` should return `{"success":true,"data":{"status":"ok"}}`.
+8. Run migrations `020`–`022` against the production database before the first order (see `apps/api/src/infrastructure/db/migrations`).
+9. Vercel Cron calls `/api/v1/cron/run` daily with `Authorization: Bearer $CRON_SECRET`; without `CRON_SECRET` the endpoint answers 503.
+10. Smoke-test: `https://bawabawa-api.vercel.app/api/v1/health` should return `{"success":true,"data":{"status":"ok"}}`.
 
 > **Cold start expectation:** First hit after ~10 minutes of idle is ~1–2 s while the lambda spins up. Subsequent hits within the warm window are <100 ms. No need for a keep-warm ping — Neon's pooler keeps DB connections cheap and Vercel's lambda revival is fast.
 
@@ -124,6 +135,12 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    SITE_PROXY_SECRET=<run: openssl rand -hex 32>
    NEXT_PUBLIC_WA_NUMBER=62812xxxxxxx
    NEXT_PUBLIC_PPN_ENABLED=false
+   # Same values as KILAT_* on the API (empty = Kilat hidden)
+   # NEXT_PUBLIC_KILAT_PER_KG=
+   # NEXT_PUBLIC_KILAT_MIN_KG=1
+   # NEXT_PUBLIC_PICKUP_POINT=
+   # Plausible funnel events (request_submit, checkout_submit, …)
+   # NEXT_PUBLIC_PLAUSIBLE_DOMAIN=bawabawa.id
 
    # Public URL (used in canonical tags, OG, sitemap)
    NEXT_PUBLIC_SITE_URL=https://bawabawa-site.vercel.app

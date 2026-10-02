@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { KILAT } from "@/lib/pricing";
+import { formatIDR } from "@/lib/utils";
 
 /**
  * Rates written out in full — the honest version of a "trust" section.
@@ -24,33 +26,45 @@ export function Pricing() {
               <tr className="border-b border-[hsl(var(--foreground))]">
                 <th scope="col" className="py-3 pr-4 font-medium text-[hsl(var(--muted-foreground))]"></th>
                 <th scope="col" className="py-3 pr-4">Reguler</th>
-                <th scope="col" className="py-3">
+                <th scope="col" className="py-3 pr-4">
                   Kargo{" "}
                   <Link href="/open-trip" className="font-normal text-sm underline">
                     Open Trip
                   </Link>
                 </th>
+                {KILAT && (
+                  <th scope="col" className="py-3">
+                    Kilat
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-[hsl(var(--border))]">
               <tr>
                 <th scope="row" className="py-3 pr-4 font-medium text-[hsl(var(--muted-foreground))]">Ongkir</th>
                 <td className="py-3 pr-4 tabular-nums">Rp43.000 / kg</td>
-                <td className="py-3 tabular-nums">Rp200.000 flat sampai 50 kg</td>
+                <td className="py-3 pr-4 tabular-nums">Rp200.000 flat sampai 50 kg</td>
+                {KILAT && (
+                  <td className="py-3 tabular-nums">
+                    {formatIDR(KILAT.perKg)} / kg{KILAT.minKg > 0.5 ? `, min. ${KILAT.minKg} kg` : ""}
+                  </td>
+                )}
               </tr>
               <tr>
                 <th scope="row" className="py-3 pr-4 font-medium text-[hsl(var(--muted-foreground))]">Sampai</th>
                 <td className="py-3 pr-4">3–4 hari kerja</td>
-                <td className="py-3">±10 hari kerja, ikut jadwal trip</td>
+                <td className="py-3 pr-4">±10 hari kerja, ikut jadwal trip</td>
+                {KILAT && <td className="py-3">1–2 hari kerja (pesawat via Balikpapan)</td>}
               </tr>
               <tr>
                 <th scope="row" className="py-3 pr-4 font-medium text-[hsl(var(--muted-foreground))]">Cocok untuk</th>
                 <td className="py-3 pr-4">Di bawah ±5 kg, butuh cepat</td>
-                <td className="py-3">Belanja banyak / barang berat</td>
+                <td className="py-3 pr-4">Belanja banyak / barang berat</td>
+                {KILAT && <td className="py-3">Kecil &amp; mendesak, tanpa baterai/aerosol</td>}
               </tr>
               <tr>
                 <th scope="row" className="py-3 pr-4 font-medium text-[hsl(var(--muted-foreground))]">Jasa titip</th>
-                <td className="py-3" colSpan={2}>
+                <td className="py-3" colSpan={KILAT ? 3 : 2}>
                   8% dari harga barang, minimal Rp20.000
                 </td>
               </tr>

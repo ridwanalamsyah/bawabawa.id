@@ -17,11 +17,24 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-type Trip = { id: string; code: string; departAt: string; status: string; capacityKg: number; bookedKg: number };
+type Trip = {
+  id: string;
+  code: string;
+  departAt: string;
+  status: string;
+  capacityKg: number;
+  bookedKg: number;
+  poClosesAt?: string | null;
+};
 
 function nextOpenTrip(trips: Trip[], now: number): Trip | undefined {
   return trips
-    .filter((t) => t.status === "open" && new Date(t.departAt).getTime() > now)
+    .filter(
+      (t) =>
+        t.status === "open" &&
+        new Date(t.departAt).getTime() > now &&
+        (!t.poClosesAt || new Date(t.poClosesAt).getTime() > now),
+    )
     .sort((a, b) => a.departAt.localeCompare(b.departAt))[0];
 }
 
@@ -57,6 +70,15 @@ export default async function CatalogPage() {
               <strong>Open Trip {nextTrip.code}</strong> berangkat{" "}
               {formatDate(nextTrip.departAt, { weekday: "long", day: "numeric", month: "long", year: undefined })} ·{" "}
               {Math.max(0, nextTrip.capacityKg - nextTrip.bookedKg)} kg slot tersisa
+              {nextTrip.poClosesAt && (
+                <>
+                  {" · "}
+                  <strong>
+                    PO tutup{" "}
+                    {formatDate(nextTrip.poClosesAt, { weekday: "long", day: "numeric", month: "long", year: undefined, hour: "2-digit", minute: "2-digit" })}
+                  </strong>
+                </>
+              )}
             </p>
             <Link href="/open-trip" className="text-sm underline sm:ml-auto">Lihat jadwal</Link>
           </GlassCard>

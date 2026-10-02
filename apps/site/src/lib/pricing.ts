@@ -17,7 +17,9 @@
  */
 
 // `fast` / `batch` keys kept for stored-order compatibility.
-export type TierId = "fast" | "batch";
+// `air` = Kilat: kargo udara Bandung (Husein) → Balikpapan, lanjut darat ke
+// Samarinda. Shown only when NEXT_PUBLIC_KILAT_PER_KG is set.
+export type TierId = "fast" | "batch" | "air";
 
 export const TIERS: Record<TierId, {
   id: TierId;
@@ -37,7 +39,28 @@ export const TIERS: Record<TierId, {
     tagline: "Gabung Open Trip terjadwal, flat Rp200rb untuk ≤50 kg.",
     eta: "±10 hari kerja",
   },
+  air: {
+    id: "air",
+    label: "Kilat",
+    tagline: "Pesawat Bandung → Balikpapan, lanjut darat ke Samarinda.",
+    eta: "1–2 hari kerja",
+  },
 };
+
+const kilatPerKg = Number(process.env.NEXT_PUBLIC_KILAT_PER_KG);
+const kilatMinKg = Number(process.env.NEXT_PUBLIC_KILAT_MIN_KG);
+export const KILAT =
+  Number.isFinite(kilatPerKg) && kilatPerKg > 0
+    ? { perKg: kilatPerKg, minKg: Number.isFinite(kilatMinKg) && kilatMinKg > 0 ? kilatMinKg : 1 }
+    : null;
+
+/** Lithium batteries can't fly. Keep in sync with the API. */
+export const KILAT_BLOCKED_CATEGORIES = ["Elektronik"];
+
+/** Tiers offered to customers, in display order. */
+export function availableTiers(): TierId[] {
+  return KILAT ? ["fast", "batch", "air"] : ["fast", "batch"];
+}
 
 export const FAST_TRACK_PER_KG = 43_000;
 export const BATCH_FLAT_FEE = 200_000;
@@ -77,12 +100,13 @@ export function billingWeight(actualKg: number): number {
 export function shippingFeeFor(tier: TierId, totalKg: number): number {
   const kg = billingWeight(totalKg);
   if (tier === "fast") return FAST_TRACK_PER_KG * kg;
+  if (tier === "air") return KILAT ? KILAT.perKg * Math.max(kg, KILAT.minKg) : FAST_TRACK_PER_KG * kg;
   return kg <= BATCH_CAPACITY_KG
     ? BATCH_FLAT_FEE
     : BATCH_FLAT_FEE + FAST_TRACK_PER_KG * (kg - BATCH_CAPACITY_KG);
 }
 
-/** The cheaper service for this weight (ties go to the faster Reguler). */
+/** The cheaper of Reguler vs Kargo (ties go to Reguler). Kilat is an opt-in upgrade. */
 export function recommendTier(totalKg: number): TierId {
   return shippingFeeFor("fast", totalKg) <= shippingFeeFor("batch", totalKg) ? "fast" : "batch";
 }

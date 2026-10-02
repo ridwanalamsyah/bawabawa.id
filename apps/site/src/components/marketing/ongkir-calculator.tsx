@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatIDR } from "@/lib/utils";
-import { TIERS, computePricing, recommendTier, type TierId } from "@/lib/pricing";
+import { TIERS, availableTiers, computePricing, recommendTier } from "@/lib/pricing";
 
 const WEIGHTS = [0.5, 1, 2, 5, 10];
 
@@ -18,7 +18,7 @@ export function OngkirCalculator() {
   const [price, setPrice] = useState(300000);
   const [kg, setKg] = useState(1);
   const best = recommendTier(kg);
-  const rows = (Object.keys(TIERS) as TierId[]).map((tier) => ({
+  const rows = availableTiers().map((tier) => ({
     tier,
     pricing: computePricing({ itemsTotal: price, totalKg: kg, tier }),
   }));

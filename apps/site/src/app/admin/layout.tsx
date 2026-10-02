@@ -36,6 +36,7 @@ const groups: SidebarGroup[] = [
     label: "CRM & Marketing",
     items: [
       { href: "/admin/leads", label: "Leads", icon: "users" },
+      { href: "/admin/partners", label: "Reseller & B2B", icon: "heart" },
       { href: "/admin/vouchers", label: "Voucher & Promo", icon: "receipt" },
       { href: "/admin/whatsapp", label: "WhatsApp Outbox", icon: "chat" },
       { href: "/admin/emails", label: "Email Outbox", icon: "bell" },
@@ -53,6 +54,7 @@ const groups: SidebarGroup[] = [
     label: "Konten & Tim",
     items: [
       { href: "/admin/cms", label: "CMS", icon: "file" },
+      { href: "/admin/reviews", label: "Ulasan", icon: "chat" },
       { href: "/admin/support", label: "Customer Support", icon: "support" },
       { href: "/admin/users", label: "Tim & Admin", icon: "users" },
       { href: "/admin/roles", label: "Role & Permission", icon: "shield" },

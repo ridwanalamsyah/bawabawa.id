@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatIDR } from "@/lib/utils";
 import { cart, cartCount } from "@/lib/cart";
+import { track } from "@/lib/analytics";
 import type { CatalogProduct } from "@/app/api/catalog/route";
 
 export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
@@ -65,6 +66,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       variant: variant || undefined,
       tripId: product.tripId,
     });
+    track("catalog_add");
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };

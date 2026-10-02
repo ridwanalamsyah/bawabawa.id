@@ -53,7 +53,14 @@ SITE_PROXY_SECRET=<sama dengan di API>    # rate-limit per pembeli, bukan per se
 NEXT_PUBLIC_SITE_URL=https://bawabawa.id
 NEXT_PUBLIC_WA_NUMBER=62812xxxxxxx
 NEXT_PUBLIC_PPN_ENABLED=false             # true hanya jika sudah PKP
+NEXT_PUBLIC_KILAT_PER_KG=                 # tarif Kilat per kg; kosong = tier Kilat disembunyikan
+NEXT_PUBLIC_KILAT_MIN_KG=1                # berat minimum tagihan Kilat
+NEXT_PUBLIC_PICKUP_POINT=                 # alamat titik ambil sendiri; kosong = opsi ambil sendiri disembunyikan
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=             # aktifkan event funnel (lib/analytics.ts)
 ```
+
+`NEXT_PUBLIC_KILAT_*` harus sama dengan `KILAT_*` di API — API tetap jadi
+sumber harga final, situs hanya menampilkan estimasi.
 
 ## Local dev
 

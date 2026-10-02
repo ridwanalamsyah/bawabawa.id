@@ -52,6 +52,22 @@ describe.skipIf(!hasPostgres)("business features", () => {
     expect(res.body.error.code).toBe("KILAT_RESTRICTED_ITEM");
   });
 
+  it("lets pickup orders skip street and postal code, but not delivery orders", async () => {
+    const address = { street: "", city: "Samarinda", postal: "" };
+    const delivery = await request(app).post("/api/v1/public/order-requests").send({ ...base, tier: "fast", address });
+    expect(delivery.status).toBe(400);
+
+    process.env.PICKUP_POINT_ADDRESS = "Jl. Contoh No. 1, Samarinda";
+    const pickup = await request(app)
+      .post("/api/v1/public/order-requests")
+      .send({ ...base, tier: "fast", deliveryMethod: "pickup", address });
+    expect(pickup.status).toBe(201);
+    const view = await request(app).get(`/api/v1/public/order-requests/${pickup.body.data.trackingToken}`);
+    expect(view.body.data.deliveryMethod).toBe("pickup");
+    expect(view.body.data.pickupPoint).toBe("Jl. Contoh No. 1, Samarinda");
+    delete process.env.PICKUP_POINT_ADDRESS;
+  });
+
   it("closes cargo orders after the trip's PO cutoff", async () => {
     const db = await getPool();
     const tripId = randomUUID();

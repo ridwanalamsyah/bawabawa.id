@@ -35,6 +35,7 @@ type Trip = {
   baseFee: number;
   perKgFee: number;
   status: "open" | "in_transit" | "fullbooked" | "closed";
+  poClosesAt?: string | null;
   popularCategories: string[];
   notes: string | null;
   isPublished: boolean;
@@ -50,6 +51,7 @@ async function fetchTrips(): Promise<Trip[]> {
 }
 
 export default async function OpenTripPage() {
+  const nowMs = new Date().getTime();
   const trips = await fetchTrips();
   const activeTrips = trips.filter((t) => t.status !== "closed");
   const totalSlotsAvailable = trips.reduce(
@@ -142,6 +144,8 @@ export default async function OpenTripPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {trips.map((t) => {
+                const poOpenUntil =
+                  t.poClosesAt && new Date(t.poClosesAt).getTime() > nowMs ? t.poClosesAt : null;
                 const filled = Math.round((t.bookedKg / Math.max(1, t.capacityKg)) * 100);
                 const isFull = t.status === "fullbooked" || filled >= 100;
                 const isInTransit = t.status === "in_transit";
@@ -228,6 +232,11 @@ export default async function OpenTripPage() {
                       <p className="mt-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
                         {Math.max(0, t.capacityKg - t.bookedKg)} kg slot tersisa
                       </p>
+                      {poOpenUntil && (
+                        <p className="mt-1 text-xs font-medium text-[hsl(var(--warning))]">
+                          PO tutup {formatDate(poOpenUntil, { weekday: "long", day: "numeric", month: "short", year: undefined, hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      )}
                     </div>
 
                     {t.popularCategories.length > 0 && (

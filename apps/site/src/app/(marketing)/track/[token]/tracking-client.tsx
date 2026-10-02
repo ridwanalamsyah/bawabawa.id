@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CircleCheck, Loader2, MessageCircle, RefreshCw, XCircle } from "lucide-react";
+import { AlertTriangle, CircleCheck, Loader2, MapPin, MessageCircle, RefreshCw, Star, XCircle } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn, formatDateTime, formatIDR } from "@/lib/utils";
 import { TIERS } from "@/lib/pricing";
 import { waLink } from "@/lib/contact";
+import { track } from "@/lib/analytics";
 import {
   ORDER_FLOW,
   ORDER_STEP_LABEL,
@@ -70,6 +71,7 @@ export function TrackingClient({ token }: { token: string }) {
       if (!res.ok || !json?.data) {
         setActionError(errorMessage(json, "Aksi gagal. Coba lagi."));
       } else {
+        track(action === "approve" ? "quote_approve" : "order_cancel");
         setState({ kind: "ready", order: json.data });
       }
     } catch {
@@ -170,6 +172,14 @@ export function TrackingClient({ token }: { token: string }) {
           </div>
         )}
 
+        {order.deliveryMethod === "pickup" && (
+          <p className="mt-4 flex items-start gap-2 text-sm">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <span>
+              Ambil sendiri{order.pickupPoint ? ` di ${order.pickupPoint}` : ""}. Kami kabari lewat WhatsApp saat barang siap diambil.
+            </span>
+          </p>
+        )}
         {order.trackingNumber && (
           <p className="mt-4 text-sm">
             No. resi: <span className="font-mono font-medium">{order.trackingNumber}</span>
@@ -251,9 +261,13 @@ export function TrackingClient({ token }: { token: string }) {
         <p className="mt-4 text-xs text-[hsl(var(--muted-foreground))]">
           Kalau barang habis: {OUT_OF_STOCK_LABEL[order.outOfStockPreference] ?? order.outOfStockPreference}
           {order.trip ? ` · Open Trip ${order.trip.code}` : ""}
-          {order.city ? ` · Dikirim ke ${order.city}` : ""}
+          {order.deliveryMethod === "pickup" ? " · Ambil sendiri" : order.city ? ` · Dikirim ke ${order.city}` : ""}
         </p>
       </GlassCard>
+
+      {(order.canReview || order.reviewSubmitted) && (
+        <ReviewForm token={token} submitted={!!order.reviewSubmitted} onSubmitted={() => void load()} />
+      )}
 
       <div className="flex flex-col sm:flex-row gap-2">
         <Button asChild variant="outline">
@@ -281,5 +295,86 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-[hsl(var(--muted-foreground))]">{label}</span>
       <span className="tabular-nums">{value}</span>
     </div>
+  );
+}
+
+function ReviewForm({ token, submitted, onSubmitted }: { token: string; submitted: boolean; onSubmitted: () => void }) {
+  const [rating, setRating] = useState(5);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (submitted) {
+    return (
+      <GlassCard className="p-5 sm:p-6 text-sm">
+        <p className="font-medium">Terima kasih atas ulasanmu!</p>
+        <p className="mt-1 text-[hsl(var(--muted-foreground))]">Ulasan akan tampil di situs setelah dicek tim.</p>
+      </GlassCard>
+    );
+  }
+
+  return (
+    <GlassCard className="p-5 sm:p-6">
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setBusy(true);
+          setError(null);
+          try {
+            const res = await fetch(`/api/order-requests/${encodeURIComponent(token)}/review`, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ rating, body: body.trim() }),
+            });
+            const json = await res.json().catch(() => null);
+            if (!res.ok) {
+              setError(errorMessage(json, "Ulasan belum terkirim. Coba lagi."));
+              return;
+            }
+            track("review_submit", { rating });
+            onSubmitted();
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <h3 className="font-semibold">Bagaimana pengalamanmu?</h3>
+        <fieldset className="mt-3">
+          <legend className="sr-only">Rating</legend>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <label key={n} className="cursor-pointer">
+                <input type="radio" name="rating" value={n} checked={rating === n} onChange={() => setRating(n)} className="sr-only" />
+                <Star
+                  className={cn("h-7 w-7", n <= rating ? "fill-[hsl(var(--warning))] text-[hsl(var(--warning))]" : "text-[hsl(var(--border))]")}
+                  aria-label={`${n} bintang`}
+                />
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <label htmlFor="review-body" className="mt-4 block text-sm font-medium">
+          Ceritakan singkat
+        </label>
+        <textarea
+          id="review-body"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          minLength={10}
+          maxLength={800}
+          required
+          placeholder="Contoh: barang sesuai pesanan, packing rapi, sampai 2 hari."
+          className="mt-1.5 min-h-[88px] w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--surface))] px-4 py-3 text-sm outline-none focus:border-[hsl(var(--ring))]"
+        />
+        {error && (
+          <p role="alert" className="mt-2 text-sm text-[hsl(var(--danger))]">
+            {error}
+          </p>
+        )}
+        <Button type="submit" className="mt-3" disabled={busy || body.trim().length < 10}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null} Kirim ulasan
+        </Button>
+      </form>
+    </GlassCard>
   );
 }

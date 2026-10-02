@@ -33,7 +33,11 @@ import {
   computePricing,
   recommendTier,
   shippingFeeFor,
+  availableTiers,
+  KILAT,
+  KILAT_BLOCKED_CATEGORIES,
 } from "@/lib/pricing";
+import { track } from "@/lib/analytics";
 import { rememberOrderLink } from "@/lib/local-orders";
 import { cart, type CartLine } from "@/lib/cart";
 import { waLink } from "@/lib/contact";
@@ -50,7 +54,14 @@ type TripRow = {
   capacityKg: number;
   bookedKg: number;
   status: string;
+  poClosesAt?: string | null;
 };
+
+const PICKUP_POINT = process.env.NEXT_PUBLIC_PICKUP_POINT?.trim() || null;
+
+function poClosed(t: TripRow): boolean {
+  return !!t.poClosesAt && new Date(t.poClosesAt).getTime() < Date.now();
+}
 
 const CATEGORIES = ["Fashion", "Skincare", "Snack Bandung", "Sepatu", "Tas", "Hijab", "Elektronik", "Aksesoris", "Lainnya"];
 
@@ -72,6 +83,7 @@ type Contact = {
   city: string;
   postal: string;
   notes: string;
+  deliveryMethod: "delivery" | "pickup";
 };
 
 type OutOfStock = "ask" | "substitute" | "cancel";
@@ -99,7 +111,15 @@ const newItem = (id: string = crypto.randomUUID()): Item => ({
   notes: "",
 });
 
-const emptyContact: Contact = { name: "", phone: "", street: "", city: "Samarinda", postal: "", notes: "" };
+const emptyContact: Contact = {
+  name: "",
+  phone: "",
+  street: "",
+  city: "Samarinda",
+  postal: "",
+  notes: "",
+  deliveryMethod: "delivery",
+};
 
 type Errors = Record<string, string>;
 
@@ -108,7 +128,16 @@ function validatePhone(raw: string): boolean {
   return /^(62|0)?8\d{7,12}$/.test(digits);
 }
 
-function stepErrors(step: number, state: { items: Item[]; isCatalog: boolean; tier: TierId; tripId: string | null; contact: Contact }): Errors {
+type StepState = {
+  items: Item[];
+  isCatalog: boolean;
+  tier: TierId;
+  tripId: string | null;
+  contact: Contact;
+  kilatBlocked: string | null;
+};
+
+function stepErrors(step: number, state: StepState): Errors {
   const errors: Errors = {};
   if (step === 1 && !state.isCatalog) {
     state.items.forEach((it, i) => {
@@ -118,13 +147,15 @@ function stepErrors(step: number, state: { items: Item[]; isCatalog: boolean; ti
     });
   }
   if (step === 2 && state.tier === "batch" && !state.tripId) errors.trip = "Pilih jadwal Open Trip";
+  if (step === 2 && state.tier === "air" && state.kilatBlocked) errors.tier = state.kilatBlocked;
   if (step === 3) {
     const c = state.contact;
     if (c.name.trim().length < 2) errors.name = "Isi nama penerima";
     if (!validatePhone(c.phone)) errors.phone = "Nomor WhatsApp tidak valid (contoh 0812xxxxxxx)";
-    if (c.street.trim().length < 5) errors.street = "Alamat terlalu singkat";
+    const pickup = c.deliveryMethod === "pickup";
+    if (!pickup && c.street.trim().length < 5) errors.street = "Alamat terlalu singkat";
     if (c.city.trim().length < 2) errors.city = "Isi kota";
-    if (!/^\d{5}$/.test(c.postal.trim())) errors.postal = "Kode pos 5 digit";
+    if (!pickup && !/^\d{5}$/.test(c.postal.trim())) errors.postal = "Kode pos 5 digit";
   }
   return errors;
 }
@@ -147,6 +178,10 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<{ code: string; token: string; status: string; total: number } | null>(null);
+
+  useEffect(() => {
+    track("request_start", { mode });
+  }, [mode]);
 
   // Restore the draft (request mode) so a refresh doesn't wipe the form.
   useEffect(() => {
@@ -210,15 +245,21 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
   const tier: TierId = tierChoice ?? recommended;
   const pricing = useMemo(() => computePricing({ itemsTotal, totalKg, tier }), [itemsTotal, totalKg, tier]);
   const trip = trips.find((t) => t.id === tripId) ?? null;
-  const errors: Errors = showErrors ? stepErrors(step, { items, isCatalog, tier, tripId, contact }) : {};
+  const blockedItem = isCatalog ? null : items.find((it) => KILAT_BLOCKED_CATEGORIES.includes(it.category));
+  const kilatBlocked = blockedItem
+    ? `${blockedItem.name || blockedItem.category} tidak bisa dikirim lewat pesawat (baterai lithium). Pilih Reguler atau Kargo.`
+    : null;
+  const stepState: StepState = { items, isCatalog, tier, tripId, contact, kilatBlocked };
+  const errors: Errors = showErrors ? stepErrors(step, stepState) : {};
 
   const goNext = () => {
-    const errs = stepErrors(step, { items, isCatalog, tier, tripId, contact });
+    const errs = stepErrors(step, stepState);
     if (Object.keys(errs).length) {
       setShowErrors(true);
       return;
     }
     setShowErrors(false);
+    track("request_step", { step: step + 1, mode });
     setStep((s) => Math.min(STEPS.length, s + 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -226,7 +267,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
   const submit = async () => {
     if (submitting) return;
     for (const s of [1, 2, 3]) {
-      const errs = stepErrors(s, { items, isCatalog, tier, tripId, contact });
+      const errs = stepErrors(s, stepState);
       if (Object.keys(errs).length) {
         setShowErrors(true);
         setStep(s);
@@ -247,6 +288,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
       },
       tier,
       tripId: tier === "batch" ? tripId : null,
+      deliveryMethod: PICKUP_POINT ? contact.deliveryMethod : "delivery",
       items: isCatalog
         ? cartLines.map((l) => ({ name: l.name, productId: l.productId, qty: l.qty, variant: l.variant || undefined }))
         : items.map((it) => ({
@@ -291,6 +333,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
         /* ignore */
       }
       if (isCatalog) cart.clear();
+      track(isCatalog ? "checkout_submit" : "request_submit", { tier, items: payload.items.length });
       setResult({ code: data.code, token: data.trackingToken, status: data.status, total });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -360,6 +403,8 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
               tripId={tripId}
               setTripId={setTripId}
               error={errors.trip}
+              tierError={errors.tier}
+              kilatBlocked={kilatBlocked}
             />
           )}
           {step === 3 && <ContactStep contact={contact} setContact={setContact} errors={errors} />}
@@ -679,6 +724,8 @@ function ShippingStep({
   tripId,
   setTripId,
   error,
+  tierError,
+  kilatBlocked,
 }: {
   tier: TierId;
   recommended: TierId;
@@ -688,8 +735,15 @@ function ShippingStep({
   tripId: string | null;
   setTripId: (v: string) => void;
   error?: string;
+  tierError?: string;
+  kilatBlocked: string | null;
 }) {
-  const fees: Record<TierId, number> = { fast: shippingFeeFor("fast", totalKg), batch: shippingFeeFor("batch", totalKg) };
+  const tiers = availableTiers();
+  const fees: Record<TierId, number> = {
+    fast: shippingFeeFor("fast", totalKg),
+    batch: shippingFeeFor("batch", totalKg),
+    air: shippingFeeFor("air", totalKg),
+  };
   const saving = Math.abs(fees.fast - fees.batch);
   return (
     <div className="space-y-4">
@@ -698,22 +752,30 @@ function ShippingStep({
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Estimasi berat ±{totalKg.toFixed(1)} kg. Kami sudah pilihkan yang paling hemat — kamu tetap bisa ganti.
         </p>
-        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3" role="radiogroup" aria-label="Layanan pengiriman">
-          {Object.values(TIERS).map((t) => {
+        <div
+          className={cn("mt-5 grid grid-cols-1 gap-3", tiers.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2")}
+          role="radiogroup"
+          aria-label="Layanan pengiriman"
+        >
+          {tiers.map((id) => {
+            const t = TIERS[id];
             const active = tier === t.id;
-            const Icon = t.id === "fast" ? Zap : Truck;
+            const Icon = t.id === "air" ? Zap : Truck;
+            const disabled = t.id === "air" && !!kilatBlocked;
             return (
               <button
                 key={t.id}
                 type="button"
                 role="radio"
                 aria-checked={active}
-                onClick={() => setTier(t.id)}
+                aria-disabled={disabled}
+                onClick={() => !disabled && setTier(t.id)}
                 className={cn(
                   "text-left rounded-2xl border p-5 transition-all",
                   active
                     ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)] ring-2 ring-[hsl(var(--sage-700))]/30"
                     : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
+                  disabled && "opacity-60 cursor-not-allowed",
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -730,11 +792,25 @@ function ShippingStep({
                 <p className="mt-3 text-lg font-semibold tabular-nums">{formatIDR(fees[t.id])}</p>
                 <p className="text-sm text-[hsl(var(--muted-foreground))]">{t.tagline}</p>
                 <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Tiba {t.eta}</p>
+                {t.id === "air" && KILAT && KILAT.minKg > 0.5 && (
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Minimal {KILAT.minKg} kg dihitung</p>
+                )}
+                {disabled && <p className="mt-2 text-xs text-[hsl(var(--danger))]">Ada barang ber-baterai — tidak bisa lewat udara.</p>}
               </button>
             );
           })}
         </div>
-        {tier !== recommended && saving > 0 && (
+        {tierError && (
+          <p role="alert" className="mt-3 text-xs text-[hsl(var(--danger))]">
+            {tierError}
+          </p>
+        )}
+        {tier === "air" && (
+          <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
+            Kilat lewat pesawat: parfum, aerosol, dan cairan mudah terbakar tidak bisa ikut — kami infokan kalau ada barang yang harus pindah layanan.
+          </p>
+        )}
+        {tier !== recommended && tier !== "air" && saving > 0 && (
           <p className="mt-3 text-xs text-[hsl(var(--warning))]">
             {TIERS[recommended].label} lebih hemat {formatIDR(saving)} untuk berat ini.
           </p>
@@ -756,7 +832,8 @@ function ShippingStep({
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3" role="radiogroup" aria-label="Jadwal Open Trip">
               {trips.map((t) => {
                 const left = Math.max(0, t.capacityKg - t.bookedKg);
-                const isFull = t.status === "fullbooked" || left <= 0;
+                const closed = poClosed(t);
+                const isFull = t.status === "fullbooked" || left <= 0 || closed;
                 const active = tripId === t.id;
                 return (
                   <button
@@ -776,7 +853,13 @@ function ShippingStep({
                   >
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
-                      {isFull ? <Badge variant="warning">Penuh</Badge> : <Badge variant="success">{left} kg tersisa</Badge>}
+                      {closed ? (
+                        <Badge variant="neutral">PO tutup</Badge>
+                      ) : isFull ? (
+                        <Badge variant="warning">Penuh</Badge>
+                      ) : (
+                        <Badge variant="success">{left} kg tersisa</Badge>
+                      )}
                     </div>
                     <p className="mt-1.5 font-semibold">
                       Berangkat {formatDate(t.departAt, { weekday: "long", day: "numeric", month: "short", year: undefined })}
@@ -786,6 +869,11 @@ function ShippingStep({
                         ? `Estimasi tiba ${formatDate(t.arriveEstimateAt, { day: "numeric", month: "short", year: undefined })}`
                         : "Estimasi tiba diinfokan saat berangkat"}
                     </p>
+                    {t.poClosesAt && !closed && (
+                      <p className="mt-1 text-xs font-medium text-[hsl(var(--warning))]">
+                        PO tutup {formatDate(t.poClosesAt, { weekday: "short", day: "numeric", month: "short", year: undefined, hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    )}
                   </button>
                 );
               })}
@@ -806,12 +894,49 @@ function ContactStep({ contact, setContact, errors }: { contact: Contact; setCon
     "aria-invalid": !!errors[key],
     "aria-describedby": errors[key] ? `contact-${key}-err` : undefined,
   });
+  const pickup = !!PICKUP_POINT && contact.deliveryMethod === "pickup";
   return (
     <GlassCard className="p-5 sm:p-6">
-      <h2 className="text-base font-semibold">Kontak & alamat penerima</h2>
+      <h2 className="text-base font-semibold">{pickup ? "Kontak penerima" : "Kontak & alamat penerima"}</h2>
       <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
         Update pesanan dikirim ke WhatsApp ini. Tidak perlu bikin akun.
       </p>
+      {PICKUP_POINT && (
+        <fieldset className="mt-5">
+          <legend className="text-sm font-medium">Cara terima barang</legend>
+          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {(
+              [
+                ["delivery", "Antar ke alamat", "Kurir lokal sampai depan rumah."],
+                ["pickup", "Ambil sendiri", PICKUP_POINT],
+              ] as const
+            ).map(([value, label, hint]) => (
+              <label
+                key={value}
+                className={cn(
+                  "flex items-start gap-3 rounded-xl border p-3 cursor-pointer",
+                  contact.deliveryMethod === value
+                    ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-700)/0.25)]"
+                    : "border-[hsl(var(--border))]",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="delivery-method"
+                  value={value}
+                  checked={contact.deliveryMethod === value}
+                  onChange={() => setContact({ ...contact, deliveryMethod: value })}
+                  className="mt-1 accent-[hsl(var(--sage-700))]"
+                />
+                <span className="text-sm">
+                  <span className="font-medium">{label}</span>
+                  <span className="block text-xs text-[hsl(var(--muted-foreground))]">{hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="grid gap-1.5">
           <Label htmlFor="contact-name">Nama penerima</Label>
@@ -823,27 +948,33 @@ function ContactStep({ contact, setContact, errors }: { contact: Contact; setCon
           <Input {...field("phone")} type="tel" inputMode="tel" autoComplete="tel" placeholder="0812 3456 7890" />
           <FieldError id="contact-phone-err" message={errors.phone} />
         </div>
-        <div className="sm:col-span-2 grid gap-1.5">
-          <Label htmlFor="contact-street">Alamat lengkap</Label>
-          <Textarea {...field("street")} autoComplete="street-address" placeholder="Jl. Pahlawan No. 10, RT 03/RW 02, Kel. …" />
-          <FieldError id="contact-street-err" message={errors.street} />
-        </div>
+        {!pickup && (
+          <div className="sm:col-span-2 grid gap-1.5">
+            <Label htmlFor="contact-street">Alamat lengkap</Label>
+            <Textarea {...field("street")} autoComplete="street-address" placeholder="Jl. Pahlawan No. 10, RT 03/RW 02, Kel. …" />
+            <FieldError id="contact-street-err" message={errors.street} />
+          </div>
+        )}
         <div className="grid gap-1.5">
           <Label htmlFor="contact-city">Kota</Label>
           <Input {...field("city")} autoComplete="address-level2" />
           <FieldError id="contact-city-err" message={errors.city} />
         </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="contact-postal">Kode pos</Label>
-          <Input {...field("postal")} inputMode="numeric" autoComplete="postal-code" maxLength={5} placeholder="75124" />
-          <FieldError id="contact-postal-err" message={errors.postal} />
-        </div>
-        <div className="sm:col-span-2 grid gap-1.5">
-          <Label htmlFor="contact-notes">
-            Catatan kurir <span className="font-normal text-[hsl(var(--muted-foreground))]">— opsional</span>
-          </Label>
-          <Input {...field("notes")} placeholder="Pagar hitam, titip ke pos satpam" />
-        </div>
+        {!pickup && (
+          <>
+            <div className="grid gap-1.5">
+              <Label htmlFor="contact-postal">Kode pos</Label>
+              <Input {...field("postal")} inputMode="numeric" autoComplete="postal-code" maxLength={5} placeholder="75124" />
+              <FieldError id="contact-postal-err" message={errors.postal} />
+            </div>
+            <div className="sm:col-span-2 grid gap-1.5">
+              <Label htmlFor="contact-notes">
+                Catatan kurir <span className="font-normal text-[hsl(var(--muted-foreground))]">— opsional</span>
+              </Label>
+              <Input {...field("notes")} placeholder="Pagar hitam, titip ke pos satpam" />
+            </div>
+          </>
+        )}
       </div>
     </GlassCard>
   );
@@ -911,7 +1042,9 @@ function ReviewStep({
           {contact.name} · {contact.phone}
         </p>
         <p className="text-[hsl(var(--muted-foreground))]">
-          {contact.street}, {contact.city} {contact.postal}
+          {contact.deliveryMethod === "pickup" && PICKUP_POINT
+            ? `Ambil sendiri di ${PICKUP_POINT}`
+            : `${contact.street}, ${contact.city} ${contact.postal}`}
         </p>
         <p className="mt-3">
           Layanan <strong>{TIERS[tier].label}</strong>
@@ -1039,7 +1172,7 @@ function SummaryCard({
           ))}
           <div className="h-px bg-[hsl(var(--border))]" />
           <Row label="Jasa titip (8%, min Rp20rb)" value={formatIDR(pricing.jastipFee)} />
-          <Row label={`Ongkir ${TIERS[tier].label} (${pricing.billingKg.toFixed(1)} kg)`} value={formatIDR(pricing.shippingFee)} />
+          <Row label={`Ongkir ${TIERS[tier].label} (${(tier === "air" && KILAT ? Math.max(pricing.billingKg, KILAT.minKg) : pricing.billingKg).toFixed(1)} kg)`} value={formatIDR(pricing.shippingFee)} />
           {PPN_ENABLED && <Row label="PPN 11% (atas jasa & ongkir)" value={formatIDR(pricing.ppn)} />}
           <div className="h-px bg-[hsl(var(--border))]" />
           <div className="flex items-center justify-between">

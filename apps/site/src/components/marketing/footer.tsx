@@ -40,7 +40,8 @@ export function Footer() {
       links: [
         { label: "Tentang", href: "/tentang" },
         { label: "Blog", href: "/blog" },
-        { label: "Afiliasi / Reseller", href: "/afiliasi" },
+        { label: "Reseller & B2B", href: "/reseller" },
+        { label: "Afiliasi", href: "/afiliasi" },
         { label: "Hubungi Kami", href: "/kontak" },
         { label: "Syarat & Ketentuan", href: "/terms" },
         { label: "Pembatalan & Refund", href: "/refund" },

@@ -89,6 +89,10 @@ export type PublicOrderView = {
   history: OrderHistoryEntry[];
   canApprove: boolean;
   canCancel: boolean;
+  canReview?: boolean;
+  reviewSubmitted?: boolean;
+  deliveryMethod?: "delivery" | "pickup";
+  pickupPoint?: string | null;
 };
 
 export type ApiError = { error?: { code?: string; message?: string; details?: unknown } | string };

@@ -9,6 +9,7 @@ const STATIC_ROUTES: Array<{ path: string; freq: MetadataRoute.Sitemap[number]["
   { path: "/request", freq: "monthly", priority: 0.9 },
   { path: "/blog", freq: "weekly", priority: 0.7 },
   { path: "/kontak", freq: "yearly", priority: 0.6 },
+  { path: "/reseller", freq: "monthly", priority: 0.6 },
   { path: "/lacak", freq: "yearly", priority: 0.4 },
   { path: "/press-kit", freq: "yearly", priority: 0.5 },
   { path: "/privacy", freq: "yearly", priority: 0.3 },

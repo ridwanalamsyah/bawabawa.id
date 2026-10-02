@@ -38,10 +38,12 @@ const createSchema = z
     customerName: z.string().trim().min(2, "Nama minimal 2 karakter").max(160),
     customerPhone: z.string().trim().min(9, "Nomor WhatsApp tidak valid").max(20),
     customerEmail: z.string().trim().email().max(180).optional().or(z.literal("").transform(() => undefined)),
+    // Street + postal code are only required for home delivery; pickup
+    // customers collect from the team's pickup point.
     address: z.object({
-      street: z.string().trim().min(5, "Alamat terlalu pendek").max(300),
+      street: z.string().trim().max(300).default(""),
       city: z.string().trim().min(2).max(80),
-      postal: z.string().trim().regex(/^\d{5}$/, "Kode pos harus 5 digit"),
+      postal: z.string().trim().default(""),
       notes: z.string().trim().max(200).optional()
     }),
     tier: z.enum(["fast", "batch", "air"]),
@@ -58,6 +60,14 @@ const createSchema = z
   .refine((body) => body.tier !== "batch" || !!body.tripId, {
     message: "Pilih jadwal trip untuk layanan Kargo",
     path: ["tripId"]
+  })
+  .refine((body) => body.deliveryMethod === "pickup" || body.address.street.length >= 5, {
+    message: "Alamat terlalu pendek",
+    path: ["address", "street"]
+  })
+  .refine((body) => body.deliveryMethod === "pickup" || /^\d{5}$/.test(body.address.postal), {
+    message: "Kode pos harus 5 digit",
+    path: ["address", "postal"]
   });
 
 /** Optional auth: link the request to an account when the caller is signed in. */

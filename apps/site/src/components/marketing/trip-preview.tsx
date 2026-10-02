@@ -15,6 +15,7 @@ type Trip = {
   bookedKg: number;
   status: string;
   popularCategories: string[] | null;
+  poClosesAt?: string | null;
 };
 
 /**
@@ -35,6 +36,7 @@ export async function TripPreview() {
     .sort((a, b) => a.departAt.localeCompare(b.departAt))
     .slice(0, 3);
   if (top.length === 0) return null;
+  const now = new Date().getTime();
 
   return (
     <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="trip-preview-title">
@@ -57,7 +59,8 @@ export async function TripPreview() {
           {top.map((t) => {
             const left = Math.max(0, t.capacityKg - t.bookedKg);
             const filled = t.capacityKg > 0 ? Math.min(100, Math.round((t.bookedKg / t.capacityKg) * 100)) : 0;
-            const isFull = t.status === "fullbooked" || left <= 0;
+            const poClosed = !!t.poClosesAt && new Date(t.poClosesAt).getTime() <= now;
+            const isFull = t.status === "fullbooked" || left <= 0 || poClosed;
             return (
               <li key={t.id} className="py-4 grid grid-cols-2 sm:grid-cols-12 gap-x-4 gap-y-2 items-center">
                 <div className="sm:col-span-3">
@@ -65,6 +68,11 @@ export async function TripPreview() {
                     {formatDate(t.departAt, { weekday: "short", day: "numeric", month: "short", year: undefined })}
                   </p>
                   <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
+                  {t.poClosesAt && new Date(t.poClosesAt).getTime() > now && (
+                    <p className="text-xs font-medium text-[hsl(var(--warning))]">
+                      PO tutup {formatDate(t.poClosesAt, { day: "numeric", month: "short", year: undefined, hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
                 </div>
                 <p className="sm:col-span-3 text-sm text-[hsl(var(--muted-foreground))]">
                   Tiba{" "}
@@ -74,7 +82,7 @@ export async function TripPreview() {
                 </p>
                 <div className="col-span-2 sm:col-span-4 flex items-center gap-3">
                   <Progress value={filled} className="h-1.5" />
-                  <span className="shrink-0 text-sm tabular-nums">{isFull ? "Penuh" : `${left} kg sisa`}</span>
+                  <span className="shrink-0 text-sm tabular-nums">{poClosed ? "PO tutup" : isFull ? "Penuh" : `${left} kg sisa`}</span>
                 </div>
                 <div className="col-span-2 sm:col-span-2 sm:text-right">
                   {!isFull && (

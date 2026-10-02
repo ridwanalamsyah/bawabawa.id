@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Handshake, Coins, BarChart3, Share2 } from "lucide-react";
+import Link from "next/link";
 import { WA_NUMBER } from "@/lib/contact";
 
 export const metadata: Metadata = {
@@ -33,8 +34,8 @@ export default function AfiliasiPage() {
       <section className="mt-10 grid sm:grid-cols-2 gap-4">
         <Step
           icon={<Handshake className="h-5 w-5" />}
-          title="1. Daftar via WhatsApp"
-          body="Kontak admin Bawabawa lewat WA dengan info nama, kota, dan channel kamu (IG / TikTok / komunitas)."
+          title="1. Isi form pendaftaran"
+          body="Isi nama, kota, dan channel kamu (IG / TikTok / komunitas). Admin menghubungi lewat WhatsApp."
         />
         <Step
           icon={<Share2 className="h-5 w-5" />}
@@ -81,16 +82,25 @@ export default function AfiliasiPage() {
           terima 20 partner pertama untuk fase awal supaya kualitas onboarding
           terjaga.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/reseller?kind=affiliate"
+            className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-6 py-3 text-sm font-semibold text-white hover:bg-[hsl(var(--sage-800))] transition-colors"
+          >
+            Daftar lewat form
+          </Link>
           <a
             href={`https://wa.me/${WA_NUMBER}?text=Halo+Bawabawa%2C+saya+mau+daftar+jadi+afiliasi`}
             target="_blank"
             rel="noreferrer noopener"
-            className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-6 py-3 text-sm font-semibold text-white hover:bg-[hsl(var(--sage-800))] transition-colors"
+            className="text-sm font-medium underline underline-offset-4"
           >
-            Daftar via WhatsApp
+            atau chat WhatsApp
           </a>
         </div>
+        <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
+          Punya toko atau butuh kulakan rutin? Lihat <Link href="/reseller" className="underline underline-offset-4">program reseller &amp; B2B</Link>.
+        </p>
       </section>
     </article>
   );
