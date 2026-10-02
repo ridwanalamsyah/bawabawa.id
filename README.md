@@ -32,18 +32,26 @@ diaktifkan ketika `NODE_ENV=production`.
 Client Secret tidak diperlukan — implementasi pakai ID-token flow lewat Google
 Identity Services JS SDK, bukan auth-code flow server-to-server.
 
-### 2. User gating
-Tiga skenario didukung lewat env:
+### 2. Akun & hak akses
+- Siapa pun bisa login dengan Google; akun baru menjadi **customer** (hanya
+  `/dashboard`, tanpa akses endpoint back-office).
+- Staf diundang lewat `/admin/users`. **Divisi** menentukan hak akses
+  (admin/owner, finance, operations, koordinator, gudang, sales, support,
+  marketing) — lihat `apps/api/src/common/security/permissions.ts` atau
+  halaman `/admin/roles`. Divisi yang tidak dikenal hanya bisa melihat pesanan.
+- `OAUTH_REQUIRE_APPROVAL` / `OAUTH_ALLOWED_DOMAINS` saat ini tidak mengubah
+  status customer baru (customer langsung aktif agar bisa melacak pesanan).
 
-| Tujuan | `OAUTH_ALLOWED_DOMAINS` | `OAUTH_REQUIRE_APPROVAL` |
-| --- | --- | --- |
-| Hanya karyawan domain tertentu auto-approved | `bawabawa.id` | `true` (default) |
-| Siapapun bisa daftar, admin approve manual via `/admin/users` | _(kosong)_ | `true` (default) |
-| Open sign-up tanpa approval (NOT recommended) | _(kosong)_ | `false` |
+### 2b. Alur pesanan jastip
+1. Pelanggan mengisi `/request` (titip apa saja) atau checkout `/katalog`.
+2. Pesanan masuk `order_requests`; tim dapat notifikasi WhatsApp
+   (`OPS_WHATSAPP_NUMBER`, butuh `FONNTE_DEVICE_TOKEN`).
+3. Tim memproses di `/admin/orders`: kirim penawaran → pelanggan setujui di
+   link tracking → tandai dibayar → belikan → kemas → kirim (resi) → diterima.
+4. Instruksi pembayaran diambil dari `PAYMENT_INSTRUCTIONS`.
 
-Sign-in pertama akan membuat row di tabel `users` dengan `status='pending'`
-(kecuali user di domain whitelist atau approval di-disable). Backend menolak
-login dengan kode `PENDING_APPROVAL` sampai admin manual switch `status='active'`.
+Migrasi baru: `020_order_requests.sql`, `021_catalog_products.sql` — jalankan
+`npm -w apps/api run migrate` sebelum deploy.
 
 ### 3. Deploy ke Fly.io (rekomendasi)
 ```bash

@@ -28,5 +28,41 @@ jobs:
       - run: npm run typecheck --workspaces --if-present
       - run: npm run test --workspaces --if-present
       - run: npm run build --workspaces --if-present
-      - name: Security audit (critical only)
-        run: npm audit --audit-level=critical
+      - name: Security audit (production deps, high+)
+        run: npm audit --omit=dev --audit-level=high
+
+  # Runs the real migrations against Postgres and exercises the order flow
+  # end to end (submit → quote → approve → status), which the SQLite-backed
+  # default test run can't cover (JSONB, FOR UPDATE).
+  postgres-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U test" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://test:test@127.0.0.1:5433/test
+      JWT_ACCESS_SECRET: ci-test-access-secret-not-for-production
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-not-for-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install build tools for native addons
+        run: sudo apt-get install -y python3 make g++
+      - run: npm ci
+      - name: Apply migrations
+        run: npm run migrate --workspace @erp/api
+      - name: Order flow + authorization tests
+        run: npx vitest run src/tests/order-requests.integration.test.ts src/tests/authorization.unit.test.ts
+        working-directory: apps/api
