@@ -3,6 +3,7 @@ import { ArrowRight, Plane } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
 import { Progress } from "@/components/ui/progress";
 import { formatDate } from "@/lib/utils";
+import { delay } from "@/lib/motion";
 
 type Trip = {
   id: string;
@@ -41,7 +42,7 @@ export async function TripPreview() {
   return (
     <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="trip-preview-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between flex-wrap gap-4">
+        <div data-reveal className="flex items-end justify-between flex-wrap gap-4">
           <div>
             <h2 id="trip-preview-title" className="text-2xl sm:text-3xl">
               Jadwal Open Trip
@@ -50,19 +51,19 @@ export async function TripPreview() {
               Kargo bersama, flat Rp200.000 sampai 50 kg.
             </p>
           </div>
-          <Link href="/open-trip" className="text-sm font-medium underline underline-offset-4">
+          <Link href="/open-trip" className="nudge text-sm font-medium underline underline-offset-4">
             Semua jadwal <ArrowRight className="inline h-4 w-4" aria-hidden />
           </Link>
         </div>
 
         <ul className="mt-6 divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
-          {top.map((t) => {
+          {top.map((t, i) => {
             const left = Math.max(0, t.capacityKg - t.bookedKg);
             const filled = t.capacityKg > 0 ? Math.min(100, Math.round((t.bookedKg / t.capacityKg) * 100)) : 0;
             const poClosed = !!t.poClosesAt && new Date(t.poClosesAt).getTime() <= now;
             const isFull = t.status === "fullbooked" || left <= 0 || poClosed;
             return (
-              <li key={t.id} className="py-4 grid grid-cols-2 sm:grid-cols-12 gap-x-4 gap-y-2 items-center">
+              <li key={t.id} data-reveal style={delay(i * 90)} className="py-4 grid grid-cols-2 sm:grid-cols-12 gap-x-4 gap-y-2 items-center">
                 <div className="sm:col-span-3">
                   <p className="font-semibold">
                     {formatDate(t.departAt, { weekday: "short", day: "numeric", month: "short", year: undefined })}
@@ -81,12 +82,12 @@ export async function TripPreview() {
                     : "diinfokan"}
                 </p>
                 <div className="col-span-2 sm:col-span-4 flex items-center gap-3">
-                  <Progress value={filled} className="h-1.5" />
+                  <Progress value={filled} className="h-1.5" barClassName="reveal-bar" />
                   <span className="shrink-0 text-sm tabular-nums">{poClosed ? "PO tutup" : isFull ? "Penuh" : `${left} kg sisa`}</span>
                 </div>
                 <div className="col-span-2 sm:col-span-2 sm:text-right">
                   {!isFull && (
-                    <Link href="/request" className="text-sm font-semibold underline underline-offset-4">
+                    <Link href="/request" className="nudge text-sm font-semibold underline underline-offset-4">
                       Titip <Plane className="inline h-3.5 w-3.5" aria-hidden />
                     </Link>
                   )}

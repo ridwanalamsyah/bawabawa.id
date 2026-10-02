@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import { delay } from "@/lib/motion";
 import { jsonLd, faqPageSchema } from "@/lib/seo/schema";
 
 // Every answer must match how the business actually operates today (see
@@ -47,7 +48,7 @@ export function Faq() {
   return (
     <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="faq-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4">
+        <div data-reveal className="lg:col-span-4">
           <h2 id="faq-title" className="text-2xl sm:text-3xl">
             Pertanyaan umum
           </h2>
@@ -55,12 +56,12 @@ export function Faq() {
             Belum terjawab? Tanya langsung lewat WhatsApp.
           </p>
         </div>
-        <div className="lg:col-span-8 divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
+        <div data-reveal style={delay(100)} className="lg:col-span-8 divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
           {FAQS.map((f, i) => (
-            <details key={f.q} className="group py-1" open={i === 0}>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-medium [&::-webkit-details-marker]:hidden">
+            <details key={f.q} className="smooth group py-1" open={i === 0}>
+              <summary className="flex cursor-pointer transition-colors hover:text-[hsl(var(--sage-700))] dark:hover:text-[hsl(var(--sage-300))] list-none items-center justify-between gap-4 py-4 font-medium [&::-webkit-details-marker]:hidden">
                 {f.q}
-                <Plus className="h-4 w-4 shrink-0 transition-transform group-open:rotate-45" aria-hidden />
+                <Plus className="h-4 w-4 shrink-0 transition-transform duration-300 group-open:rotate-45" aria-hidden />
               </summary>
               <p className="pb-5 pr-8 text-[15px] leading-relaxed text-[hsl(var(--muted-foreground))]">{f.a}</p>
             </details>

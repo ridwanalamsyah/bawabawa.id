@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import type { CatalogProduct } from "@/app/api/catalog/route";
 import { CatalogGrid, CartBar } from "./catalog-client";
+import { delay } from "@/lib/motion";
 
 export const metadata: Metadata = {
   title: "Katalog titipan Bandung",
@@ -50,13 +51,13 @@ export default async function CatalogPage() {
     <section className="py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
-          <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+          <p className="animate-rise text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
             Katalog
           </p>
-          <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+          <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
             Titipan populer, harga sudah all-in.
           </h1>
-          <p className="mt-4 text-base text-[hsl(var(--muted-foreground))]">
+          <p style={delay(140)} className="animate-rise mt-4 text-base text-[hsl(var(--muted-foreground))]">
             Harga sudah termasuk jasa titip. Ongkir dihitung dari berat di keranjang.
             Barang yang kamu cari tidak ada?{" "}
             <Link href="/request" className="underline">Titip barang apa saja</Link>.

@@ -400,6 +400,89 @@ h1, h2, h3 {
 }
 
 
+/* ------------------------------------------------------------------
+   Motion. Small, purposeful, CSS-first:
+   - .animate-rise / .animate-pop: first-paint entrance (hero), no JS needed.
+   - [data-reveal]: fades sections in on scroll. Hidden only once
+     RevealObserver has put .reveal-ready on <html>, so content is always
+     visible without JS or before hydration.
+   - .reveal-bar: lines/progress bars that draw in when their section shows.
+   - .lift: hover feedback on clickable cards.
+   Stagger with style={{ "--d": "120ms" }}.
+------------------------------------------------------------------- */
+:root {
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  interpolate-size: allow-keywords;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes tick {
+  from { opacity: 0.35; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-rise { animation: rise 0.7s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
+.animate-pop  { animation: pop 0.8s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes spin-in {
+  from { opacity: 0; transform: rotate(-90deg) scale(0.7); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-drop { animation: drop 0.25s var(--ease-out-soft) both; }
+.animate-spin-in { animation: spin-in 0.25s var(--ease-out-soft) both; }
+.animate-tick { animation: tick 0.35s var(--ease-out-soft); display: inline-block; }
+
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s var(--ease-out-soft), transform 0.6s var(--ease-out-soft);
+  transition-delay: var(--d, 0s);
+}
+html.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+.reveal-bar { transform-origin: left center; }
+html.reveal-ready [data-reveal] .reveal-bar {
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out-soft);
+  transition-delay: calc(var(--d, 0s) + 0.15s);
+}
+html.reveal-ready [data-reveal].is-visible .reveal-bar { transform: none; }
+
+.lift {
+  transition: transform 0.2s var(--ease-out-soft), box-shadow 0.2s var(--ease-out-soft), border-color 0.2s;
+}
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -8px hsl(var(--foreground) / 0.18);
+}
+.lift:active { transform: translateY(0); }
+
+/* Arrow nudge on links/buttons that carry a trailing icon. */
+.nudge svg:last-child { transition: transform 0.2s var(--ease-out-soft); }
+.nudge:hover svg:last-child { transform: translateX(3px); }
+
+/* FAQ: animate <details> open/close where the browser supports it. */
+details.smooth::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition: block-size 0.3s var(--ease-out-soft), content-visibility 0.3s allow-discrete;
+}
+details.smooth[open]::details-content { block-size: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-ready [data-reveal],
+  html.reveal-ready [data-reveal] .reveal-bar { opacity: 1; transform: none; transition: none; }
+  .lift:hover { transform: none; }
+}
+
 /* Accessibility baseline (WCAG 2.4.7): a visible focus ring for every
    keyboard-focusable element that doesn't define its own. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {

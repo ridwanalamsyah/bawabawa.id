@@ -10,6 +10,7 @@ import { cn, formatIDR } from "@/lib/utils";
 import { cart, cartCount } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import type { CatalogProduct } from "@/app/api/catalog/route";
+import { delay } from "@/lib/motion";
 
 export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
   const categories = useMemo(
@@ -43,8 +44,8 @@ export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
         </div>
       )}
       <ul className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {visible.map((p) => (
-          <li key={p.id}>
+        {visible.map((p, i) => (
+          <li key={p.id} data-reveal style={delay(Math.min(i, 7) * 60)}>
             <ProductCard product={p} />
           </li>
         ))}
@@ -71,7 +72,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
     setTimeout(() => setAdded(false), 1500);
   };
   return (
-    <GlassCard className="h-full overflow-hidden flex flex-col">
+    <GlassCard className="lift h-full overflow-hidden flex flex-col">
       <div className="aspect-square bg-[hsl(var(--surface-2))] grid place-items-center">
         {product.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

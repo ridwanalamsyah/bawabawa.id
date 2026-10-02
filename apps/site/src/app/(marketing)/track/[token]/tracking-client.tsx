@@ -10,6 +10,7 @@ import { cn, formatDateTime, formatIDR } from "@/lib/utils";
 import { TIERS } from "@/lib/pricing";
 import { waLink } from "@/lib/contact";
 import { track } from "@/lib/analytics";
+import { delay } from "@/lib/motion";
 import {
   ORDER_FLOW,
   ORDER_STEP_LABEL,
@@ -201,22 +202,26 @@ export function TrackingClient({ token }: { token: string }) {
           </p>
         ) : (
           <ol className="mt-4 space-y-3">
-            {ORDER_FLOW.filter((s) => order.source === "request" || s !== "quoted").map((s) => {
+            {ORDER_FLOW.filter((s) => order.source === "request" || s !== "quoted").map((s, i) => {
               const idx = ORDER_FLOW.indexOf(s);
               const done = idx < currentIndex || (idx === currentIndex && s === "delivered");
               const active = idx === currentIndex && s !== "delivered";
               const at = reachedAt.get(s);
               return (
-                <li key={s} className="flex items-start gap-3" aria-current={active ? "step" : undefined}>
+                <li key={s} style={delay(i * 50)} className="animate-rise flex items-start gap-3" aria-current={active ? "step" : undefined}>
                   <span
                     className={cn(
-                      "mt-0.5 h-5 w-5 shrink-0 rounded-full border-2",
+                      "relative mt-0.5 h-5 w-5 shrink-0 rounded-full border-2",
                       done && "bg-[hsl(var(--emerald-500))] border-[hsl(var(--emerald-500))]",
                       active && "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-200))]",
                       !done && !active && "border-[hsl(var(--border))]",
                     )}
                     aria-hidden
-                  />
+                  >
+                    {active && (
+                      <span className="absolute -inset-0.5 rounded-full border-2 border-[hsl(var(--sage-700))] animate-ping opacity-40" />
+                    )}
+                  </span>
                   <div className="text-sm">
                     <p className={cn(!done && !active && "text-[hsl(var(--muted-foreground))]", active && "font-semibold")}>
                       {ORDER_STEP_LABEL[s]}

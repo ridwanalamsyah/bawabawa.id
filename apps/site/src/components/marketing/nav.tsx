@@ -8,6 +8,7 @@ import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { delay } from "@/lib/motion";
 
 // Public-facing navigation. /admin intentionally NOT linked here — staff
 // access the panel by typing the URL directly and authenticating via
@@ -82,19 +83,20 @@ export function MarketingNav() {
             className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]"
             aria-label="Toggle menu"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="animate-spin-in h-5 w-5" /> : <Menu className="animate-spin-in h-5 w-5" />}
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--bg))] px-4 py-4 flex flex-col gap-1">
-          {NAV.map((item) => (
+        <div className="animate-drop md:hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--bg))] px-4 py-4 flex flex-col gap-1">
+          {NAV.map((item, i) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm hover:bg-[hsl(var(--surface-2))]"
+              style={delay(40 + i * 40)}
+              className="animate-rise rounded-xl px-4 py-3 text-sm hover:bg-[hsl(var(--surface-2))]"
             >
               {item.label}
             </Link>

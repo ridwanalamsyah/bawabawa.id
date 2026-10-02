@@ -386,7 +386,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-8">
         <Stepper step={step} onJump={(s) => s < step && setStep(s)} />
-        <div className="mt-6">
+        <div key={step} className="animate-rise mt-6">
           {step === 1 &&
             (isCatalog ? (
               <CartStep lines={cartLines} />

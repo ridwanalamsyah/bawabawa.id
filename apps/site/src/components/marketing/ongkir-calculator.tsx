@@ -70,10 +70,12 @@ export function OngkirCalculator() {
               <span className="font-semibold">{TIERS[tier].label}</span>
               <span className="text-[hsl(var(--muted-foreground))]"> · {TIERS[tier].eta}</span>
               {tier === best && (
-                <span className="ml-2 text-xs font-medium text-[hsl(var(--emerald-600))]">lebih hemat</span>
+                <span className="animate-tick ml-2 text-xs font-medium text-[hsl(var(--emerald-600))]">lebih hemat</span>
               )}
             </dt>
-            <dd className="text-base font-semibold tabular-nums">{formatIDR(pricing.total)}</dd>
+            <dd className="text-base font-semibold tabular-nums">
+              <span key={pricing.total} className="animate-tick">{formatIDR(pricing.total)}</span>
+            </dd>
           </div>
         ))}
       </dl>
@@ -82,7 +84,7 @@ export function OngkirCalculator() {
         tim setelah cek stok — kamu bayar setelah setuju.
       </p>
       <Button asChild className="mt-5 w-full" size="lg">
-        <Link href="/request">
+        <Link href="/request" className="nudge">
           Titip barang ini <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </Button>

@@ -3,6 +3,7 @@ import { Footer } from "@/components/marketing/footer";
 import { WhatsAppFloat } from "@/components/marketing/whatsapp-float";
 import { StickyMobileCTA } from "@/components/marketing/sticky-cta";
 import { RouteProgress } from "@/components/marketing/route-progress";
+import { RevealObserver } from "@/components/marketing/reveal-observer";
 
 /**
  * One floating element at a time: the WhatsApp button on desktop, the
@@ -23,6 +24,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <Footer />
       <WhatsAppFloat />
       <StickyMobileCTA />
+      <RevealObserver />
     </>
   );
 }

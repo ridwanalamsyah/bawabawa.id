@@ -3,20 +3,21 @@ import { ArrowRight, ShieldCheck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/card";
 import type { CategoryPage } from "@/lib/seo/categories";
+import { delay } from "@/lib/motion";
 
 export function CategoryLanding({ page }: { page: CategoryPage }) {
   return (
     <>
       <section className="border-b border-[hsl(var(--border))]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+          <p className="animate-rise text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
             {page.heroEyebrow}
           </p>
-          <h1 className="mt-3 text-4xl sm:text-5xl leading-tight max-w-3xl">{page.heroHeadline}</h1>
-          <p className="mt-5 max-w-2xl text-lg text-[hsl(var(--muted-foreground))] leading-relaxed">
+          <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl leading-tight max-w-3xl">{page.heroHeadline}</h1>
+          <p style={delay(140)} className="animate-rise mt-5 max-w-2xl text-lg text-[hsl(var(--muted-foreground))] leading-relaxed">
             {page.heroDescription}
           </p>
-          <div className="mt-7 flex flex-col sm:flex-row gap-3">
+          <div style={delay(220)} className="animate-rise mt-7 flex flex-col sm:flex-row gap-3">
             <Button asChild size="lg" variant="primary">
               <Link href={`/request?cat=${page.slug}`}>
                 Titip {page.title.toLowerCase()} <ArrowRight className="h-4 w-4" aria-hidden />
