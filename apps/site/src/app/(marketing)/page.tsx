@@ -5,6 +5,7 @@ import { Pricing } from "@/components/marketing/pricing";
 import { TripPreview } from "@/components/marketing/trip-preview";
 import { Reviews } from "@/components/marketing/reviews";
 import { Faq } from "@/components/marketing/faq";
+import { FinalCTA } from "@/components/marketing/cta";
 
 /**
  * Landing page: hero with a working price calculator, how it works, rates
@@ -20,6 +21,7 @@ export default function HomePage() {
       <TripPreview />
       <Reviews />
       <Faq />
+      <FinalCTA />
     </>
   );
 }

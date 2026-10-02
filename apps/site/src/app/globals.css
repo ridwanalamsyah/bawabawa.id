@@ -489,6 +489,20 @@ h1, h2, h3 {
 }
 .animate-orb-drift { animation: orb-drift var(--orb-duration, 28s) ease-in-out infinite; }
 
+/* CTA map: dashes flow toward Samarinda, pins pulse. */
+@keyframes dash-flow { to { stroke-dashoffset: -56; } }
+.animate-dash-flow { animation: dash-flow 1.4s linear infinite; }
+@keyframes pin-pulse {
+  0%   { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.animate-pin-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pin-pulse 2.4s ease-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
 /* Brand gradient for one highlighted word in a headline. */
 .text-gradient-brand {
   background-image: linear-gradient(135deg, hsl(var(--sage-700)), hsl(var(--olive-500)), hsl(var(--emerald-600)));
