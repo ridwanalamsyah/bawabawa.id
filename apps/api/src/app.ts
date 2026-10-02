@@ -75,6 +75,19 @@ export function createApp() {
   app.use(metricsMiddleware);
   app.use(
     pinoHttp({
+      // Never write credentials to logs (bearer tokens, cookies, the
+      // site→API proxy secret, webhook tokens in query strings).
+      redact: {
+        paths: [
+          "req.headers.authorization",
+          "req.headers.cookie",
+          "req.headers[\"x-bawabawa-proxy-secret\"]",
+          "req.headers[\"x-api-key\"]",
+          "req.query.token",
+          "res.headers[\"set-cookie\"]"
+        ],
+        censor: "[redacted]"
+      },
       autoLogging: {
         ignore: (req) => (req as any).url?.startsWith?.("/assets") || (req as any).url?.endsWith?.(".html") || (req as any).url?.endsWith?.(".css") || (req as any).url?.endsWith?.(".js")
       }

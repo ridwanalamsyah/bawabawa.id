@@ -2,7 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { authGuard, requirePermission, type AuthUser } from "../../common/middleware/auth";
-import { publicOrderRateLimit } from "../../common/security/rate-limit";
+import { publicOrderActionRateLimit, publicOrderRateLimit } from "../../common/security/rate-limit";
 import { requireEnv } from "../../common/security/env";
 import { logAudit } from "../../common/audit/audit-log";
 import {
@@ -100,7 +100,7 @@ publicOrderRequestsRouter.get("/:token", async (req, res, next) => {
   }
 });
 
-publicOrderRequestsRouter.post("/:token/approve", publicOrderRateLimit, async (req, res, next) => {
+publicOrderRequestsRouter.post("/:token/approve", publicOrderActionRateLimit, async (req, res, next) => {
   try {
     res.json({ success: true, data: await approveByToken(tokenParam.parse(req.params.token)) });
   } catch (error) {
@@ -108,7 +108,7 @@ publicOrderRequestsRouter.post("/:token/approve", publicOrderRateLimit, async (r
   }
 });
 
-publicOrderRequestsRouter.post("/:token/cancel", publicOrderRateLimit, async (req, res, next) => {
+publicOrderRequestsRouter.post("/:token/cancel", publicOrderActionRateLimit, async (req, res, next) => {
   try {
     const reason = z.string().trim().max(300).optional().parse(req.body?.reason);
     res.json({ success: true, data: await cancelByToken(tokenParam.parse(req.params.token), reason) });

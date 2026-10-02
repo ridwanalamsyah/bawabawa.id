@@ -95,3 +95,20 @@ describe("division permission map", () => {
     expect(roleForDivision("customer")).toBe("customer");
   });
 });
+
+describe("rate limit key", () => {
+  it("only trusts the forwarded client IP when the site proves the shared secret", async () => {
+    const { rateLimitKey } = await import("../common/security/rate-limit");
+    const req = (h: Record<string, string>) =>
+      ({ ip: "10.0.0.1", header: (name: string) => h[name.toLowerCase()] }) as never;
+    process.env.SITE_PROXY_SECRET = "s3cret-value";
+    expect(rateLimitKey(req({ "x-bawabawa-client-ip": "1.2.3.4" }))).toBe("10.0.0.1");
+    expect(
+      rateLimitKey(req({ "x-bawabawa-client-ip": "1.2.3.4", "x-bawabawa-proxy-secret": "wrong-value!" }))
+    ).toBe("10.0.0.1");
+    expect(
+      rateLimitKey(req({ "x-bawabawa-client-ip": "1.2.3.4", "x-bawabawa-proxy-secret": "s3cret-value" }))
+    ).toBe("site:1.2.3.4");
+    delete process.env.SITE_PROXY_SECRET;
+  });
+});
