@@ -51,7 +51,9 @@ const STAFF_ONLY: Array<[method: "get" | "post" | "patch" | "put", path: string]
   ["get", "/api/v1/cms/settings"],
   ["get", "/api/v1/cms/media"],
   ["get", "/api/v1/metrics"],
-  ["get", "/api/v1/admin/orders/requests"]
+  ["get", "/api/v1/admin/orders/requests"],
+  ["get", "/api/v1/admin/reviews"],
+  ["get", "/api/v1/admin/partner-inquiries"]
 ];
 
 describe("authorization: customer tokens cannot reach back-office routes", () => {
@@ -126,6 +128,21 @@ describe("CORS in production", () => {
     } finally {
       process.env.NODE_ENV = prev.env;
       if (prev.cors !== undefined) process.env.CORS_ALLOWED_ORIGINS = prev.cors;
+    }
+  });
+});
+
+describe("cron endpoint", () => {
+  it("fails closed without CRON_SECRET and rejects a wrong token", async () => {
+    const app = createApp();
+    delete process.env.CRON_SECRET;
+    expect((await request(app).get("/api/v1/cron/run")).status).toBe(503);
+    process.env.CRON_SECRET = "cron-secret-value";
+    try {
+      expect((await request(app).get("/api/v1/cron/run")).status).toBe(401);
+      expect((await request(app).get("/api/v1/cron/run").set("authorization", "Bearer nope")).status).toBe(401);
+    } finally {
+      delete process.env.CRON_SECRET;
     }
   });
 });

@@ -12,7 +12,13 @@
  *      1 kg order is no longer defaulted to the 200rb flat cargo slot.
  */
 
-export type TierId = "fast" | "batch";
+/**
+ * fast  = Reguler (ekspedisi darat/laut, 3–4 hari kerja)
+ * batch = Kargo lewat Open Trip (flat per slot)
+ * air   = Kilat: kargo udara Bandung (Husein) → Balikpapan, lanjut darat ke
+ *         Samarinda. Opt-in, only offered when KILAT_PER_KG is configured.
+ */
+export type TierId = "fast" | "batch" | "air";
 
 export const FAST_TRACK_PER_KG = 43_000;
 export const BATCH_FLAT_FEE = 200_000;
@@ -20,6 +26,16 @@ export const BATCH_CAPACITY_KG = 50;
 export const PPN_RATE = 0.11;
 export const JASTIP_FEE_RATE = 0.08;
 export const JASTIP_FEE_MIN = 20_000;
+
+/** Categories that can't fly (lithium batteries). Keep in sync with the site. */
+export const KILAT_BLOCKED_CATEGORIES = ["Elektronik"];
+
+export function kilatConfig(): { perKg: number; minKg: number } | null {
+  const perKg = Number(process.env.KILAT_PER_KG);
+  if (!Number.isFinite(perKg) || perKg <= 0) return null;
+  const minKg = Number(process.env.KILAT_MIN_KG);
+  return { perKg, minKg: Number.isFinite(minKg) && minKg > 0 ? minKg : 1 };
+}
 
 export function ppnEnabled(): boolean {
   const raw = process.env.PPN_ENABLED;
@@ -33,11 +49,17 @@ export function billingWeight(actualKg: number): number {
 export function shippingFeeFor(tier: TierId, totalKg: number): number {
   const kg = billingWeight(totalKg);
   if (tier === "fast") return FAST_TRACK_PER_KG * kg;
+  if (tier === "air") {
+    const kilat = kilatConfig();
+    if (!kilat) return FAST_TRACK_PER_KG * kg;
+    return kilat.perKg * Math.max(kg, kilat.minKg);
+  }
   return kg <= BATCH_CAPACITY_KG
     ? BATCH_FLAT_FEE
     : BATCH_FLAT_FEE + FAST_TRACK_PER_KG * (kg - BATCH_CAPACITY_KG);
 }
 
+/** Cheapest of Reguler vs Kargo. Kilat is a paid upgrade, never "recommended". */
 export function recommendTier(totalKg: number): TierId {
   return shippingFeeFor("fast", totalKg) <= shippingFeeFor("batch", totalKg) ? "fast" : "batch";
 }

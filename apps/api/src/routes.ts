@@ -36,6 +36,9 @@ import {
   publicOrderRequestsRouter
 } from "./modules/order-requests/order-requests.routes";
 import { adminCatalogRouter, publicCatalogRouter } from "./modules/order-requests/catalog.routes";
+import { adminReviewsRouter, publicReviewsRouter } from "./modules/order-requests/reviews";
+import { adminPartnersRouter, publicPartnersRouter } from "./modules/partners/partners.routes";
+import { cronRouter } from "./modules/cron/cron.routes";
 import { pingDatabase } from "./infrastructure/db/pool";
 import { getMetricsSnapshot } from "./common/observability/metrics";
 import { authGuard, requirePermission } from "./common/middleware/auth";
@@ -73,6 +76,8 @@ apiRouter.get("/metrics", authGuard, requirePermission("users:manage_users"), (_
 apiRouter.use("/auth", authRateLimit, authRouter);
 apiRouter.use("/admin/orders/requests", adminOrderRequestsRouter);
 apiRouter.use("/admin/catalog", adminCatalogRouter);
+apiRouter.use("/admin/reviews", adminReviewsRouter);
+apiRouter.use("/admin/partner-inquiries", adminPartnersRouter);
 apiRouter.use("/admin", adminUsersRouter);
 apiRouter.use("/rbac", rbacRouter);
 apiRouter.use("/orders", ordersRouter);
@@ -103,6 +108,9 @@ apiRouter.use("/admin/blog-posts", adminBlogRouter);
 apiRouter.use("/uploads", uploadsRouter);
 apiRouter.use("/trips", publicTripsRouter);
 apiRouter.use("/public/order-requests", publicOrderRequestsRouter);
+apiRouter.use("/public/order-requests", publicReviewsRouter);
+apiRouter.use("/public/partner-inquiries", publicPartnersRouter);
+apiRouter.use("/cron", cronRouter);
 apiRouter.use("/order-requests", myOrderRequestsRouter);
 apiRouter.use("/catalog", publicCatalogRouter);
 apiRouter.use("/admin/trips", adminTripsRouter);

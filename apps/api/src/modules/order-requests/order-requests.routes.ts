@@ -44,7 +44,8 @@ const createSchema = z
       postal: z.string().trim().regex(/^\d{5}$/, "Kode pos harus 5 digit"),
       notes: z.string().trim().max(200).optional()
     }),
-    tier: z.enum(["fast", "batch"]),
+    tier: z.enum(["fast", "batch", "air"]),
+    deliveryMethod: z.enum(["delivery", "pickup"]).default("delivery"),
     tripId: z.string().uuid().nullable().optional(),
     items: z.array(itemSchema).min(1, "Minimal 1 barang").max(20),
     outOfStockPreference: z.enum(["cancel", "substitute", "ask"]).default("ask"),

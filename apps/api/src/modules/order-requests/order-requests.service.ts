@@ -4,7 +4,14 @@ import { getPool } from "../../infrastructure/db/pool";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
 import { loadEnv } from "../../config/env";
 import { enqueueWhatsApp, normalizePhone, sendQueuedWhatsApp } from "../whatsapp/fonnte.service";
-import { computePricing, type PricingBreakdown, type TierId } from "./pricing";
+import { reviewStateForToken } from "./reviews";
+import {
+  KILAT_BLOCKED_CATEGORIES,
+  computePricing,
+  kilatConfig,
+  type PricingBreakdown,
+  type TierId
+} from "./pricing";
 
 type QueryClient = {
   query: <Row = any>(sql: string, params?: any[]) => Promise<{ rows: Row[]; rowCount: number }>;
@@ -72,6 +79,7 @@ export type CreateOrderRequestInput = {
   outOfStockPreference: "cancel" | "substitute" | "ask";
   customerNotes?: string;
   estimatedKg?: number;
+  deliveryMethod?: "delivery" | "pickup";
   userId?: string | null;
 };
 
@@ -99,11 +107,13 @@ type Row = {
   history: any;
   created_at: string;
   updated_at: string;
+  delivery_method: string | null;
 };
 
 const COLUMNS = `id, code, tracking_token, source, status, user_id, customer_name, customer_phone,
   customer_email, address, tier, trip_id, items, out_of_stock_preference, customer_notes,
-  estimate, quote, quote_note, payment_method, tracking_number, history, created_at, updated_at`;
+  estimate, quote, quote_note, payment_method, tracking_number, history, created_at, updated_at,
+  delivery_method`;
 
 function parseJson<T>(value: unknown, fallback: T): T {
   if (value == null) return fallback;
@@ -223,13 +233,30 @@ function rupiah(value: number): string {
 export async function createOrderRequest(input: CreateOrderRequestInput) {
   const phone = normalizePhone(input.customerPhone);
   const result = await withTransaction(async (qc) => {
-    if (input.tripId) {
-      const trip = await qc.query<{ id: string }>(
-        `SELECT id FROM trips WHERE id = $1 AND is_published = TRUE AND status <> 'closed'`,
+    if (input.tier === "air") {
+      if (!kilatConfig()) {
+        throw new AppError(422, "KILAT_UNAVAILABLE", "Layanan Kilat belum tersedia. Pilih Reguler atau Kargo.");
+      }
+      const blocked = input.items.find((item) => item.category && KILAT_BLOCKED_CATEGORIES.includes(item.category));
+      if (blocked) {
+        throw new AppError(
+          422,
+          "KILAT_RESTRICTED_ITEM",
+          `${blocked.name} (${blocked.category}) tidak bisa dikirim lewat udara karena baterai lithium. Pilih Reguler atau Kargo.`
+        );
+      }
+    }
+    if (input.tier === "batch" && input.tripId) {
+      const trip = await qc.query<{ id: string; po_closes_at: string | null }>(
+        `SELECT id, po_closes_at FROM trips WHERE id = $1 AND is_published = TRUE AND status <> 'closed'`,
         [input.tripId]
       );
       if (!trip.rowCount) {
         throw new AppError(422, "TRIP_UNAVAILABLE", "Jadwal trip yang dipilih sudah tidak tersedia");
+      }
+      const closesAt = trip.rows[0].po_closes_at;
+      if (closesAt && new Date(closesAt).getTime() < Date.now()) {
+        throw new AppError(422, "PO_CLOSED", "PO untuk trip ini sudah ditutup. Pilih trip berikutnya atau layanan Reguler.");
       }
     }
     const { items, estimate } = await priceItems(qc, input);
@@ -245,9 +272,9 @@ export async function createOrderRequest(input: CreateOrderRequestInput) {
       `INSERT INTO order_requests
          (id, code, tracking_token, source, status, user_id, customer_name, customer_phone,
           customer_email, address, tier, trip_id, items, out_of_stock_preference,
-          customer_notes, estimate, quote, history, approved_at)
+          customer_notes, estimate, quote, history, approved_at, delivery_method)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12, $13::jsonb, $14,
-               $15, $16::jsonb, $17::jsonb, $18::jsonb, $19)`,
+               $15, $16::jsonb, $17::jsonb, $18::jsonb, $19, $20)`,
       [
         id,
         code,
@@ -260,14 +287,15 @@ export async function createOrderRequest(input: CreateOrderRequestInput) {
         input.customerEmail ?? null,
         JSON.stringify(input.address),
         input.tier,
-        input.tripId ?? null,
+        input.tier === "batch" ? input.tripId ?? null : null,
         JSON.stringify(items),
         input.outOfStockPreference,
         input.customerNotes ?? null,
         JSON.stringify(estimate),
         status === "approved" ? JSON.stringify(estimate) : null,
         JSON.stringify(history),
-        status === "approved" ? new Date().toISOString() : null
+        status === "approved" ? new Date().toISOString() : null,
+        input.deliveryMethod ?? "delivery"
       ]
     );
     return { id, code, token, status, estimate, phone };
@@ -354,6 +382,8 @@ export async function getPublicView(token: string) {
     customerPhone: maskPhone(row.customer_phone),
     city: parseJson<{ city?: string }>(row.address, {}).city ?? null,
     tier: row.tier,
+    deliveryMethod: row.delivery_method ?? "delivery",
+    pickupPoint: row.delivery_method === "pickup" ? process.env.PICKUP_POINT_ADDRESS?.trim() || null : null,
     trip: await tripSummary(qc, row.trip_id),
     items: parseJson<RequestItemInput[]>(row.items, []).map((item) => ({
       name: item.name,
@@ -370,6 +400,7 @@ export async function getPublicView(token: string) {
     trackingNumber: row.tracking_number,
     paymentInstructions: status === "approved" ? paymentInstructions() : null,
     history: parseJson<unknown[]>(row.history, []),
+    ...(await reviewStateForToken(token)),
     canApprove: status === "quoted",
     canCancel: status === "submitted" || status === "quoted" || status === "approved"
   };
@@ -444,6 +475,7 @@ function adminView(row: Row) {
     customerEmail: row.customer_email,
     address: parseJson(row.address, {}),
     tier: row.tier,
+    deliveryMethod: row.delivery_method ?? "delivery",
     tripId: row.trip_id,
     items: parseJson(row.items, []),
     outOfStockPreference: row.out_of_stock_preference,

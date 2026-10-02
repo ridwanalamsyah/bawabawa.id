@@ -64,5 +64,5 @@ jobs:
       - name: Apply migrations
         run: npm run migrate --workspace @erp/api
       - name: Order flow + authorization tests
-        run: npx vitest run src/tests/order-requests.integration.test.ts src/tests/authorization.unit.test.ts
+        run: npx vitest run src/tests/order-requests.integration.test.ts src/tests/business-features.integration.test.ts src/tests/authorization.unit.test.ts
         working-directory: apps/api
