@@ -74,8 +74,15 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    # Webhook signing (used when ERP fires updates toward the public site)
    ERP_WEBHOOK_SECRET=<run: openssl rand -hex 32>
 
-   # CORS — required in production (the API refuses to boot without it):
+   # CORS — set it: in production an empty list blocks every browser origin:
    CORS_ALLOWED_ORIGINS=https://bawabawa.id,https://bawabawa-site.vercel.app,https://bawabawa-web.vercel.app
+
+   # Order flow
+   SITE_PROXY_SECRET=<same value as on the site project>
+   PUBLIC_SITE_URL=https://bawabawa.id
+   OPS_WHATSAPP_NUMBER=62812xxxxxxx
+   PAYMENT_INSTRUCTIONS=Transfer BCA ... a.n. ...
+   PPN_ENABLED=false
 
    # Optional integrations (leave empty for MVP):
    # DOKU_CLIENT_ID=
@@ -112,6 +119,11 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
 
    # ERP webhook receiver verifies this HMAC
    ERP_WEBHOOK_SECRET=<run: openssl rand -hex 32>
+
+   # Same value as SITE_PROXY_SECRET on the API (per-shopper rate limits)
+   SITE_PROXY_SECRET=<run: openssl rand -hex 32>
+   NEXT_PUBLIC_WA_NUMBER=62812xxxxxxx
+   NEXT_PUBLIC_PPN_ENABLED=false
 
    # Public URL (used in canonical tags, OG, sitemap)
    NEXT_PUBLIC_SITE_URL=https://bawabawa-site.vercel.app

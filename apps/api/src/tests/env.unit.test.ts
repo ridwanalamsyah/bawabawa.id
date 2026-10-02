@@ -68,7 +68,7 @@ describe("config/env loadEnv()", () => {
     expect(() => loadEnv()).toThrow();
   });
 
-  it("requires CORS_ALLOWED_ORIGINS in production", () => {
+  it("boots in production without CORS_ALLOWED_ORIGINS (app.ts fails closed instead)", () => {
     process.env.NODE_ENV = "production";
     process.env.JWT_ACCESS_SECRET = "0123456789abcdef0123456789abcdef";
     process.env.JWT_REFRESH_SECRET = "0123456789abcdef0123456789abcdef-r";
@@ -76,7 +76,7 @@ describe("config/env loadEnv()", () => {
     process.env.DATABASE_URL = "postgres://user:pw@localhost:5432/db";
     delete process.env.CORS_ALLOWED_ORIGINS;
     delete process.env.DEMO_MODE;
-    expect(() => loadEnv()).toThrow(/Environment validation failed/);
+    expect(loadEnv().CORS_ALLOWED_ORIGINS).toEqual([]);
   });
 
   it("rejects DEMO_MODE=true in production", () => {

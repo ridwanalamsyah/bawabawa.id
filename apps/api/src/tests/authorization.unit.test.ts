@@ -112,3 +112,20 @@ describe("rate limit key", () => {
     delete process.env.SITE_PROXY_SECRET;
   });
 });
+
+describe("CORS in production", () => {
+  it("rejects cross-origin browser requests when no allowlist is configured", async () => {
+    const prev = { env: process.env.NODE_ENV, cors: process.env.CORS_ALLOWED_ORIGINS };
+    process.env.NODE_ENV = "production";
+    delete process.env.CORS_ALLOWED_ORIGINS;
+    try {
+      const res = await request(createApp()).get("/api/v1/health").set("origin", "https://evil.example");
+      expect(res.headers["access-control-allow-origin"]).toBeUndefined();
+      const sameServer = await request(createApp()).get("/api/v1/health");
+      expect(sameServer.status).toBe(200);
+    } finally {
+      process.env.NODE_ENV = prev.env;
+      if (prev.cors !== undefined) process.env.CORS_ALLOWED_ORIGINS = prev.cors;
+    }
+  });
+});

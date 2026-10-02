@@ -187,12 +187,14 @@ const envSchema = z.object({
       });
     }
     if (env.CORS_ALLOWED_ORIGINS.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["CORS_ALLOWED_ORIGINS"],
-        message:
-          "CORS_ALLOWED_ORIGINS is required in production (comma-separated list of the site + admin origins)"
-      });
+      // Not fatal: app.ts already refuses cross-origin browser requests in
+      // production when the list is empty (server-to-server calls from the
+      // site carry no Origin and keep working). Failing validation here
+      // would take every route down on deploys that predate this check.
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[config/env] CORS_ALLOWED_ORIGINS is empty in production — browser apps on other origins (admin SPA) will be blocked until it is set."
+      );
     }
     if (!env.DATABASE_URL) {
       ctx.addIssue({
