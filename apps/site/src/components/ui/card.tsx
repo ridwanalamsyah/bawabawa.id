@@ -6,7 +6,7 @@ export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
     <div
       ref={ref}
       className={cn(
-        "rounded-3xl bg-[hsl(var(--surface))] border border-[hsl(var(--border))] shadow-[0_1px_2px_hsl(var(--foreground)/0.04),0_18px_50px_-30px_hsl(var(--sage-700)/0.25)]",
+        "rounded-2xl bg-[hsl(var(--surface))] border border-[hsl(var(--border))]",
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, React.HTMLAttributes<H
     <div
       ref={ref}
       className={cn(
-        "glass rounded-3xl",
+        "glass rounded-2xl",
         className
       )}
       {...props}

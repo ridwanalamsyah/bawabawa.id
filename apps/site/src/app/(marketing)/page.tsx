@@ -1,17 +1,13 @@
 import { Hero } from "@/components/marketing/hero";
 import { PromotionBanner } from "@/components/marketing/promotion-banner";
-import { TrustGrid } from "@/components/marketing/trust";
 import { HowItWorks } from "@/components/marketing/how-it-works";
+import { Pricing } from "@/components/marketing/pricing";
 import { TripPreview } from "@/components/marketing/trip-preview";
 import { Faq } from "@/components/marketing/faq";
 
 /**
- * Landing page, trimmed to one job: get a visitor to "Titip sekarang" or
- * the catalog. Removed sections: Categories (lives in the footer + landing
- * pages), Testimonials (empty until real reviews exist), TrustBadges
- * (listed payment partners that aren't live), and FinalCTA (loaded a 3D
- * model for a decorative map). The hero and sticky CTA already carry the
- * call to action.
+ * Landing page: hero with a working price calculator, how it works, rates
+ * (which double as the promises we keep), real Open Trip dates, FAQ.
  */
 export default function HomePage() {
   return (
@@ -19,8 +15,8 @@ export default function HomePage() {
       <PromotionBanner />
       <Hero />
       <HowItWorks />
+      <Pricing />
       <TripPreview />
-      <TrustGrid />
       <Faq />
     </>
   );

@@ -241,37 +241,36 @@ html, body {
 body {
   font-size: 16px;
   line-height: 1.55;
-  /* Sage + cream gradient mesh — same composition as ERP web. */
-  background-image:
-    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.22) 0%, transparent 50%),
-    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.18) 0%, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(196, 213, 175, 0.18) 0%, transparent 55%),
-    radial-gradient(at 100% 80%, rgba(232, 215, 188, 0.18) 0%, transparent 50%);
-  background-attachment: fixed;
+  /* Flat paper background. The old four-blob gradient mesh made every
+     page look like the same template. */
+  background-color: hsl(var(--bg));
   transition: background-color var(--motion-base), color var(--motion-base);
 }
 
 [data-theme="dark"] body,
 .dark body {
-  background-image:
-    radial-gradient(at 18% 0%, rgba(163, 191, 168, 0.22) 0%, transparent 50%),
-    radial-gradient(at 82% 0%, rgba(227, 184, 138, 0.16) 0%, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(124, 152, 133, 0.20) 0%, transparent 55%);
+  background-image: none;
 }
 
-/* Display headings use Playfair, like ERP sales / cinematic surfaces. */
-h1, h2, h3, .font-display {
+/* Headings use the UI sans in a heavy weight — direct and legible.
+   Playfair stays available via .font-display for rare editorial use. */
+h1, h2, h3 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.font-display {
   font-family: var(--font-display);
   letter-spacing: -0.01em;
 }
 
 /* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */
+/* Solid surface + hairline border. Frosted glass over blurred blobs was
+   the main "generic template" tell, and hurt text contrast. */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04);
 }
 .glass-strong {
   background: var(--glass-bg-strong);

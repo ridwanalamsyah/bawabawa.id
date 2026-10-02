@@ -4,18 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-[hsl(var(--sage-700))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--sage-800))] shadow-[0_8px_24px_-8px_hsl(var(--sage-700)/0.5)]",
+          "bg-[hsl(var(--sage-700))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--sage-800))]",
         primary:
-          "bg-[hsl(var(--sage-700))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--sage-800))] shadow-[0_8px_24px_-8px_hsl(var(--sage-700)/0.5)]",
+          "bg-[hsl(var(--sage-700))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--sage-800))]",
         accent:
-          "bg-[hsl(var(--emerald-500))] text-white hover:bg-[hsl(var(--emerald-600))] shadow-[0_8px_24px_-8px_hsl(var(--emerald-500)/0.55)]",
+          "bg-[hsl(var(--emerald-500))] text-white hover:bg-[hsl(var(--emerald-600))]",
         outline:
-          "border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.7)] backdrop-blur hover:bg-[hsl(var(--surface-2))] text-[hsl(var(--foreground))]",
+          "border border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:bg-[hsl(var(--surface-2))] text-[hsl(var(--foreground))]",
         ghost:
           "hover:bg-[hsl(var(--surface-2))] text-[hsl(var(--foreground))]",
         soft:

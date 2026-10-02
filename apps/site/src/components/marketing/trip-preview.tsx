@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Package2, Plane } from "lucide-react";
+import { ArrowRight, Plane } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 
 type Trip = {
@@ -39,94 +37,56 @@ export async function TripPreview() {
   if (top.length === 0) return null;
 
   return (
-    <section className="py-16 sm:py-24" aria-labelledby="trip-preview-title">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="trip-preview-title">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between flex-wrap gap-4">
-          <div className="max-w-xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-              Open Trip terdekat
-            </p>
-            <h2 id="trip-preview-title" className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">
-              Kirim barang berat lebih hemat lewat Open Trip.
+          <div>
+            <h2 id="trip-preview-title" className="text-2xl sm:text-3xl">
+              Jadwal Open Trip
             </h2>
-            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-              Flat Rp200rb sampai 50 kg — cocok untuk belanja banyak atau barang berat.
+            <p className="mt-2 text-[15px] text-[hsl(var(--muted-foreground))]">
+              Kargo bersama, flat Rp200.000 sampai 50 kg.
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href="/open-trip">
-              Semua jadwal <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-          </Button>
+          <Link href="/open-trip" className="text-sm font-medium underline underline-offset-4">
+            Semua jadwal <ArrowRight className="inline h-4 w-4" aria-hidden />
+          </Link>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ul className="mt-6 divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
           {top.map((t) => {
+            const left = Math.max(0, t.capacityKg - t.bookedKg);
             const filled = t.capacityKg > 0 ? Math.min(100, Math.round((t.bookedKg / t.capacityKg) * 100)) : 0;
-            const isFull = t.status === "fullbooked" || filled >= 100;
+            const isFull = t.status === "fullbooked" || left <= 0;
             return (
-              <article
-                key={t.id}
-                className="rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
-                    <h3 className="mt-1 text-lg font-semibold">
-                      {t.origin} <span className="text-[hsl(var(--muted-foreground))]">→</span> {t.destination}
-                    </h3>
-                  </div>
-                  {isFull ? <Badge variant="warning">Penuh</Badge> : <Badge variant="success">Slot tersedia</Badge>}
+              <li key={t.id} className="py-4 grid grid-cols-2 sm:grid-cols-12 gap-x-4 gap-y-2 items-center">
+                <div className="sm:col-span-3">
+                  <p className="font-semibold">
+                    {formatDate(t.departAt, { weekday: "short", day: "numeric", month: "short", year: undefined })}
+                  </p>
+                  <p className="text-xs font-mono text-[hsl(var(--muted-foreground))]">{t.code}</p>
                 </div>
-
-                <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl bg-[hsl(var(--surface-2))] p-3">
-                    <dt className="text-[11px] text-[hsl(var(--muted-foreground))]">Berangkat</dt>
-                    <dd className="font-medium mt-0.5">{formatDate(t.departAt, { weekday: "short", day: "numeric", month: "short", year: undefined })}</dd>
-                  </div>
-                  <div className="rounded-2xl bg-[hsl(var(--surface-2))] p-3">
-                    <dt className="text-[11px] text-[hsl(var(--muted-foreground))]">Estimasi tiba</dt>
-                    <dd className="font-medium mt-0.5">
-                      {t.arriveEstimateAt
-                        ? formatDate(t.arriveEstimateAt, { weekday: "short", day: "numeric", month: "short", year: undefined })
-                        : "Diinfokan"}
-                    </dd>
-                  </div>
-                </dl>
-
-                <div className="mt-5">
-                  <div className="flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
-                    <span className="flex items-center gap-1.5">
-                      <Package2 className="h-3.5 w-3.5" aria-hidden /> Kapasitas terisi
-                    </span>
-                    <span className="font-medium text-[hsl(var(--foreground))]">
-                      {t.bookedKg}/{t.capacityKg} kg
-                    </span>
-                  </div>
-                  <Progress value={filled} className="mt-2" />
+                <p className="sm:col-span-3 text-sm text-[hsl(var(--muted-foreground))]">
+                  Tiba{" "}
+                  {t.arriveEstimateAt
+                    ? formatDate(t.arriveEstimateAt, { day: "numeric", month: "short", year: undefined })
+                    : "diinfokan"}
+                </p>
+                <div className="col-span-2 sm:col-span-4 flex items-center gap-3">
+                  <Progress value={filled} className="h-1.5" />
+                  <span className="shrink-0 text-sm tabular-nums">{isFull ? "Penuh" : `${left} kg sisa`}</span>
                 </div>
-
-                {t.popularCategories && t.popularCategories.length > 0 && (
-                  <div className="mt-5 flex flex-wrap gap-1.5">
-                    {t.popularCategories.map((c) => (
-                      <Badge key={c} variant="neutral">
-                        {c}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {!isFull && (
-                  <Button asChild size="sm" variant="primary" className="mt-5 w-full">
-                    <Link href="/request">
-                      Titip lewat trip ini <Plane className="h-3.5 w-3.5" aria-hidden />
+                <div className="col-span-2 sm:col-span-2 sm:text-right">
+                  {!isFull && (
+                    <Link href="/request" className="text-sm font-semibold underline underline-offset-4">
+                      Titip <Plane className="inline h-3.5 w-3.5" aria-hidden />
                     </Link>
-                  </Button>
-                )}
-              </article>
+                  )}
+                </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
     </section>
   );
