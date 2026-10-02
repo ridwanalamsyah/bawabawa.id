@@ -72,7 +72,7 @@ export default async function OpenTripPage() {
               </p>
               <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Jadwal keberangkatan{" "}
-                <span>
+                <span className="text-gradient-brand">
                   Bandung → Samarinda
                 </span>
               </h1>

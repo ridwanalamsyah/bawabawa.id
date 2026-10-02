@@ -269,12 +269,12 @@ h1, h2, h3 {
 }
 
 /* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */
-/* Solid surface + hairline border. Frosted glass over blurred blobs was
-   the main "generic template" tell, and hurt text contrast. */
 .glass {
-  background: hsl(var(--surface));
-  border: 1px solid hsl(var(--border));
-  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 .glass-strong {
   background: var(--glass-bg-strong);
@@ -395,8 +395,123 @@ h1, h2, h3 {
 .route-progress-bar {
   animation: route-progress 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-@media (prefers-reduced-motion: reduce) {
-  .route-progress-bar { animation: none; opacity: 0; }
+
+/* Gentle vertical float — used by hero "Tiba di Samarinda" card and other
+   ambient floating glass cards. Tailwind v4 doesn't ship a `float` animation
+   utility by default, so we register the keyframe + class here. */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 4.5s ease-in-out infinite;
+}
+
+/* Hero entrance animations — CSS-only fallback so above-the-fold copy
+   doesn't depend on framer-motion hydration. Previously the hero h1/p/cta
+   stack used `motion.*` with `initial={{ opacity: 0 }}` which SSR-rendered
+   them at opacity:0 and waited on JS hydration to animate them in. If the
+   JS chunks failed or hydrated late the entire hero text stayed invisible.
+   Registering the keyframes in CSS means the animation runs on first paint
+   without any JS, and the `forwards` fill mode keeps the final state. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-rise-lg {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-slide-in-left {
+  from { opacity: 0; transform: translate(-40px, 30px); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes hero-slide-in-right {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-hero-rise {
+  animation: hero-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-rise-lg {
+  animation: hero-rise-lg 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-pop {
+  animation: hero-pop 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-left {
+  animation: hero-slide-in-left 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-right {
+  animation: hero-slide-in-right 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* Continuous scan-line sweep used by HeroVisual. Replaces a framer-motion
+   loop so the effect still plays even if framer-motion fails to load. */
+@keyframes hero-scan {
+  0%   { transform: translateY(-30%); }
+  100% { transform: translateY(130%); }
+}
+.animate-hero-scan {
+  animation: hero-scan 8s linear infinite;
+}
+
+/* Sequential pulse used by the hero "Belanja → Packing → Kirim" pipeline.
+   Each step shares the same 3.6s animation but with staggered delays so
+   the brightening sweeps across the row like an actual progress bar — no
+   framer-motion required. */
+@keyframes pulse-step {
+  0%, 100% { opacity: 0.55; }
+  35%      { opacity: 1;    }
+  70%      { opacity: 0.55; }
+}
+.animate-pulse-step {
+  animation: pulse-step 3.6s ease-in-out infinite;
+}
+
+/* Hero visual: the route badge plane flies Bandung → Samarinda. */
+@keyframes plane-fly {
+  0%   { transform: translateX(-6px) rotate(-12deg); }
+  50%  { transform: translateX(6px) translateY(-2px) rotate(-12deg); }
+  100% { transform: translateX(-6px) rotate(-12deg); }
+}
+.animate-plane-fly { animation: plane-fly 3.2s ease-in-out infinite; }
+
+/* Ambient orbs drift slowly behind the hero. */
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, 30px) scale(1.06); }
+  66%      { transform: translate(-20px, -10px) scale(0.96); }
+}
+.animate-orb-drift { animation: orb-drift var(--orb-duration, 28s) ease-in-out infinite; }
+
+/* Brand gradient for one highlighted word in a headline. */
+.text-gradient-brand {
+  background-image: linear-gradient(135deg, hsl(var(--sage-700)), hsl(var(--olive-500)), hsl(var(--emerald-600)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .text-gradient-brand {
+  background-image: linear-gradient(135deg, hsl(var(--sage-300)), hsl(var(--olive-500)), hsl(var(--emerald-400)));
+}
+
+/* Admin switch (Admin → Pengaturan → Animasi): data-motion="off" on the
+   marketing wrapper stops every animation and shows reveal content as-is. */
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.reveal-ready [data-motion="off"] [data-reveal],
+html.reveal-ready [data-motion="off"] [data-reveal] .reveal-bar {
+  opacity: 1;
+  transform: none;
 }
 
 
@@ -477,11 +592,6 @@ details.smooth::details-content {
 }
 details.smooth[open]::details-content { block-size: auto; }
 
-@media (prefers-reduced-motion: reduce) {
-  html.reveal-ready [data-reveal],
-  html.reveal-ready [data-reveal] .reveal-bar { opacity: 1; transform: none; transition: none; }
-  .lift:hover { transform: none; }
-}
 
 /* Accessibility baseline (WCAG 2.4.7): a visible focus ring for every
    keyboard-focusable element that doesn't define its own. */
@@ -490,12 +600,3 @@ details.smooth[open]::details-content { block-size: auto; }
   outline-offset: 2px;
 }
 
-/* Respect "reduce motion" for CSS-driven hero/entrance animations too. */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}

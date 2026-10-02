@@ -13,7 +13,17 @@ export function CategoryLanding({ page }: { page: CategoryPage }) {
           <p className="animate-rise text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
             {page.heroEyebrow}
           </p>
-          <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl leading-tight max-w-3xl">{page.heroHeadline}</h1>
+          <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl leading-tight max-w-3xl">
+            {page.heroHeadline.includes("Bandung") ? (
+              <>
+                {page.heroHeadline.split("Bandung")[0]}
+                <span className="text-gradient-brand">Bandung</span>
+                {page.heroHeadline.split("Bandung").slice(1).join("Bandung")}
+              </>
+            ) : (
+              page.heroHeadline
+            )}
+          </h1>
           <p style={delay(140)} className="animate-rise mt-5 max-w-2xl text-lg text-[hsl(var(--muted-foreground))] leading-relaxed">
             {page.heroDescription}
           </p>
