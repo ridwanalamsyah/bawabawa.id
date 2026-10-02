@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { authGuard, requirePermission } from "../../common/middleware/auth";
-import * as XLSX from "xlsx";
 import { getPool } from "../../infrastructure/db/pool";
 
 const reportsRouter = Router();
@@ -17,21 +16,50 @@ reportsRouter.get("/kpi", authGuard, requirePermission("reports:export"), (_req,
   });
 });
 
-reportsRouter.get("/sales.xlsx", authGuard, requirePermission("reports:export"), (_req, res) => {
-  const rows = [
-    { orderNumber: "SO-001", totalAmount: 120000, paymentStatus: "paid" },
-    { orderNumber: "SO-002", totalAmount: 80000, paymentStatus: "dp" }
-  ];
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(rows);
-  XLSX.utils.book_append_sheet(wb, ws, "Sales");
-  const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
-  res.setHeader(
-    "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  );
-  res.setHeader("Content-Disposition", "attachment; filename=sales-report.xlsx");
-  res.send(buffer);
+/**
+ * GET /reports/sales.csv — real order rows (newest first, max 5000) as CSV.
+ * Replaces the old sales.xlsx endpoint, which returned two hardcoded demo
+ * rows and depended on the unmaintained `xlsx` package (prototype
+ * pollution advisory, no fix). Excel and Google Sheets open CSV directly.
+ */
+function csvCell(value: unknown): string {
+  const text = value == null ? "" : String(value);
+  // Neutralise spreadsheet formula injection (=, +, -, @ at cell start).
+  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+}
+
+reportsRouter.get("/sales.csv", authGuard, requirePermission("reports:export"), async (_req, res, next) => {
+  try {
+    const { rows } = await (await getPool()).query<{
+      order_number: string;
+      created_at: string;
+      status: string;
+      payment_status: string;
+      total_amount: string;
+      customer: string | null;
+    }>(
+      `SELECT o.order_number, o.created_at, o.status, o.payment_status, o.total_amount, c.name AS customer
+         FROM orders o
+         LEFT JOIN customers c ON c.id = o.customer_id
+        ORDER BY o.created_at DESC
+        LIMIT 5000`
+    );
+    const header = ["order_number", "created_at", "customer", "status", "payment_status", "total_amount"];
+    const lines = [
+      header.join(","),
+      ...rows.map((row) =>
+        [row.order_number, row.created_at, row.customer, row.status, row.payment_status, row.total_amount]
+          .map(csvCell)
+          .join(",")
+      )
+    ];
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=sales-report.csv");
+    res.send("\uFEFF" + lines.join("\n"));
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**

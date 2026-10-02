@@ -46,6 +46,7 @@ const STAFF_ONLY: Array<[method: "get" | "post" | "patch" | "put", path: string]
   ["post", "/api/v1/inventory/adjustments"],
   ["get", "/api/v1/approvals"],
   ["get", "/api/v1/reports/kpi"],
+  ["get", "/api/v1/reports/sales.csv"],
   ["post", "/api/v1/erp/sync"],
   ["get", "/api/v1/cms/settings"],
   ["get", "/api/v1/cms/media"],
