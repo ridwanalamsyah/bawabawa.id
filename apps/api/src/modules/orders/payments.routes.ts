@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
@@ -29,7 +29,7 @@ const splitSchema = z.object({
 
 paymentsRouter.post(
   "/:id/splits",
-  authGuard,
+  authGuard, requirePermission("finance:manage_finance"),
   idempotency(),
   (req, res, next) => {
     splitSchema
@@ -52,7 +52,7 @@ paymentsRouter.post(
   }
 );
 
-paymentsRouter.get("/:id/splits", authGuard, async (req, res, next) => {
+paymentsRouter.get("/:id/splits", authGuard, requirePermission("orders:read"), async (req, res, next) => {
   try {
     const orderId = String(req.params.id);
     const splits = await listSplitsForOrder(await getPool(), orderId);
@@ -71,7 +71,7 @@ const tenderSchema = z.object({
 
 paymentsRouter.post(
   "/:id/tenders",
-  authGuard,
+  authGuard, requirePermission("finance:manage_finance"),
   idempotency(),
   (req, res, next) => {
     tenderSchema
@@ -100,7 +100,7 @@ paymentsRouter.post(
   }
 );
 
-paymentsRouter.get("/:id/tenders", authGuard, async (req, res, next) => {
+paymentsRouter.get("/:id/tenders", authGuard, requirePermission("orders:read"), async (req, res, next) => {
   try {
     const orderId = String(req.params.id);
     const payments = await listPaymentsForOrder(await getPool(), orderId);

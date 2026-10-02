@@ -1,72 +1,79 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card } from "@/components/ui/card";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Plus, Shield } from "lucide-react";
-import { adminUsers } from "@/lib/mock/analytics";
+import { Check } from "lucide-react";
 
-const ROLES: { role: string; perms: string[] }[] = [
-  { role: "owner", perms: ["Semua akses", "Kelola tim", "Konfigurasi sistem"] },
-  { role: "operations", perms: ["Order", "Trip", "Customer", "Support"] },
-  { role: "finance", perms: ["Pembayaran", "Invoice", "Reports", "Reconciliation"] },
-  { role: "support", perms: ["Tiket support", "Customer profile (read)", "Live chat"] },
-  { role: "shopper", perms: ["Order assigned", "Tracking update", "Wallet payout"] },
+/**
+ * Read-only view of the permission matrix enforced by the API
+ * (apps/api/src/common/security/permissions.ts). Keep the two in sync.
+ * A user's access is decided by their division, set on /admin/users.
+ */
+const PERMS: Array<{ key: string; label: string }> = [
+  { key: "orders:read", label: "Lihat pesanan" },
+  { key: "orders:create", label: "Buat order manual" },
+  { key: "orders:update", label: "Proses pesanan (penawaran, status)" },
+  { key: "orders:approve", label: "Approval" },
+  { key: "finance:manage_finance", label: "Keuangan" },
+  { key: "inventory:manage", label: "Stok & katalog" },
+  { key: "crm:manage", label: "Customer & leads" },
+  { key: "comms:send", label: "Kirim WA / email" },
+  { key: "cms:manage", label: "Konten situs" },
+  { key: "reports:export", label: "Unduh laporan" },
+  { key: "users:manage_users", label: "Kelola tim & HR" },
+];
+
+const ALL = PERMS.map((p) => p.key);
+const DIVISIONS: Array<{ division: string; perms: string[] }> = [
+  { division: "admin / owner", perms: ALL },
+  { division: "finance", perms: ["orders:read", "orders:approve", "finance:manage_finance", "reports:export"] },
+  { division: "operations", perms: ["orders:read", "orders:create", "orders:update", "inventory:manage", "comms:send"] },
+  { division: "koordinator", perms: ["orders:read", "orders:create", "orders:update", "orders:approve", "inventory:manage", "comms:send"] },
+  { division: "gudang", perms: ["orders:read", "orders:update", "inventory:manage"] },
+  { division: "sales", perms: ["orders:read", "orders:create", "crm:manage", "comms:send"] },
+  { division: "support", perms: ["orders:read", "crm:manage", "comms:send"] },
+  { division: "marketing / cms", perms: ["cms:manage"] },
 ];
 
 export default function RolesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Role & Permission"
-        title="Multi-role admin"
-        description="Atur peran tim & granular permission. Setiap aktivitas tercatat di audit log."
-        actions={<Button variant="primary"><Plus className="h-4 w-4" /> Undang anggota</Button>}
+        eyebrow="Tim"
+        title="Hak akses per divisi"
+        description="Akses ditentukan dari divisi akun. Ubah divisi seseorang di halaman Tim & Admin. Divisi yang tidak dikenal hanya bisa melihat pesanan."
       />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <Card className="lg:col-span-7 p-0 overflow-hidden">
-          <div className="p-5 border-b border-[hsl(var(--border))]"><p className="font-semibold">Anggota tim</p></div>
-          <ul className="divide-y divide-[hsl(var(--border))]">
-            {adminUsers.map((u) => (
-              <li key={u.id} className="p-4 flex items-center gap-3">
-                <Avatar name={u.name} size={36} />
-                <div className="flex-1">
-                  <p className="font-medium">{u.name}</p>
-                  <p className="text-xs text-[hsl(var(--muted-foreground))]">{u.email}</p>
-                </div>
-                <Badge variant={u.role === "owner" ? "success" : "neutral"}>{u.role}</Badge>
-                <span className="text-xs text-[hsl(var(--muted-foreground))]">
-                  {u.lastActive === "online" ? (
-                    <span className="text-[hsl(var(--emerald-600))] dark:text-[hsl(var(--emerald-400))] flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--emerald-500))]" /> online
-                    </span>
-                  ) : (
-                    `${u.lastActive} lalu`
-                  )}
-                </span>
-              </li>
+      <Card className="p-0 overflow-x-auto">
+        <table className="w-full text-sm">
+          <caption className="sr-only">Matriks hak akses per divisi</caption>
+          <thead className="bg-[hsl(var(--surface-2))] text-xs text-[hsl(var(--muted-foreground))]">
+            <tr>
+              <th scope="col" className="text-left font-medium px-4 py-3">Akses</th>
+              {DIVISIONS.map((d) => (
+                <th key={d.division} scope="col" className="font-medium px-3 py-3 whitespace-nowrap">{d.division}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {PERMS.map((p) => (
+              <tr key={p.key} className="border-t border-[hsl(var(--border))]">
+                <th scope="row" className="text-left font-normal px-4 py-2.5">{p.label}</th>
+                {DIVISIONS.map((d) => (
+                  <td key={d.division} className="text-center px-3 py-2.5">
+                    {d.perms.includes(p.key) ? (
+                      <Check className="inline h-4 w-4 text-[hsl(var(--emerald-600))]" aria-label="Ya" />
+                    ) : (
+                      <span className="text-[hsl(var(--muted-foreground))]" aria-label="Tidak">—</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
             ))}
-          </ul>
-        </Card>
-        <Card className="lg:col-span-5 p-0 overflow-hidden">
-          <div className="p-5 border-b border-[hsl(var(--border))] flex items-center gap-2">
-            <Shield className="h-4 w-4 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]" />
-            <p className="font-semibold">Permission matrix</p>
-          </div>
-          <ul className="divide-y divide-[hsl(var(--border))]">
-            {ROLES.map((r) => (
-              <li key={r.role} className="p-4">
-                <p className="text-sm font-semibold capitalize">{r.role}</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {r.perms.map((p) => (
-                    <Badge key={p} variant="neutral">{p}</Badge>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
+          </tbody>
+        </table>
+      </Card>
+      <p className="mt-4 text-sm">
+        <Link href="/admin/users" className="underline">Kelola tim & divisi →</Link>
+      </p>
     </>
   );
 }

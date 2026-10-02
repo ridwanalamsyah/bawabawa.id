@@ -1,132 +1,123 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ArrowRight, ShoppingBag, ExternalLink } from "lucide-react";
+import { ArrowRight, ShoppingBag, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { Card, GlassCard } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  getLocalOrderListSnapshot,
-  subscribeLocalOrders,
-  type LocalOrder,
-} from "@/lib/local-orders";
-import { formatIDR, formatDate } from "@/lib/utils";
-import { TIERS } from "@/lib/pricing";
+import { getLocalOrderLinks, getServerLocalOrderLinks, subscribeLocalOrderLinks } from "@/lib/local-orders";
+import { ORDER_STEP_LABEL, STATUS_BADGE, type OrderRequestStatus } from "@/lib/order-requests";
+import { formatDate, formatIDR } from "@/lib/utils";
 
-const STATUS_LABEL: Record<LocalOrder["status"], string> = {
-  pending_payment: "Menunggu pembayaran",
-  shopping: "Dibelanjakan",
-  packed: "Dikemas",
-  in_transit: "Dalam perjalanan",
-  delivered: "Diterima",
-  cancelled: "Dibatalkan",
+type MyOrder = {
+  code: string;
+  trackingToken: string;
+  status: OrderRequestStatus | null;
+  total: number | null;
+  itemCount: number;
+  createdAt: string;
 };
 
-const EMPTY_LIST: LocalOrder[] = [];
-
 export default function OrdersPage() {
-  const orders = useSyncExternalStore<LocalOrder[]>(
-    subscribeLocalOrders,
-    getLocalOrderListSnapshot,
-    () => EMPTY_LIST,
-  );
+  const local = useSyncExternalStore(subscribeLocalOrderLinks, getLocalOrderLinks, getServerLocalOrderLinks);
+  const [remote, setRemote] = useState<MyOrder[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/order-requests/mine", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : { data: [] }))
+      .then((json: { data?: MyOrder[] }) => {
+        if (!cancelled) setRemote(Array.isArray(json.data) ? json.data : []);
+      })
+      .catch(() => !cancelled && setRemote([]));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Orders tied to the account (from the ERP) plus guest orders made on this
+  // device before logging in. Device-only entries show no live status here;
+  // their tracking page fetches it.
+  const orders = useMemo<MyOrder[]>(() => {
+    const byToken = new Map<string, MyOrder>();
+    for (const o of remote ?? []) byToken.set(o.trackingToken, o);
+    for (const l of local) {
+      if (!byToken.has(l.token)) {
+        byToken.set(l.token, {
+          code: l.code,
+          trackingToken: l.token,
+          status: null,
+          total: l.estimateTotal,
+          itemCount: l.itemCount,
+          createdAt: l.createdAt,
+        });
+      }
+    }
+    return [...byToken.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }, [remote, local]);
 
   return (
     <>
       <PageHeader
         eyebrow="Pesanan"
-        title="Semua titipan kamu"
-        description="Pesanan yang dibuat dari perangkat ini muncul di sini. Riwayat lengkap akan ditampilkan saat akun kamu terhubung."
+        title="Pesanan saya"
+        description="Semua titipan dari akunmu dan dari perangkat ini. Klik untuk lihat status & rincian."
         actions={
           <Button asChild variant="primary">
             <Link href="/request">
-              Buat request <ArrowRight className="h-4 w-4" />
+              Titip barang <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </Button>
         }
       />
 
-      {orders.length === 0 && (
+      {remote === null && orders.length === 0 ? (
+        <GlassCard className="p-10 flex items-center justify-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Memuat pesanan…
+        </GlassCard>
+      ) : orders.length === 0 ? (
         <GlassCard className="p-10 text-center">
-          <div className="mx-auto h-14 w-14 rounded-2xl bg-[hsl(var(--surface-2))] grid place-items-center text-[hsl(var(--muted-foreground))]">
-            <ShoppingBag className="h-6 w-6" />
-          </div>
+          <ShoppingBag className="mx-auto h-8 w-8 text-[hsl(var(--muted-foreground))]" aria-hidden />
           <h2 className="mt-4 text-xl font-semibold tracking-tight">Belum ada pesanan</h2>
           <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] max-w-md mx-auto">
-            Buat request pertama kamu — pesanan akan disimpan secara lokal dan
-            dapat dipantau lewat halaman tracking. Login pakai akun kamu untuk
-            melihat riwayat lengkap.
+            Titip barang dari katalog atau lewat form request. Statusnya akan muncul di sini.
           </p>
-          <Button asChild variant="primary" className="mt-6">
-            <Link href="/request">
-              Buat request pertama <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </GlassCard>
-      )}
-
-      {orders.length > 0 && (
-        <Card className="p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-[hsl(var(--muted-foreground))] bg-[hsl(var(--surface-2))]">
-                <tr>
-                  <Th>Kode</Th>
-                  <Th>Item</Th>
-                  <Th>Status</Th>
-                  <Th>Layanan</Th>
-                  <Th>Tanggal</Th>
-                  <Th className="text-right">Total</Th>
-                  <Th></Th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((o) => (
-                  <tr key={o.token} className="border-t border-[hsl(var(--border))] hover:bg-[hsl(var(--surface-2))]">
-                    <Td>
-                      <span className="font-mono font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
-                        {o.code}
-                      </span>
-                    </Td>
-                    <Td>
-                      <div className="flex items-center gap-2 min-w-0">
-                        <ShoppingBag className="h-3.5 w-3.5 text-[hsl(var(--muted-foreground))] shrink-0" />
-                        <span className="truncate max-w-[20rem]">
-                          {o.items.map((i) => i.name).filter(Boolean).join(", ") || "—"}
-                        </span>
-                      </div>
-                    </Td>
-                    <Td>
-                      <Badge variant={o.status === "delivered" ? "success" : "info"}>
-                        {STATUS_LABEL[o.status]}
-                      </Badge>
-                    </Td>
-                    <Td className="text-xs text-[hsl(var(--muted-foreground))]">{TIERS[o.tier].label}</Td>
-                    <Td className="text-[hsl(var(--muted-foreground))]">{formatDate(o.createdAt)}</Td>
-                    <Td className="text-right tabular-nums font-medium">{formatIDR(o.pricing.total)}</Td>
-                    <Td>
-                      <Button asChild size="sm" variant="ghost">
-                        <Link href={`/track/${o.token}`}>
-                          Lacak <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+            <Button asChild variant="primary">
+              <Link href="/katalog">Lihat katalog</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/request">Titip barang apa saja</Link>
+            </Button>
           </div>
-        </Card>
+        </GlassCard>
+      ) : (
+        <ul className="space-y-3">
+          {orders.map((o) => (
+            <li key={o.trackingToken}>
+              <Link href={`/track/${o.trackingToken}`} className="block">
+                <GlassCard className="p-5 flex flex-wrap items-center gap-3 hover:ring-2 hover:ring-[hsl(var(--sage-500)/0.3)] transition">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono font-medium">{o.code}</p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                      {formatDate(o.createdAt)} · {o.itemCount} barang
+                    </p>
+                  </div>
+                  {o.status ? (
+                    <Badge variant={STATUS_BADGE[o.status]}>{ORDER_STEP_LABEL[o.status]}</Badge>
+                  ) : (
+                    <Badge variant="neutral">Lihat status</Badge>
+                  )}
+                  {o.total != null && <span className="tabular-nums font-medium">{formatIDR(o.total)}</span>}
+                  <ArrowRight className="h-4 w-4 text-[hsl(var(--muted-foreground))]" aria-hidden />
+                </GlassCard>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </>
   );
-}
-
-function Th({ children, className }: { children?: React.ReactNode; className?: string }) {
-  return <th className={"text-left font-medium px-5 py-3 " + (className ?? "")}>{children}</th>;
-}
-function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
-  return <td className={"px-5 py-3 " + (className ?? "")}>{children}</td>;
 }

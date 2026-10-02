@@ -1,6 +1,6 @@
 import { Router, json, urlencoded } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { loadEnv } from "../../config/env";
@@ -51,7 +51,7 @@ const fonnteRouter = Router();
  */
 fonnteRouter.post(
   "/send",
-  authGuard,
+  authGuard, requirePermission("comms:send"),
   idempotency(),
   json({ limit: "16kb" }),
   (req, res, next) => {
@@ -101,7 +101,7 @@ fonnteRouter.post(
  */
 fonnteRouter.post(
   "/flush",
-  authGuard,
+  authGuard, requirePermission("comms:send"),
   json({ limit: "1kb" }),
   async (req, res, next) => {
     try {

@@ -24,8 +24,8 @@ on-demand revalidation. It is the single source of truth for the
 | Update order | `PATCH /api/orders/[id]` | `PATCH /api/v1/orders/{id}` | proxied |
 | Initiate payment | `POST /api/payments` | `POST /api/v1/payments/doku/charge` | proxied |
 
-When the ERP is unreachable each handler falls back to the bundled mock
-dataset under `src/lib/mock/*` so pages still render in demo mode.
+When the ERP is unreachable the handlers return an error or empty state
+(there is no mock dataset anymore).
 
 ## Data flow — ERP → Web (read path)
 

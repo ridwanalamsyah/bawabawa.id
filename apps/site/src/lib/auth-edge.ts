@@ -73,3 +73,10 @@ export const SESSION_COOKIE = "bb_session";
  * cookie alone is not enough — the ERP's authGuard checks its own JWT.
  */
 export const ERP_TOKEN_COOKIE = "bb_erp_token";
+
+/**
+ * ERP refresh token (httpOnly). Lets the site mint fresh 15-minute ERP
+ * access tokens during the 8-hour site session without exposing either
+ * token to browser JavaScript.
+ */
+export const ERP_REFRESH_COOKIE = "bb_erp_refresh";

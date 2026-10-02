@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Truck, PackageCheck, Clock, Building2, ArrowRight } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { WA_NUMBER } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Pengiriman Langsung — Bandung → Samarinda",
@@ -23,12 +24,12 @@ export default function PengirimanLangsungPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-10">
           <div className="grid lg:grid-cols-12 gap-8 items-end">
             <div className="lg:col-span-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+              <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
                 Pengiriman Langsung
               </p>
               <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Kirim langsung,{" "}
-                <span className="bg-linear-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+                <span>
                   satu pengirim
                 </span>{" "}
                 tanpa tunggu trip
@@ -42,7 +43,7 @@ export default function PengirimanLangsungPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild>
                   <a
-                    href="https://wa.me/6281234567890?text=Halo+Bawabawa%2C+saya+mau+tanya+Pengiriman+Langsung"
+                    href={`https://wa.me/${WA_NUMBER}?text=Halo+Bawabawa%2C+saya+mau+tanya+Pengiriman+Langsung`}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
@@ -56,7 +57,7 @@ export default function PengirimanLangsungPage() {
             </div>
             <div className="lg:col-span-5">
               <GlassCard className="p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">
+                <p className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
                   Perbandingan singkat
                 </p>
                 <div className="mt-4 space-y-3 text-sm">
@@ -123,7 +124,7 @@ export default function PengirimanLangsungPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Button asChild>
                 <a
-                  href="https://wa.me/6281234567890?text=Halo+Bawabawa%2C+saya+mau+request+Pengiriman+Langsung"
+                  href={`https://wa.me/${WA_NUMBER}?text=Halo+Bawabawa%2C+saya+mau+request+Pengiriman+Langsung`}
                   target="_blank"
                   rel="noreferrer noopener"
                 >
@@ -176,7 +177,7 @@ function Feature({
   body: string;
 }) {
   return (
-    <div className="rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6">
+    <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6">
       <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(var(--sage-700))]/10 text-[hsl(var(--sage-700))] dark:bg-[hsl(var(--sage-300))]/15 dark:text-[hsl(var(--sage-300))]">
         {icon}
       </div>

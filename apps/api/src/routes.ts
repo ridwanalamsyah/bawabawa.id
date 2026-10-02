@@ -30,10 +30,31 @@ import { publicTripsRouter, adminTripsRouter } from "./modules/erp/trips.routes"
 import { emailsRouter, emailsWebhookRouter } from "./modules/email/resend.routes";
 import { fonnteRouter, fonnteWebhookRouter } from "./modules/whatsapp/fonnte.routes";
 import { uploadsRouter } from "./modules/uploads/uploads.routes";
+import {
+  adminOrderRequestsRouter,
+  myOrderRequestsRouter,
+  publicOrderRequestsRouter
+} from "./modules/order-requests/order-requests.routes";
+import { adminCatalogRouter, publicCatalogRouter } from "./modules/order-requests/catalog.routes";
+import { adminReviewsRouter, publicReviewsRouter } from "./modules/order-requests/reviews";
+import { adminPartnersRouter, publicPartnersRouter } from "./modules/partners/partners.routes";
+import { cronRouter } from "./modules/cron/cron.routes";
 import { pingDatabase } from "./infrastructure/db/pool";
 import { getMetricsSnapshot } from "./common/observability/metrics";
+import { authGuard, requirePermission } from "./common/middleware/auth";
+import { authRateLimit } from "./common/security/rate-limit";
 
 export const apiRouter = Router();
+
+/**
+ * Mounted by app.ts ahead of express.json() so each receiver's own
+ * body parser can capture `req.rawBody` for signature verification.
+ */
+export const webhooksRouter = Router();
+webhooksRouter.use(dokuRouter);
+webhooksRouter.use(shippingWebhookRouter);
+webhooksRouter.use(emailsWebhookRouter);
+webhooksRouter.use(fonnteWebhookRouter);
 
 apiRouter.get("/health", (_req, res) => {
   res.json({ success: true, data: { status: "ok" } });
@@ -48,11 +69,15 @@ apiRouter.get("/health/ready", async (_req, res, next) => {
   }
 });
 
-apiRouter.get("/metrics", (_req, res) => {
+apiRouter.get("/metrics", authGuard, requirePermission("users:manage_users"), (_req, res) => {
   res.json({ success: true, data: getMetricsSnapshot() });
 });
 
-apiRouter.use("/auth", authRouter);
+apiRouter.use("/auth", authRateLimit, authRouter);
+apiRouter.use("/admin/orders/requests", adminOrderRequestsRouter);
+apiRouter.use("/admin/catalog", adminCatalogRouter);
+apiRouter.use("/admin/reviews", adminReviewsRouter);
+apiRouter.use("/admin/partner-inquiries", adminPartnersRouter);
 apiRouter.use("/admin", adminUsersRouter);
 apiRouter.use("/rbac", rbacRouter);
 apiRouter.use("/orders", ordersRouter);
@@ -64,10 +89,6 @@ apiRouter.use("/orders", chargesRouter);
 apiRouter.use("/vouchers", vouchersRouter);
 apiRouter.use("/promotions", publicVouchersRouter);
 apiRouter.use("/shipping", shippingRouter);
-apiRouter.use("/webhooks", dokuRouter);
-apiRouter.use("/webhooks", shippingWebhookRouter);
-apiRouter.use("/webhooks", emailsWebhookRouter);
-apiRouter.use("/webhooks", fonnteWebhookRouter);
 apiRouter.use("/payments", paymentsConfigRouter);
 apiRouter.use("/emails", emailsRouter);
 apiRouter.use("/inventory", inventoryRouter);
@@ -86,4 +107,10 @@ apiRouter.use("/blog-posts", publicBlogRouter);
 apiRouter.use("/admin/blog-posts", adminBlogRouter);
 apiRouter.use("/uploads", uploadsRouter);
 apiRouter.use("/trips", publicTripsRouter);
+apiRouter.use("/public/order-requests", publicOrderRequestsRouter);
+apiRouter.use("/public/order-requests", publicReviewsRouter);
+apiRouter.use("/public/partner-inquiries", publicPartnersRouter);
+apiRouter.use("/cron", cronRouter);
+apiRouter.use("/order-requests", myOrderRequestsRouter);
+apiRouter.use("/catalog", publicCatalogRouter);
 apiRouter.use("/admin/trips", adminTripsRouter);

@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     template: "%s · Bawabawa.id",
   },
   description:
-    "Jasa titip modern dari Bandung ke Samarinda. Personal shopper terverifikasi, tracking realtime, pengiriman aman door-to-door.",
+    "Jasa titip dari Bandung ke Samarinda. Pilih dari katalog atau titip barang apa saja — cek harga dulu, bayar setelah setuju, pantau lewat WhatsApp.",
   keywords: [
     "jasa titip Bandung Samarinda",
     "jastip Bandung",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Bawabawa.id — Jasa Titip Premium Bandung ke Samarinda",
     description:
-      "Personal shopper terverifikasi, tracking realtime, pengiriman aman door-to-door.",
+      "Cek harga dulu, bayar setelah setuju, pantau pesanan lewat WhatsApp.",
     type: "website",
     locale: "id_ID",
   },
@@ -85,6 +85,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-screen flex flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-[hsl(var(--sage-700))] focus:px-4 focus:py-2 focus:text-white"
+        >
+          Lewati ke konten utama
+        </a>
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster
           position="top-center"

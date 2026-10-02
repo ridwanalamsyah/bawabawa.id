@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { getPool } from "../../infrastructure/db/pool";
 
 const erpRouter = Router();
@@ -40,7 +40,7 @@ async function ensureSyncTable() {
 
 // Minimal sync endpoint for the single-file ERP client.
 // In production, you can extend this to persist ops and/or return server state.
-erpRouter.post("/sync", authGuard, async (req, res, next) => {
+erpRouter.post("/sync", authGuard, requirePermission("orders:update"), async (req, res, next) => {
   try {
     const body = syncSchema.parse(req.body);
     await ensureSyncTable();

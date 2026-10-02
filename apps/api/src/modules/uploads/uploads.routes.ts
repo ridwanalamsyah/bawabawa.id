@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import { randomUUID } from "crypto";
 import { put, type PutBlobResult } from "@vercel/blob";
-import { authGuard, requirePermission } from "../../common/middleware/auth";
+import { authGuard, requireAnyPermission } from "../../common/middleware/auth";
 import { loadEnv } from "../../config/env";
 import { logAudit } from "../../common/audit/audit-log";
 import {
@@ -24,10 +24,9 @@ const upload = multer({
   limits: { fileSize: UPLOAD_MAX_BYTES, files: 1 }
 });
 
-// Re-use the existing CMS permission for write access; admins and CMS
-// editors already have it via the seeded `cms:manage` permission.
-const UPLOAD_PERMISSION = "cms:manage";
-const requireUploadPermission = requirePermission(UPLOAD_PERMISSION);
+// CMS editors upload blog/media images; operations staff upload catalog
+// product photos.
+const requireUploadPermission = requireAnyPermission("cms:manage", "inventory:manage");
 
 const uploadsRouter = Router();
 

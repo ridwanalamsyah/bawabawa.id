@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, MessageCircle, Clock, MapPin } from "lucide-react";
+import { WA_NUMBER } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Hubungi Kami",
@@ -9,7 +10,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/kontak" },
 };
 
-const WA_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER ?? "6281234567890";
 const SUPPORT_EMAIL = "support@bawabawa.id";
 
 const CHANNELS: Array<{
@@ -67,7 +67,7 @@ const FAQ_QUICK: Array<{ q: string; a: React.ReactNode }> = [
 export default function KontakPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
         Support
       </p>
       <h1 className="mt-3 text-4xl font-semibold tracking-tight">Hubungi Kami</h1>

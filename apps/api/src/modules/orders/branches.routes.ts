@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { getPool } from "../../infrastructure/db/pool";
 
 /**
@@ -11,7 +11,7 @@ import { getPool } from "../../infrastructure/db/pool";
  */
 export const branchesRouter = Router();
 
-branchesRouter.get("/", authGuard, async (_req, res, next) => {
+branchesRouter.get("/", authGuard, requirePermission("orders:read"), async (_req, res, next) => {
   try {
     const db = await getPool();
     const result = await db.query<{ id: string; code: string; name: string }>(

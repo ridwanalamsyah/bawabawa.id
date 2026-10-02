@@ -4,16 +4,20 @@
  * `POST /api/v1/auth/google`, then mints a same-origin session cookie so the
  * Edge middleware can route the user.
  *
- * The ERP access/refresh tokens are returned in the response body so the
- * client can keep calling ERP endpoints directly when needed.
+ * The ERP access/refresh tokens are stored only in httpOnly cookies — never
+ * returned to browser JavaScript — and forwarded by the BFF routes.
  */
 
 import { cookies } from "next/headers";
 import { signToken, audit, type AuthRole } from "@/lib/auth";
-import { SESSION_COOKIE, ERP_TOKEN_COOKIE } from "@/lib/auth-edge";
+import { SESSION_COOKIE } from "@/lib/auth-edge";
 import { erpSafe } from "@/lib/erp-client";
-
-const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8h
+import {
+  ERP_REFRESH_COOKIE,
+  ERP_TOKEN_COOKIE,
+  SESSION_TTL_SECONDS,
+  erpCookieOptions,
+} from "@/lib/erp-session";
 
 type ErpGoogleResponse = {
   accessToken?: string;
@@ -46,17 +50,13 @@ function mapRolesToAuthRole(roles: readonly string[] | undefined): AuthRole {
   return "customer";
 }
 
-async function setSessionCookies(sessionToken: string, erpAccessToken: string) {
+async function setSessionCookies(sessionToken: string, erpAccessToken: string, erpRefreshToken?: string) {
   const jar = await cookies();
-  const cookieDefaults = {
-    httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_TTL_SECONDS,
-  };
-  jar.set({ name: SESSION_COOKIE, value: sessionToken, ...cookieDefaults });
-  jar.set({ name: ERP_TOKEN_COOKIE, value: erpAccessToken, ...cookieDefaults });
+  jar.set({ name: SESSION_COOKIE, value: sessionToken, ...erpCookieOptions });
+  jar.set({ name: ERP_TOKEN_COOKIE, value: erpAccessToken, ...erpCookieOptions });
+  if (erpRefreshToken) {
+    jar.set({ name: ERP_REFRESH_COOKIE, value: erpRefreshToken, ...erpCookieOptions });
+  }
 }
 
 export async function POST(req: Request) {
@@ -86,12 +86,11 @@ export async function POST(req: Request) {
     { userId: user.id, role },
     SESSION_TTL_SECONDS,
   );
-  await setSessionCookies(sessionToken, erp.data.accessToken);
+  await setSessionCookies(sessionToken, erp.data.accessToken, erp.data.refreshToken);
   audit.log(user.id, "auth.login.google", user.email ?? user.id);
 
+  // Tokens stay in httpOnly cookies; the browser only needs the profile.
   return Response.json({
-    token: erp.data.accessToken,
-    refreshToken: erp.data.refreshToken,
     user: {
       id: user.id,
       name: user.fullName,

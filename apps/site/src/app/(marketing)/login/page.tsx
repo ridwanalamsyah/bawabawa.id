@@ -24,7 +24,7 @@ export default async function LoginPage({
         className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-br from-[hsl(var(--sage-50))] via-transparent to-[hsl(var(--cream-100))]"
       />
       <div className="w-full max-w-md">
-        <div className="rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 shadow-[0_24px_64px_-24px_hsl(var(--sage-700)/0.18)] backdrop-blur">
+        <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 shadow-[0_24px_64px_-24px_hsl(var(--sage-700)/0.18)]">
           <div className="mb-6">
             <h1 className="text-2xl font-semibold tracking-tight">Masuk ke Bawabawa.id</h1>
             <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">

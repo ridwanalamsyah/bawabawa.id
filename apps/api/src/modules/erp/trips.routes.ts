@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { randomUUID } from "crypto";
-import { authGuard, requirePermission } from "../../common/middleware/auth";
+import { authGuard, requireAnyPermission } from "../../common/middleware/auth";
 import { logAudit } from "../../common/audit/audit-log";
 import { getPool } from "../../infrastructure/db/pool";
 import { AppError } from "../../common/errors/app-error";
@@ -20,6 +20,9 @@ import { AppError } from "../../common/errors/app-error";
 
 const codeRegex = /^[A-Z0-9-]{4,40}$/;
 
+// Operations staff run the trip schedule; CMS editors keep access too.
+const requireTripsPermission = requireAnyPermission("orders:update", "cms:manage");
+
 type TripRow = {
   id: string;
   code: string;
@@ -35,6 +38,7 @@ type TripRow = {
   popular_categories: string[] | null;
   notes: string | null;
   is_published: boolean;
+  po_closes_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -55,6 +59,7 @@ function rowToDto(row: TripRow) {
     popularCategories: row.popular_categories ?? [],
     notes: row.notes,
     isPublished: row.is_published,
+    poClosesAt: row.po_closes_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -69,7 +74,7 @@ publicTripsRouter.get("/", async (_req, res) => {
     const result = await db.query<TripRow>(
       `SELECT id, code, origin, destination, depart_at, arrive_estimate_at,
               capacity_kg, booked_kg, base_fee, per_kg_fee, status,
-              popular_categories, notes, is_published, created_at, updated_at
+              popular_categories, notes, is_published, po_closes_at, created_at, updated_at
          FROM trips
         WHERE is_published = TRUE AND status <> 'closed'
         ORDER BY depart_at ASC
@@ -99,6 +104,8 @@ const tripInput = z.object({
   popularCategories: z.array(z.string().min(1).max(40)).max(8).optional(),
   notes: z.string().max(500).nullable().optional(),
   isPublished: z.boolean().optional(),
+  // Last moment cargo orders are accepted for this trip (PO batch cutoff).
+  poClosesAt: z.string().datetime().nullable().optional(),
 });
 
 const tripPatchInput = tripInput.partial();
@@ -106,14 +113,14 @@ const tripPatchInput = tripInput.partial();
 adminTripsRouter.get(
   "/",
   authGuard,
-  requirePermission("cms:manage"),
+  requireTripsPermission,
   async (_req, res, next) => {
     try {
       const db = await getPool();
       const result = await db.query<TripRow>(
         `SELECT id, code, origin, destination, depart_at, arrive_estimate_at,
                 capacity_kg, booked_kg, base_fee, per_kg_fee, status,
-                popular_categories, notes, is_published, created_at, updated_at
+                popular_categories, notes, is_published, po_closes_at, created_at, updated_at
            FROM trips
           ORDER BY depart_at ASC NULLS LAST, created_at DESC
           LIMIT 200`
@@ -128,7 +135,7 @@ adminTripsRouter.get(
 adminTripsRouter.post(
   "/",
   authGuard,
-  requirePermission("cms:manage"),
+  requireTripsPermission,
   (req, res, next) => {
     tripInput
       .parseAsync(req.body)
@@ -140,8 +147,8 @@ adminTripsRouter.post(
             `INSERT INTO trips
                (id, code, origin, destination, depart_at, arrive_estimate_at,
                 capacity_kg, booked_kg, base_fee, per_kg_fee, status,
-                popular_categories, notes, is_published, created_by)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15)`,
+                popular_categories, notes, is_published, created_by, po_closes_at)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15,$16)`,
             [
               id,
               input.code,
@@ -158,6 +165,7 @@ adminTripsRouter.post(
               input.notes ?? null,
               input.isPublished ?? false,
               req.user?.sub ?? null,
+              input.poClosesAt ?? null,
             ]
           );
         } catch (err) {
@@ -182,7 +190,7 @@ adminTripsRouter.post(
 adminTripsRouter.patch(
   "/:id",
   authGuard,
-  requirePermission("cms:manage"),
+  requireTripsPermission,
   (req, res, next) => {
     tripPatchInput
       .parseAsync(req.body)
@@ -211,6 +219,7 @@ adminTripsRouter.patch(
         }
         if (input.notes !== undefined) push("notes", input.notes);
         if (input.isPublished !== undefined) push("is_published", input.isPublished);
+        if (input.poClosesAt !== undefined) push("po_closes_at", input.poClosesAt);
         if (values.length === 0) {
           throw new AppError(422, "NO_FIELDS", "Tidak ada field yang diubah");
         }
@@ -239,7 +248,7 @@ adminTripsRouter.patch(
 adminTripsRouter.delete(
   "/:id",
   authGuard,
-  requirePermission("cms:manage"),
+  requireTripsPermission,
   async (req, res, next) => {
     try {
       const id = String(req.params.id);

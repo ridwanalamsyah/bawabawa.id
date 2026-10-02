@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { Router, json } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { loadEnv } from "../../config/env";
@@ -49,7 +49,7 @@ const sendSchema = z.object({
 
 const emailsRouter = Router();
 
-emailsRouter.get("/", authGuard, async (_req, res, next) => {
+emailsRouter.get("/", authGuard, requirePermission("comms:send"), async (_req, res, next) => {
   try {
     const rows = await (await getPool()).query(
       `SELECT id, to_email AS "toEmail", template_key AS "templateKey",
@@ -77,7 +77,7 @@ emailsRouter.get("/", authGuard, async (_req, res, next) => {
  */
 emailsRouter.post(
   "/send",
-  authGuard,
+  authGuard, requirePermission("comms:send"),
   idempotency(),
   json({ limit: "256kb" }),
   (req, res, next) => {
@@ -122,7 +122,7 @@ emailsRouter.post(
  */
 emailsRouter.post(
   "/flush",
-  authGuard,
+  authGuard, requirePermission("comms:send"),
   json({ limit: "1kb" }),
   async (req, res, next) => {
     try {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { Mail, MessageCircle } from "lucide-react";
+import { WA_NUMBER } from "@/lib/contact";
 
 function Instagram(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -17,10 +18,11 @@ export function Footer() {
     {
       title: "Layanan",
       links: [
-        { label: "Titip Sekarang", href: "/request" },
+        { label: "Katalog", href: "/katalog" },
+        { label: "Titip Barang", href: "/request" },
         { label: "Open Trip (kargo batch)", href: "/open-trip" },
         { label: "Pengiriman Langsung", href: "/pengiriman-langsung" },
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Lacak Pesanan", href: "/lacak" },
       ],
     },
     {
@@ -38,7 +40,8 @@ export function Footer() {
       links: [
         { label: "Tentang", href: "/tentang" },
         { label: "Blog", href: "/blog" },
-        { label: "Afiliasi / Reseller", href: "/afiliasi" },
+        { label: "Reseller & B2B", href: "/reseller" },
+        { label: "Afiliasi", href: "/afiliasi" },
         { label: "Hubungi Kami", href: "/kontak" },
         { label: "Syarat & Ketentuan", href: "/terms" },
         { label: "Pembatalan & Refund", href: "/refund" },
@@ -55,14 +58,14 @@ export function Footer() {
             <Logo />
             <p className="mt-4 max-w-sm text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
               Bawabawa.id adalah jasa titip lokal modern dari Bandung ke Samarinda.
-              Cepat, aman, terpercaya — didukung oleh personal shopper terverifikasi
-              dan ekosistem digital terintegrasi.
+              Pilih dari katalog atau titip barang apa saja — kami cek harga dulu,
+              kamu bayar setelah setuju.
             </p>
             <div className="mt-5 flex items-center gap-2">
               <a href="#" aria-label="Instagram" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER ?? "6281234567890"}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
+              <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <MessageCircle className="h-4 w-4" />
               </a>
               <a href="mailto:hello@bawabawa.id" aria-label="Email" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">

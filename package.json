@@ -12,5 +12,8 @@
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }

@@ -26,7 +26,7 @@ const FONTS = [
 export default function PressKitPage() {
   return (
     <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
         Press Kit
       </p>
       <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">
@@ -42,12 +42,12 @@ export default function PressKitPage() {
         <h2 className="text-xl font-semibold tracking-tight">Logo</h2>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 flex items-center justify-center">
-            <span className="text-3xl font-display font-bold bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+            <span className="text-3xl font-bold text-[hsl(var(--sage-700))]">
               Bawabawa.id
             </span>
           </div>
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[#2A2C28] p-8 flex items-center justify-center">
-            <span className="text-3xl font-display font-bold bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--emerald-400))] bg-clip-text text-transparent">
+            <span className="text-3xl font-bold text-[hsl(var(--sage-700))]">
               Bawabawa.id
             </span>
           </div>
@@ -117,7 +117,7 @@ export default function PressKitPage() {
         </div>
       </section>
 
-      <section className="mt-12 rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.7)] backdrop-blur p-6 sm:p-8">
+      <section className="mt-12 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 sm:p-8">
         <h2 className="text-xl font-semibold tracking-tight">Tentang Bawabawa.id</h2>
         <dl className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
           <div>

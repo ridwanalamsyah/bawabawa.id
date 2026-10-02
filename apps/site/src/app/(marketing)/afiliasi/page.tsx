@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Handshake, Coins, BarChart3, Share2 } from "lucide-react";
+import Link from "next/link";
+import { WA_NUMBER } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Afiliasi & Reseller — Bawabawa.id",
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
 export default function AfiliasiPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
         Afiliasi &amp; Reseller
       </p>
       <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">
@@ -32,8 +34,8 @@ export default function AfiliasiPage() {
       <section className="mt-10 grid sm:grid-cols-2 gap-4">
         <Step
           icon={<Handshake className="h-5 w-5" />}
-          title="1. Daftar via WhatsApp"
-          body="Kontak admin Bawabawa lewat WA dengan info nama, kota, dan channel kamu (IG / TikTok / komunitas)."
+          title="1. Isi form pendaftaran"
+          body="Isi nama, kota, dan channel kamu (IG / TikTok / komunitas). Admin menghubungi lewat WhatsApp."
         />
         <Step
           icon={<Share2 className="h-5 w-5" />}
@@ -43,12 +45,12 @@ export default function AfiliasiPage() {
         <Step
           icon={<Coins className="h-5 w-5" />}
           title="3. Komisi otomatis tercatat"
-          body="Setiap order yang pakai kode kamu masuk ke akun afiliasi. Komisi ditentukan per kategori barang."
+          body="Pembeli menulis kode kamu saat memesan; admin mencatatnya di pesanan. Komisi ditentukan per kategori barang."
         />
         <Step
           icon={<BarChart3 className="h-5 w-5" />}
           title="4. Pencairan bulanan"
-          body="Cek total komisi di dashboard afiliasi. Pencairan via transfer setiap awal bulan, minimum saldo Rp 100.000."
+          body="Rekap komisi dikirim admin lewat WhatsApp setiap awal bulan, lalu ditransfer (minimum Rp100.000)."
         />
       </section>
 
@@ -69,27 +71,36 @@ export default function AfiliasiPage() {
           />
           <Faq
             q="Bagaimana cara tracking order yang pakai kode saya?"
-            a="Setiap order yang menggunakan kode referral kamu akan tercatat di dashboard afiliasi — order ID, nilai, status komisi (pending / settled)."
+            a="Admin mencatat setiap pesanan yang menyebut kode kamu dan mengirim rekap bulanan berisi kode pesanan, nilai, dan status komisi. Dashboard afiliasi mandiri belum tersedia."
           />
         </div>
       </section>
 
-      <section className="mt-12 rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 sm:p-8 text-center">
+      <section className="mt-12 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 sm:p-8 text-center">
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
           Status program: <strong>soft launch — limited slot</strong>. Kami
           terima 20 partner pertama untuk fase awal supaya kualitas onboarding
           terjaga.
         </p>
-        <div className="mt-4">
-          <a
-            href="https://wa.me/6281234567890?text=Halo+Bawabawa%2C+saya+mau+daftar+jadi+afiliasi"
-            target="_blank"
-            rel="noreferrer noopener"
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/reseller?kind=affiliate"
             className="inline-flex items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-6 py-3 text-sm font-semibold text-white hover:bg-[hsl(var(--sage-800))] transition-colors"
           >
-            Daftar via WhatsApp
+            Daftar lewat form
+          </Link>
+          <a
+            href={`https://wa.me/${WA_NUMBER}?text=Halo+Bawabawa%2C+saya+mau+daftar+jadi+afiliasi`}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-sm font-medium underline underline-offset-4"
+          >
+            atau chat WhatsApp
           </a>
         </div>
+        <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
+          Punya toko atau butuh kulakan rutin? Lihat <Link href="/reseller" className="underline underline-offset-4">program reseller &amp; B2B</Link>.
+        </p>
       </section>
     </article>
   );

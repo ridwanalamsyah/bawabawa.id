@@ -7,7 +7,7 @@ import { logAudit } from "../../common/audit/audit-log";
 
 const approvalRouter = Router();
 
-approvalRouter.post("/request/:id", authGuard, async (req, res, next) => {
+approvalRouter.post("/request/:id", authGuard, requirePermission("orders:update"), async (req, res, next) => {
   try {
     const approvalId = randomUUID();
     const levelRequired = Number(req.body.levelRequired ?? 2);
@@ -155,7 +155,7 @@ approvalRouter.post(
   }
 );
 
-approvalRouter.get("/", authGuard, async (_req, res, next) => {
+approvalRouter.get("/", authGuard, requirePermission("orders:approve"), async (_req, res, next) => {
   try {
     const rows = await (await getPool()).query(
       `SELECT id, module_name AS "moduleName", entity_id AS "entityId",

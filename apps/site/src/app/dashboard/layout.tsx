@@ -4,30 +4,15 @@ import { Topbar } from "@/components/dashboard/topbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { callErpAsCustomer, readSession } from "@/lib/customer-bff";
+import { waLink } from "@/lib/contact";
 
 const groups: SidebarGroup[] = [
   {
-    label: "Overview",
+    label: "Pesanan",
     items: [
-      { href: "/dashboard", label: "Beranda", icon: "dashboard" },
-      { href: "/dashboard/orders", label: "Pesanan", icon: "package" },
-      { href: "/dashboard/tracking", label: "Live Tracking", icon: "truck" },
-    ],
-  },
-  {
-    label: "Aktivitas",
-    items: [
-      { href: "/dashboard/invoice", label: "Invoice", icon: "receipt" },
-      { href: "/dashboard/wishlist", label: "Wishlist", icon: "heart" },
-      { href: "/dashboard/chat", label: "Live Chat Admin", icon: "chat" },
-      { href: "/dashboard/notifications", label: "Notifikasi", icon: "bell" },
-    ],
-  },
-  {
-    label: "Akun",
-    items: [
-      { href: "/dashboard/addresses", label: "Alamat tersimpan", icon: "pin" },
-      { href: "/dashboard/settings", label: "Pengaturan", icon: "settings" },
+      { href: "/dashboard", label: "Pesanan saya", icon: "package" },
+      { href: "/request", label: "Titip barang", icon: "truck" },
+      { href: "/katalog", label: "Katalog", icon: "receipt" },
     ],
   },
 ];
@@ -62,13 +47,15 @@ export default async function UserDashboardLayout({ children }: { children: Reac
       <Sidebar
         groups={groups}
         footer={
-          <Link
-            href="#"
-            className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--surface)/0.6)] hover:text-[hsl(var(--foreground))]"
+          <a
+            href={waLink("Halo Bawabawa, saya butuh bantuan.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--surface))] hover:text-[hsl(var(--foreground))]"
           >
-            <LifeBuoy className="h-4 w-4" />
-            Pusat Bantuan
-          </Link>
+            <LifeBuoy className="h-4 w-4" aria-hidden />
+            Bantuan via WhatsApp
+          </a>
         }
       />
       <div className="flex-1 min-w-0 flex flex-col">
@@ -77,14 +64,14 @@ export default async function UserDashboardLayout({ children }: { children: Reac
           subtitle={`Halo ${userName.split(" ")[0]}, pantau titipanmu di sini.`}
           user={{ name: userName, role: userRole }}
         />
-        <div className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
+        <main id="main" tabIndex={-1} className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
           <div className="lg:hidden mb-4 flex items-center gap-2">
             <Button asChild size="sm" variant="outline">
               <Link href="/">← Kembali ke beranda</Link>
             </Button>
           </div>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

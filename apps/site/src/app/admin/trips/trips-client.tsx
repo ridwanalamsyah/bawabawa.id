@@ -22,6 +22,7 @@ type Trip = {
   destination: string;
   departAt: string;
   arriveEstimateAt: string | null;
+  poClosesAt: string | null;
   capacityKg: number;
   bookedKg: number;
   baseFee: number;
@@ -40,6 +41,7 @@ type FormState = {
   destination: string;
   departAt: string;
   arriveEstimateAt: string;
+  poClosesAt: string;
   capacityKg: string;
   bookedKg: string;
   baseFee: string;
@@ -56,6 +58,7 @@ const emptyForm: FormState = {
   destination: "Samarinda",
   departAt: "",
   arriveEstimateAt: "",
+  poClosesAt: "",
   capacityKg: "200",
   bookedKg: "0",
   baseFee: "0",
@@ -231,6 +234,7 @@ function TripForm({
         destination: form.destination.trim(),
         departAt: departAtIso,
         arriveEstimateAt: toIsoLocal(form.arriveEstimateAt),
+        poClosesAt: toIsoLocal(form.poClosesAt),
         capacityKg: Math.max(0, Number(form.capacityKg) || 0),
         bookedKg: Math.max(0, Number(form.bookedKg) || 0),
         baseFee: Math.max(0, Number(form.baseFee) || 0),
@@ -301,6 +305,13 @@ function TripForm({
               type="datetime-local"
               value={form.arriveEstimateAt}
               onChange={(e) => set("arriveEstimateAt", e.target.value)}
+            />
+          </Field>
+          <Field label="PO ditutup (batas pesan Kargo)">
+            <Input
+              type="datetime-local"
+              value={form.poClosesAt}
+              onChange={(e) => set("poClosesAt", e.target.value)}
             />
           </Field>
           <Field label="Status">
@@ -548,6 +559,7 @@ function InlineEdit({
   const [arriveEstimateAt, setArriveEstimateAt] = React.useState(
     isoToInput(trip.arriveEstimateAt),
   );
+  const [poClosesAt, setPoClosesAt] = React.useState(isoToInput(trip.poClosesAt));
   const [capacityKg, setCapacityKg] = React.useState(String(trip.capacityKg));
   const [bookedKg, setBookedKg] = React.useState(String(trip.bookedKg));
   const [status, setStatus] = React.useState<Trip["status"]>(trip.status);
@@ -564,6 +576,7 @@ function InlineEdit({
         const dIso = toIsoLocal(departAt);
         if (dIso) next.departAt = dIso;
         next.arriveEstimateAt = toIsoLocal(arriveEstimateAt);
+        next.poClosesAt = toIsoLocal(poClosesAt);
         void onSubmit(next);
       }}
       className="mt-4 rounded-2xl border border-[hsl(var(--border))] p-4 space-y-3"
@@ -581,6 +594,13 @@ function InlineEdit({
             type="datetime-local"
             value={arriveEstimateAt}
             onChange={(e) => setArriveEstimateAt(e.target.value)}
+          />
+        </Field>
+        <Field label="PO ditutup">
+          <Input
+            type="datetime-local"
+            value={poClosesAt}
+            onChange={(e) => setPoClosesAt(e.target.value)}
           />
         </Field>
         <Field label="Kapasitas (kg)">

@@ -7,7 +7,8 @@
 import { cookies } from "next/headers";
 import { verifyToken, type AuthSession } from "@/lib/auth";
 import { ERP_TOKEN_COOKIE, SESSION_COOKIE } from "@/lib/auth-edge";
-import { erpFetch, ErpError } from "@/lib/erp-client";
+import { ErpError } from "@/lib/erp-client";
+import { erpFetchAsUser } from "@/lib/erp-authed-fetch";
 
 export type CustomerContext = {
   userId: string;
@@ -51,13 +52,15 @@ export async function callErpAsCustomer<T>(opts: {
   if (!ctxResult.ok) return null;
   if (!ctxResult.ctx.erpToken) return null;
   try {
-    return await erpFetch<T>({
-      path: opts.path,
-      method: opts.method ?? "GET",
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-      token: ctxResult.ctx.erpToken,
-      timeoutMs: 6000,
-    });
+    return await erpFetchAsUser<T>(
+      {
+        path: opts.path,
+        method: opts.method ?? "GET",
+        body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+        timeoutMs: 6000,
+      },
+      ctxResult.ctx.erpToken,
+    );
   } catch (error) {
     if (error instanceof ErpError) {
       // Most likely 401 / 403 / 404 — caller treats as empty.

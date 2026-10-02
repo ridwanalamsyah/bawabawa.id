@@ -15,6 +15,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { TripFilterTabs } from "./filter-tabs";
+import { WA_NUMBER } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Open Trip Bandung → Samarinda",
@@ -34,6 +35,7 @@ type Trip = {
   baseFee: number;
   perKgFee: number;
   status: "open" | "in_transit" | "fullbooked" | "closed";
+  poClosesAt?: string | null;
   popularCategories: string[];
   notes: string | null;
   isPublished: boolean;
@@ -49,6 +51,7 @@ async function fetchTrips(): Promise<Trip[]> {
 }
 
 export default async function OpenTripPage() {
+  const nowMs = new Date().getTime();
   const trips = await fetchTrips();
   const activeTrips = trips.filter((t) => t.status !== "closed");
   const totalSlotsAvailable = trips.reduce(
@@ -63,12 +66,12 @@ export default async function OpenTripPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-10">
           <div className="grid lg:grid-cols-12 gap-8 items-end">
             <div className="lg:col-span-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+              <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
                 Open Trip
               </p>
               <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Jadwal keberangkatan{" "}
-                <span className="bg-linear-to-br from-[hsl(var(--sage-700))] via-[hsl(var(--olive-500))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+                <span>
                   Bandung → Samarinda
                 </span>
               </h1>
@@ -124,7 +127,7 @@ export default async function OpenTripPage() {
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Button asChild variant="primary">
                   <a
-                    href="https://wa.me/6281234567890?text=Halo+Bawabawa%2C+saya+mau+tanya+jadwal+open+trip+berikutnya"
+                    href={`https://wa.me/${WA_NUMBER}?text=Halo+Bawabawa%2C+saya+mau+tanya+jadwal+open+trip+berikutnya`}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
@@ -141,13 +144,15 @@ export default async function OpenTripPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {trips.map((t) => {
+                const poOpenUntil =
+                  t.poClosesAt && new Date(t.poClosesAt).getTime() > nowMs ? t.poClosesAt : null;
                 const filled = Math.round((t.bookedKg / Math.max(1, t.capacityKg)) * 100);
                 const isFull = t.status === "fullbooked" || filled >= 100;
                 const isInTransit = t.status === "in_transit";
                 return (
                   <article
                     key={t.id}
-                    className="group relative overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:shadow-[0_24px_60px_-30px_hsl(var(--sage-700)/0.45)] transition-all"
+                    className="group relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:shadow-[0_24px_60px_-30px_hsl(var(--sage-700)/0.45)] transition-all"
                   >
                     <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-linear-to-br from-[hsl(var(--sage-200))] to-transparent dark:from-[hsl(var(--sage-700)/0.4)] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-start justify-between gap-3">
@@ -227,6 +232,11 @@ export default async function OpenTripPage() {
                       <p className="mt-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
                         {Math.max(0, t.capacityKg - t.bookedKg)} kg slot tersisa
                       </p>
+                      {poOpenUntil && (
+                        <p className="mt-1 text-xs font-medium text-[hsl(var(--warning))]">
+                          PO tutup {formatDate(poOpenUntil, { weekday: "long", day: "numeric", month: "short", year: undefined, hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      )}
                     </div>
 
                     {t.popularCategories.length > 0 && (

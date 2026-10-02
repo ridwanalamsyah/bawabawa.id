@@ -1,8 +1,10 @@
-import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Sidebar, type SidebarGroup } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
+import { readSession } from "@/lib/customer-bff";
+import { isAdminRole } from "@/lib/auth-edge";
 
 // Sidebar removed: "ERP Integration" entry (system-language leak) and the
 // hardcoded badge counts on Pesanan/Pembayaran (those were faking activity
@@ -12,7 +14,8 @@ const groups: SidebarGroup[] = [
     label: "Operasional",
     items: [
       { href: "/admin", label: "Overview", icon: "dashboard" },
-      { href: "/admin/orders", label: "Pesanan", icon: "package" },
+      { href: "/admin/orders", label: "Pesanan masuk", icon: "package" },
+      { href: "/admin/catalog", label: "Katalog", icon: "receipt" },
       { href: "/admin/trips", label: "Open Trip", icon: "plane" },
       { href: "/admin/customers", label: "Customer", icon: "users" },
       { href: "/admin/payments", label: "Pembayaran", icon: "card" },
@@ -33,6 +36,7 @@ const groups: SidebarGroup[] = [
     label: "CRM & Marketing",
     items: [
       { href: "/admin/leads", label: "Leads", icon: "users" },
+      { href: "/admin/partners", label: "Reseller & B2B", icon: "heart" },
       { href: "/admin/vouchers", label: "Voucher & Promo", icon: "receipt" },
       { href: "/admin/whatsapp", label: "WhatsApp Outbox", icon: "chat" },
       { href: "/admin/emails", label: "Email Outbox", icon: "bell" },
@@ -50,6 +54,7 @@ const groups: SidebarGroup[] = [
     label: "Konten & Tim",
     items: [
       { href: "/admin/cms", label: "CMS", icon: "file" },
+      { href: "/admin/reviews", label: "Ulasan", icon: "chat" },
       { href: "/admin/support", label: "Customer Support", icon: "support" },
       { href: "/admin/users", label: "Tim & Admin", icon: "users" },
       { href: "/admin/roles", label: "Role & Permission", icon: "shield" },
@@ -58,36 +63,32 @@ const groups: SidebarGroup[] = [
   },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Defense in depth: proxy.ts already gates /admin, but a proxy bypass
+  // (see CVE class fixed in Next 16.3) must still not render staff pages.
+  const session = await readSession();
+  if (!session || !isAdminRole(session.role)) {
+    redirect("/login?next=/admin&reason=forbidden");
+  }
   return (
     <div className="flex min-h-svh">
       <Sidebar
         groups={groups}
         brandHref="/admin"
-        footer={
-          <div className="rounded-xl bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--sage-900))] p-4 text-white">
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <Sparkles className="h-3.5 w-3.5" /> Admin Bawabawa
-            </div>
-            <p className="mt-1 text-[11px] opacity-80">
-              Kelola pesanan, customer, dan konten dari satu tempat.
-            </p>
-          </div>
-        }
       />
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
           title="Admin Console"
           subtitle="Bawabawa Bandung"
         />
-        <div className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
+        <main id="main" tabIndex={-1} className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
           <div className="lg:hidden mb-4 flex items-center gap-2">
             <Button asChild size="sm" variant="outline">
               <Link href="/">← Kembali ke beranda</Link>
             </Button>
           </div>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

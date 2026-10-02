@@ -1,7 +1,6 @@
 import { erpSafe } from "@/lib/erp-client";
 
 type ErpReportSummary = {
-  revenueMonth?: number;
   activeOrders?: number;
   activeCustomers?: number;
   activeTrips?: number;
@@ -27,7 +26,6 @@ export async function GET() {
   });
   if (erp.ok && erp.data) {
     return Response.json({
-      revenueMonth: erp.data.revenueMonth ?? 0,
       activeOrders: erp.data.activeOrders ?? 0,
       activeCustomers: erp.data.activeCustomers ?? 0,
       activeTrips: erp.data.activeTrips ?? 0,
@@ -38,7 +36,6 @@ export async function GET() {
     });
   }
   return Response.json({
-    revenueMonth: 0,
     activeOrders: 0,
     activeCustomers: 0,
     activeTrips: 0,

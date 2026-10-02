@@ -68,6 +68,17 @@ describe("config/env loadEnv()", () => {
     expect(() => loadEnv()).toThrow();
   });
 
+  it("boots in production without CORS_ALLOWED_ORIGINS (app.ts fails closed instead)", () => {
+    process.env.NODE_ENV = "production";
+    process.env.JWT_ACCESS_SECRET = "0123456789abcdef0123456789abcdef";
+    process.env.JWT_REFRESH_SECRET = "0123456789abcdef0123456789abcdef-r";
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "1234567890.apps.googleusercontent.com";
+    process.env.DATABASE_URL = "postgres://user:pw@localhost:5432/db";
+    delete process.env.CORS_ALLOWED_ORIGINS;
+    delete process.env.DEMO_MODE;
+    expect(loadEnv().CORS_ALLOWED_ORIGINS).toEqual([]);
+  });
+
   it("rejects DEMO_MODE=true in production", () => {
     process.env.NODE_ENV = "production";
     process.env.JWT_ACCESS_SECRET = "0123456789abcdef0123456789abcdef";
@@ -85,6 +96,7 @@ describe("config/env loadEnv()", () => {
     process.env.GOOGLE_OAUTH_CLIENT_ID = "1234567890.apps.googleusercontent.com";
     process.env.DATABASE_URL = "postgres://user:pw@localhost:5432/db";
     process.env.OAUTH_ALLOWED_DOMAINS = "bawabawa.id,bawabawa.co.id";
+    process.env.CORS_ALLOWED_ORIGINS = "https://bawabawa.id";
     delete process.env.DEMO_MODE;
     const env = loadEnv();
     expect(env.NODE_ENV).toBe("production");
