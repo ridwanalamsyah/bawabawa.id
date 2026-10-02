@@ -85,8 +85,11 @@ const STEPS = [
 
 const DRAFT_KEY = "bb_request_draft_v1";
 
-const newItem = (): Item => ({
-  id: crypto.randomUUID(),
+// The first row needs a stable id: it is rendered on the server too, and a
+// random id there would differ from the client's (hydration mismatch on
+// every label/input pair). Rows added later can use random ids.
+const newItem = (id: string = crypto.randomUUID()): Item => ({
+  id,
   name: "",
   link: "",
   category: "Fashion",
@@ -131,7 +134,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
   const cartLines = useSyncExternalStore(cart.subscribe, cart.get, cart.getServer);
 
   const [step, setStep] = useState(1);
-  const [items, setItems] = useState<Item[]>([newItem()]);
+  const [items, setItems] = useState<Item[]>(() => [newItem("item-1")]);
   const [contact, setContact] = useState<Contact>(emptyContact);
   const [outOfStock, setOutOfStock] = useState<OutOfStock>("ask");
   const [customerNotes, setCustomerNotes] = useState("");
@@ -971,7 +974,7 @@ function SuccessCard({
   const [copied, setCopied] = useState(false);
   return (
     <GlassCard className="p-8 sm:p-10 text-center max-w-2xl mx-auto">
-      <div className="mx-auto h-16 w-16 rounded-3xl bg-linear-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
+      <div className="mx-auto h-16 w-16 rounded-2xl bg-linear-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
         <CircleCheck className="h-8 w-8" aria-hidden />
       </div>
       <h2 className="mt-5 text-2xl font-semibold tracking-tight">
@@ -1022,7 +1025,7 @@ function SummaryCard({
   return (
     <div className="lg:sticky lg:top-24">
       <GlassCard className="p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+        <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
           {isCatalog ? "Ringkasan" : "Estimasi maksimal"}
         </p>
         <div className="mt-4 space-y-2.5 text-sm">

@@ -38,7 +38,7 @@ export function MarketingNav() {
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
         scrolled
-          ? "backdrop-blur-xl bg-[hsl(var(--bg)/0.7)] border-b border-[hsl(var(--border))]"
+          ? "backdrop-blur-xl bg-[hsl(var(--bg))] border-b border-[hsl(var(--border))]"
           : "bg-transparent"
       )}
     >

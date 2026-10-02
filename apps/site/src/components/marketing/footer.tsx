@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { Mail, MessageCircle } from "lucide-react";
+import { WA_NUMBER } from "@/lib/contact";
 
 function Instagram(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -63,7 +64,7 @@ export function Footer() {
               <a href="#" aria-label="Instagram" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER ?? "6281234567890"}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
+              <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
                 <MessageCircle className="h-4 w-4" />
               </a>
               <a href="mailto:hello@bawabawa.id" aria-label="Email" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">

@@ -47,7 +47,7 @@ export default function AdminOverviewPage() {
         <Card className="lg:col-span-7 p-0 overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-[hsl(var(--border))]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+              <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
                 Pesanan terbaru
               </p>
               <h3 className="mt-1 font-semibold">Live order feed</h3>
@@ -65,7 +65,7 @@ export default function AdminOverviewPage() {
         </Card>
 
         <GlassCard className="lg:col-span-5 p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+          <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
             Aktivitas terbaru
           </p>
           <h3 className="mt-1 font-semibold">Activity feed</h3>
@@ -81,7 +81,7 @@ export default function AdminOverviewPage() {
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
         <Card className="lg:col-span-6 p-0 overflow-hidden">
           <div className="p-5 border-b border-[hsl(var(--border))]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+            <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
               Trip aktif
             </p>
             <h3 className="mt-1 font-semibold">Monitoring pengiriman</h3>
@@ -98,7 +98,7 @@ export default function AdminOverviewPage() {
         </Card>
 
         <GlassCard className="lg:col-span-6 p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+          <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
             Log otomatisasi
           </p>
           <h3 className="mt-1 font-semibold">Notifikasi & status pengiriman</h3>

@@ -51,7 +51,7 @@ export default async function UserDashboardLayout({ children }: { children: Reac
             href={waLink("Halo Bawabawa, saya butuh bantuan.")}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--surface)/0.6)] hover:text-[hsl(var(--foreground))]"
+            className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--surface))] hover:text-[hsl(var(--foreground))]"
           >
             <LifeBuoy className="h-4 w-4" aria-hidden />
             Bantuan via WhatsApp

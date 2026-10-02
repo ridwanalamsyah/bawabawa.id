@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function TentangPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
         Tentang
       </p>
       <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">

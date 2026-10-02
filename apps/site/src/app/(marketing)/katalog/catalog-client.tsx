@@ -130,7 +130,7 @@ export function CartBar() {
   const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
   return (
     <div className="fixed bottom-0 inset-x-0 z-30 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-      <div className="mx-auto max-w-3xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.95)] backdrop-blur-xl shadow-lg px-4 py-3 flex items-center gap-3">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.95)] shadow-lg px-4 py-3 flex items-center gap-3">
         <ShoppingCart className="h-5 w-5 text-[hsl(var(--sage-700))]" aria-hidden />
         <p className="flex-1 text-sm">
           <strong>{count} barang</strong> · {formatIDR(subtotal)}

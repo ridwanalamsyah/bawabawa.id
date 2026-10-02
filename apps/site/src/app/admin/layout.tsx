@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Sidebar, type SidebarGroup } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
@@ -74,16 +73,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <Sidebar
         groups={groups}
         brandHref="/admin"
-        footer={
-          <div className="rounded-xl bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--sage-900))] p-4 text-white">
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <Sparkles className="h-3.5 w-3.5" /> Admin Bawabawa
-            </div>
-            <p className="mt-1 text-[11px] opacity-80">
-              Kelola pesanan, customer, dan konten dari satu tempat.
-            </p>
-          </div>
-        }
       />
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar

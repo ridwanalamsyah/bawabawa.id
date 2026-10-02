@@ -17,7 +17,7 @@ export default async function TrackPage({
   const { token } = await params;
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
         Lacak Pesanan
       </p>
       <h1 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight">

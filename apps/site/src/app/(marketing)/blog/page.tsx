@@ -98,7 +98,7 @@ export default async function BlogPage() {
 
   return (
     <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
         Blog
       </p>
       <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">
@@ -114,7 +114,7 @@ export default async function BlogPage() {
           <Link
             key={p.slug}
             href={`/blog/${p.slug}`}
-            className="group rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.7)] backdrop-blur-sm p-6 hover:border-[hsl(var(--sage-400))] hover:-translate-y-0.5 transition-all"
+            className="group rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:border-[hsl(var(--sage-400))] hover:-translate-y-0.5 transition-all"
           >
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-medium">
               <span className="rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-900))] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))] px-2 py-0.5">
@@ -140,7 +140,7 @@ export default async function BlogPage() {
         ))}
       </div>
 
-      <div className="mt-12 rounded-3xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.5)] p-8 text-center">
+      <div className="mt-12 rounded-2xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 text-center">
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
           Lebih banyak artikel segera hadir. Subscribe untuk update via email.
         </p>

@@ -24,21 +24,21 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip sepatu Bandung",
     heroHeadline: "Jastip sepatu original Bandung → Samarinda",
     heroDescription:
-      "Nike, Adidas, Vans, Converse, Compass, Brodo, Aerostreet — kami beli langsung dari outlet resmi di Pasar Baru, Cihampelas, dan Trans Studio Mall Bandung. Foto detail sebelum bayar, jaminan original.",
+      "Nike, Adidas, Vans, Converse, Compass, Brodo, Aerostreet — kami belikan di toko yang kamu pilih di Bandung. Minta foto barang di toko sebelum kamu setuju dan bayar.",
     examples: ["Nike Air Force 1", "Adidas Samba", "Compass Gazelle", "Brodo Signore", "Vans Old Skool", "Converse Run Star"],
     faq: [
       {
         q: "Apakah dijamin original?",
-        a: "Ya. Personal shopper kami hanya beli di outlet resmi & official store. Sertifikat & box asli dikirim utuh, plus foto di lokasi pembelian.",
+        a: "Kami membelikan di toko yang kamu sebutkan (sebaiknya outlet resmi atau official store) dan mengirim box serta nota aslinya. Kamu bisa minta foto barang dan nota di toko sebelum setuju.",
       },
       {
         q: "Bagaimana cara cek ukuran kalau toko fisik?",
-        a: "Kasih spesifikasi (US/EU/UK + insole panjang dalam cm) di form request. Shopper bisa kirim foto ukuran di toko sebelum bayar.",
+        a: "Tulis ukuran (US/EU/UK, atau panjang insole dalam cm) di kolom varian. Kalau perlu, minta foto label ukuran di toko lewat WhatsApp sebelum setuju.",
       },
     ],
-    metaTitle: "Jastip Sepatu Bandung ke Samarinda — Original 100% | Bawabawa.id",
+    metaTitle: "Jastip Sepatu Bandung ke Samarinda | Bawabawa.id",
     metaDescription:
-      "Jastip sepatu original dari Bandung (Nike, Adidas, Vans, Compass, Brodo) ke Samarinda. Foto detail sebelum bayar, garansi original, pengiriman 3–4 hari.",
+      "Jastip sepatu original dari Bandung (Nike, Adidas, Vans, Compass, Brodo) ke Samarinda. Cek harga dulu, bayar setelah setuju, Reguler 3–4 hari kerja.",
   },
   "jastip-skincare": {
     slug: "jastip-skincare",
@@ -51,7 +51,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     faq: [
       {
         q: "Apakah expired date masih lama?",
-        a: "Shopper akan cek expired date di toko dan kirim foto sebelum bayar. Kami tidak terima produk dengan masa simpan < 6 bulan.",
+        a: "Kami cek tanggal kedaluwarsa di toko dan mencantumkannya di penawaran harga. Kalau masa simpannya terlalu pendek, kami tanya kamu dulu.",
       },
       {
         q: "Bisa request batch tertentu?",
@@ -60,7 +60,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     ],
     metaTitle: "Jastip Skincare Bandung ke Samarinda — Somethinc, Skintific, Wardah | Bawabawa.id",
     metaDescription:
-      "Jastip skincare & beauty dari Bandung ke Samarinda. Cek expired date sebelum bayar, foto detail produk, garansi original 100%.",
+      "Jastip skincare & beauty dari Bandung ke Samarinda. Cek tanggal kedaluwarsa sebelum kamu setuju, bayar setelah harga final.",
   },
   "jastip-fashion": {
     slug: "jastip-fashion",
@@ -68,7 +68,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip fashion Bandung",
     heroHeadline: "Fashion Bandung → Samarinda",
     heroDescription:
-      "Pasar Baru Bandung punya distro lokal terbaik: Eiger, Erigo, 3Second, Cardinal, Greenlight, Wakai, Cotton On. Kami jastip-kan dengan ukuran detail, foto pas, pengiriman aman.",
+      "Pasar Baru Bandung punya distro lokal terbaik: Eiger, Erigo, 3Second, Cardinal, Greenlight, Wakai, Cotton On. Tulis ukuran & warna yang kamu mau; kami belikan setelah kamu setuju harganya.",
     examples: ["Erigo Outerwear", "Eiger Backpack", "3Second Tee", "Cardinal Polo", "Greenlight Hoodie"],
     faq: [
       {
@@ -78,7 +78,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     ],
     metaTitle: "Jastip Fashion Bandung ke Samarinda — Erigo, Eiger, 3Second | Bawabawa.id",
     metaDescription:
-      "Jastip baju & fashion Bandung (Erigo, Eiger, 3Second, Cardinal) ke Samarinda. Foto fitting di toko, ukuran detail, pengiriman aman.",
+      "Jastip baju & fashion Bandung (Erigo, Eiger, 3Second, Cardinal) ke Samarinda. Ukuran sesuai pesananmu, bayar setelah harga disetujui.",
   },
   "jastip-makanan": {
     slug: "jastip-makanan",
@@ -104,21 +104,21 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip elektronik Bandung",
     heroHeadline: "Elektronik & gadget Bandung → Samarinda",
     heroDescription:
-      "BEC Mall Bandung & toko-toko resmi: iPhone, Samsung, Xiaomi, laptop, headset, smartwatch. Kami bantu verifikasi serial number, foto di toko, garansi resmi terdaftar.",
+      "BEC Mall Bandung & toko-toko resmi: iPhone, Samsung, Xiaomi, laptop, headset, smartwatch. Beli di toko resmi pilihanmu, nota & kartu garansi dikirim bersama barang.",
     examples: ["iPhone 15 Pro iBox", "Samsung Galaxy S24", "Xiaomi Redmi Note 13", "MacBook Air M3", "Apple Watch SE"],
     faq: [
       {
         q: "Garansi resmi tetap dapat?",
-        a: "Iya, asal beli di toko resmi (iBox, Erafone, Samsung Center, etc). Kartu garansi diaktifkan atas nama customer, dikirim utuh.",
+        a: "Garansi mengikuti kebijakan toko resmi tempat membeli (mis. iBox, Erafone, Samsung Store). Nota dan kartu garansi kami kirim utuh bersama barang.",
       },
       {
-        q: "Asuransi untuk gadget mahal?",
-        a: "Untuk barang ≥Rp 10jt, opsional asuransi 2% dari nilai barang. Klaim 100% kalau hilang/rusak selama perjalanan.",
+        q: "Bagaimana dengan gadget mahal?",
+        a: "Untuk barang bernilai tinggi, diskusikan dulu lewat WhatsApp soal pengemasan dan opsi asuransi pengiriman dari ekspedisi sebelum kamu menyetujui penawaran.",
       },
     ],
     metaTitle: "Jastip iPhone, Samsung, Laptop Bandung ke Samarinda | Bawabawa.id",
     metaDescription:
-      "Jastip elektronik & gadget Bandung (iPhone iBox, Samsung, MacBook) ke Samarinda. Garansi resmi, asuransi opsional, foto verifikasi.",
+      "Jastip elektronik & gadget Bandung (iPhone iBox, Samsung, MacBook) ke Samarinda. Beli di toko resmi, nota & kartu garansi ikut dikirim.",
   },
   "jastip-buku": {
     slug: "jastip-buku",
@@ -131,12 +131,12 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     faq: [
       {
         q: "Aman untuk buku import?",
-        a: "Kami pakai box hardcover + bubble wrap. Sampul plastik orisinil dipertahankan. Klaim ganti 100% kalau ada kerusakan transit.",
+        a: "Buku dikemas dengan kardus dan bubble wrap, sampul plastik asli dipertahankan. Kalau ada kerusakan saat pengiriman, hubungi kami lewat WhatsApp — ketentuannya ada di halaman Refund.",
       },
     ],
     metaTitle: "Jastip Buku Bandung ke Samarinda — Gramedia, Palasari, Import | Bawabawa.id",
     metaDescription:
-      "Jastip buku & stationery dari Bandung (Gramedia, Periplus, Palasari) ke Samarinda. Buku langka & import aman, garansi packing hardcover.",
+      "Jastip buku & stationery dari Bandung (Gramedia, Periplus, Palasari) ke Samarinda. Dikemas rapi, bayar setelah harga disetujui.",
   },
 };
 
