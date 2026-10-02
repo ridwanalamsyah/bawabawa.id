@@ -58,7 +58,7 @@ financeRouter.post(
   }
 );
 
-financeRouter.get("/invoices", authGuard, async (_req, res, next) => {
+financeRouter.get("/invoices", authGuard, requirePermission("finance:manage_finance"), async (_req, res, next) => {
   try {
     const result = await (await getPool()).query(
       `SELECT i.id, i.invoice_number AS "invoiceNumber", i.order_id AS "orderId",
@@ -76,7 +76,7 @@ financeRouter.get("/invoices", authGuard, async (_req, res, next) => {
   }
 });
 
-financeRouter.get("/transactions", authGuard, async (_req, res, next) => {
+financeRouter.get("/transactions", authGuard, requirePermission("finance:manage_finance"), async (_req, res, next) => {
   try {
     const transactions = await (await getPool()).query(
       `SELECT id, branch_id AS "branchId", source_type AS "sourceType", source_id AS "sourceId",
@@ -91,7 +91,7 @@ financeRouter.get("/transactions", authGuard, async (_req, res, next) => {
   }
 });
 
-financeRouter.get("/profit-share", authGuard, async (_req, res, next) => {
+financeRouter.get("/profit-share", authGuard, requirePermission("finance:manage_finance"), async (_req, res, next) => {
   try {
     const result = await (await getPool()).query(
       `SELECT setting_value AS "settingValue"

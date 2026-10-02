@@ -6,11 +6,38 @@ import { getPool } from "../../infrastructure/db/pool";
 import { AppError } from "../../common/errors/app-error";
 import { requireEnv } from "../../common/security/env";
 import { loadEnv } from "../../config/env";
+import { permissionsForDivision, roleForDivision } from "../../common/security/permissions";
+
+/**
+ * Roles + permissions for a division: the static map in
+ * common/security/permissions.ts widened by any custom_roles an admin
+ * defined for that division. custom_roles is optional (older databases,
+ * SQLite tests), so lookup failures fall back to the static map.
+ */
+async function resolveDivisionProfile(division: string): Promise<{ roles: string[]; permissions: string[] }> {
+  const permissions = new Set<string>(permissionsForDivision(division));
+  try {
+    const pool = await getPool();
+    const custom = await pool.query<{ permissions: unknown }>(
+      "SELECT permissions FROM custom_roles WHERE LOWER(division) = LOWER($1)",
+      [division]
+    );
+    for (const row of custom.rows) {
+      const list = typeof row.permissions === "string" ? JSON.parse(row.permissions) : row.permissions;
+      if (Array.isArray(list)) for (const perm of list) permissions.add(String(perm));
+    }
+  } catch {
+    // table missing or DB unavailable — static map only
+  }
+  return { roles: [roleForDivision(division)], permissions: [...permissions] };
+}
 
 const ACCESS_SECRET = requireEnv("JWT_ACCESS_SECRET");
 const REFRESH_SECRET = requireEnv("JWT_REFRESH_SECRET");
 const BOOTSTRAP_ADMIN_EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? "admin@erp.local";
-const BOOTSTRAP_ADMIN_PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? "Admin#1234";
+// No hardcoded fallback: without an explicit password the bootstrap admin
+// is simply not created (see bootstrapAdminIfMissing).
+const BOOTSTRAP_ADMIN_PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? "";
 const BOOTSTRAP_ADMIN_NAME = process.env.BOOTSTRAP_ADMIN_NAME ?? "ERP Administrator";
 const BOOTSTRAP_ADMIN_DIVISION = process.env.BOOTSTRAP_ADMIN_DIVISION ?? "admin";
 const BOOTSTRAP_ADMIN_ID = "00000000-0000-0000-0000-000000000001";
@@ -104,22 +131,14 @@ export class AuthService {
       );
 
       if (!result.rowCount) return null;
+      const profile = await resolveDivisionProfile(result.rows[0].division);
       return {
         id: result.rows[0].id,
         email: result.rows[0].email,
         fullName: result.rows[0].full_name,
         division: result.rows[0].division,
-        roles: ["admin"],
-        permissions: [
-          "orders:create",
-          "orders:read",
-          "orders:update",
-          "orders:approve",
-          "finance:manage_finance",
-          "users:manage_users",
-          "reports:export",
-    "cms:manage"
-        ]
+        roles: profile.roles,
+        permissions: profile.permissions
       };
     } catch (error) {
       console.error("Get user by id failed:", error);
@@ -127,7 +146,39 @@ export class AuthService {
     }
   }
 
-  private async findSessionByRefreshToken(userId: string, refreshToken: string) {
+  /**
+   * Mint an access + refresh pair and persist the refresh session. The
+   * refresh JWT carries the session id (`sid`) so lookups hit one row by
+   * primary key instead of argon2-verifying every session the user owns.
+   */
+  private async issueTokens(user: { id: string; roles: string[]; permissions: string[] }) {
+    const sessionId = randomUUID();
+    const accessToken = jwt.sign(
+      { sub: user.id, roles: user.roles, permissions: user.permissions },
+      ACCESS_SECRET,
+      { expiresIn: "15m" }
+    );
+    const refreshToken = jwt.sign({ sub: user.id, sid: sessionId }, REFRESH_SECRET, {
+      expiresIn: "7d"
+    });
+
+    if (!authFlags().demoMode) {
+      try {
+        const refreshHash = await argon2.hash(refreshToken);
+        const pool = await getPool();
+        await pool.query(
+          `INSERT INTO user_sessions (id, user_id, refresh_token_hash, expires_at)
+           VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
+          [sessionId, user.id, refreshHash]
+        );
+      } catch (error) {
+        console.error("Session creation failed:", error);
+      }
+    }
+    return { accessToken, refreshToken };
+  }
+
+  private async findSessionByRefreshToken(userId: string, refreshToken: string, sessionId?: string) {
     if (authFlags().demoMode) {
       // Demo mode - skip session checking
       return { id: randomUUID(), refresh_token_hash: await argon2.hash(refreshToken) };
@@ -135,6 +186,22 @@ export class AuthService {
 
     try {
       const pool = await getPool();
+
+      if (sessionId) {
+        const one = await pool.query<{ id: string; refresh_token_hash: string }>(
+          `SELECT id, refresh_token_hash
+             FROM user_sessions
+            WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL
+            LIMIT 1`,
+          [sessionId, userId]
+        );
+        const session = one.rows[0];
+        if (!session) return null;
+        return (await argon2.verify(session.refresh_token_hash, refreshToken)) ? session : null;
+      }
+
+      // Legacy refresh tokens (issued before `sid` existed) — scan this
+      // user's sessions. Disappears once those tokens expire (≤7 days).
 
       const sessions = await pool.query<{
         id: string;
@@ -161,7 +228,7 @@ export class AuthService {
   }
 
   private async bootstrapAdminIfMissing() {
-    if (authFlags().demoMode) return;
+    if (authFlags().demoMode || !BOOTSTRAP_ADMIN_PASSWORD) return;
     
     try {
       const pool = await getPool();
@@ -221,23 +288,15 @@ export class AuthService {
       );
 
       if (!result.rowCount) return null;
+      const profile = await resolveDivisionProfile(result.rows[0].division);
       return {
         id: result.rows[0].id,
         email: result.rows[0].email,
         passwordHash: result.rows[0].password_hash,
         fullName: result.rows[0].full_name,
         division: result.rows[0].division,
-        roles: ["admin"],
-        permissions: [
-          "orders:create",
-          "orders:read",
-          "orders:update",
-          "orders:approve",
-          "finance:manage_finance",
-          "users:manage_users",
-          "reports:export",
-    "cms:manage"
-        ]
+        roles: profile.roles,
+        permissions: profile.permissions
       };
     } catch (error) {
       console.error("Get user by email failed:", error);
@@ -256,28 +315,7 @@ export class AuthService {
       throw new AppError(401, "INVALID_CREDENTIALS", "Email atau password salah");
     }
 
-    const accessToken = jwt.sign(
-      { sub: user.id, roles: user.roles, permissions: user.permissions },
-      ACCESS_SECRET,
-      { expiresIn: "15m" }
-    );
-    const refreshToken = jwt.sign({ sub: user.id }, REFRESH_SECRET, {
-      expiresIn: "7d"
-    });
-
-    if (!authFlags().demoMode) {
-      try {
-        const refreshHash = await argon2.hash(refreshToken);
-        const pool = await getPool();
-        await (pool as any).query(
-          `INSERT INTO user_sessions (id, user_id, refresh_token_hash, expires_at)
-           VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
-          [randomUUID(), user.id, refreshHash]
-        );
-      } catch (error) {
-        console.error("Session creation failed:", error);
-      }
-    }
+    const { accessToken, refreshToken } = await this.issueTokens(user);
 
     return {
       accessToken,
@@ -345,7 +383,12 @@ export class AuthService {
     if (authFlags().demoMode) {
       try {
         const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { sub: string };
-        const accessToken = jwt.sign({ sub: payload.sub }, ACCESS_SECRET, { expiresIn: "15m" });
+        const demoUser = [...demoUsers.values()].find((u) => u.id === payload.sub);
+        const accessToken = jwt.sign(
+          { sub: payload.sub, roles: demoUser?.roles ?? [], permissions: demoUser?.permissions ?? [] },
+          ACCESS_SECRET,
+          { expiresIn: "15m" }
+        );
         const newRefreshToken = jwt.sign({ sub: payload.sub }, REFRESH_SECRET, { expiresIn: "7d" });
         return { accessToken, refreshToken: newRefreshToken };
       } catch {
@@ -354,8 +397,8 @@ export class AuthService {
     }
 
     try {
-      const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { sub: string };
-      const matchedSession = await this.findSessionByRefreshToken(payload.sub, refreshToken);
+      const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { sub: string; sid?: string };
+      const matchedSession = await this.findSessionByRefreshToken(payload.sub, refreshToken, payload.sid);
 
       if (!matchedSession) {
         throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token tidak valid");
@@ -366,8 +409,12 @@ export class AuthService {
       // token naturally expires (up to 7 days), because /auth/refresh would
       // happily mint new access+refresh pairs forever.
       const pool = await getPool();
-      const userRow = await pool.query<{ status: string | null; is_active: boolean | number | null }>(
-        `SELECT status, is_active
+      const userRow = await pool.query<{
+        status: string | null;
+        is_active: boolean | number | null;
+        division: string | null;
+      }>(
+        `SELECT status, is_active, division
            FROM users
           WHERE id = $1 AND deleted_at IS NULL
           LIMIT 1`,
@@ -401,19 +448,13 @@ export class AuthService {
         matchedSession.id
       ]);
 
-      const accessToken = jwt.sign({ sub: payload.sub }, ACCESS_SECRET, {
-        expiresIn: "15m"
-      });
-      const newRefreshToken = jwt.sign({ sub: payload.sub }, REFRESH_SECRET, {
-        expiresIn: "7d"
-      });
-      const refreshHash = await argon2.hash(newRefreshToken);
-      await pool.query(
-        `INSERT INTO user_sessions (id, user_id, refresh_token_hash, expires_at)
-         VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
-        [randomUUID(), payload.sub, refreshHash]
-      );
-      return { accessToken, refreshToken: newRefreshToken };
+      // Re-resolve permissions so the new access token keeps (or loses)
+      // rights according to the user's current division. Previously the
+      // refreshed token carried only `sub`, so every permission-gated route
+      // started answering 403 fifteen minutes after login.
+      const profile = await resolveDivisionProfile(user.division ?? "");
+      const tokens = await this.issueTokens({ id: payload.sub, ...profile });
+      return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
     } catch (err) {
       if (err instanceof AppError) throw err;
       throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token tidak valid");
@@ -432,8 +473,8 @@ export class AuthService {
     }
 
     try {
-      const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { sub: string };
-      const matchedSession = await this.findSessionByRefreshToken(payload.sub, refreshToken);
+      const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { sub: string; sid?: string };
+      const matchedSession = await this.findSessionByRefreshToken(payload.sub, refreshToken, payload.sid);
       if (!matchedSession) {
         throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token tidak valid");
       }
@@ -498,26 +539,7 @@ export class AuthService {
       );
     }
 
-    const accessToken = jwt.sign(
-      { sub: user.id, roles: user.roles, permissions: user.permissions },
-      ACCESS_SECRET,
-      { expiresIn: "15m" }
-    );
-    const refreshToken = jwt.sign({ sub: user.id }, REFRESH_SECRET, { expiresIn: "7d" });
-
-    if (!authFlags().demoMode) {
-      try {
-        const refreshHash = await argon2.hash(refreshToken);
-        const pool = await getPool();
-        await (pool as any).query(
-          `INSERT INTO user_sessions (id, user_id, refresh_token_hash, expires_at)
-           VALUES ($1, $2, $3, NOW() + INTERVAL '7 days')`,
-          [randomUUID(), user.id, refreshHash]
-        );
-      } catch (error) {
-        console.error("Session creation failed:", error);
-      }
-    }
+    const { accessToken, refreshToken } = await this.issueTokens(user);
 
     return {
       accessToken,
@@ -551,28 +573,11 @@ export class AuthService {
     pictureUrl: string | null;
   }> {
     const flags = authFlags();
-    // Permission profiles — separates the back-office (admin) from
-    // public customers who sign up via /login. New Google signups that
-    // weren't pre-invited as admin land as `division = 'customer'` with
-    // only the read-only `dashboard:view` permission, so the same /login
-    // page can serve both audiences without granting admin powers.
-    const adminRoles = ["admin"];
-    const adminPermissions = [
-      "orders:create",
-      "orders:read",
-      "orders:update",
-      "orders:approve",
-      "finance:manage_finance",
-      "users:manage_users",
-      "reports:export",
-      "cms:manage"
-    ];
-    const customerRoles = ["customer"];
-    const customerPermissions = ["dashboard:view"];
-    const resolveProfile = (division: string) =>
-      division === "customer"
-        ? { roles: customerRoles, permissions: customerPermissions }
-        : { roles: adminRoles, permissions: adminPermissions };
+    // Back-office vs public customers: new Google signups that weren't
+    // pre-invited land as `division = 'customer'` (dashboard:view only).
+    // Staff permissions come from the division map, never a blanket
+    // admin grant.
+    const resolveProfile = resolveDivisionProfile;
 
     if (flags.demoMode) {
       const existing = demoUsers.get(args.email);
@@ -590,7 +595,7 @@ export class AuthService {
       }
       // Demo mode — default new signups to customer; admins must be
       // pre-seeded in demoUsers via env or invite flow.
-      const profile = resolveProfile("customer");
+      const profile = await resolveProfile("customer");
       const created: DemoUser = {
         id: randomUUID(),
         email: args.email,
@@ -635,7 +640,7 @@ export class AuthService {
           WHERE id = $3`,
         [args.sub, args.pictureUrl, row.id]
       );
-      const profile = resolveProfile(row.division);
+      const profile = await resolveProfile(row.division);
       return {
         id: row.id,
         email: row.email,
@@ -655,7 +660,7 @@ export class AuthService {
     // order they just placed.
     const id = randomUUID();
     const newDivision = "customer";
-    const profile = resolveProfile(newDivision);
+    const profile = await resolveProfile(newDivision);
     await (pool as any).query(
       `INSERT INTO users (id, full_name, email, password_hash, division, oauth_provider, oauth_subject, picture_url, status, is_active)
        VALUES ($1, $2, $3, NULL, $4, 'google', $5, $6, $7, TRUE)`,

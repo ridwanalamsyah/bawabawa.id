@@ -21,7 +21,7 @@ const settingUpsertSchema = z.object({
   description: z.string().max(500).nullable().optional()
 });
 
-cmsRouter.get("/settings", authGuard, async (_req, res, next) => {
+cmsRouter.get("/settings", authGuard, requirePermission("cms:manage"), async (_req, res, next) => {
   try {
     const settings = await service.listSettings();
     res.json({ success: true, data: settings });
@@ -45,7 +45,7 @@ cmsRouter.get("/settings/public", async (_req, res, next) => {
   }
 });
 
-cmsRouter.get("/settings/:key", authGuard, async (req, res, next) => {
+cmsRouter.get("/settings/:key", authGuard, requirePermission("cms:manage"), async (req, res, next) => {
   try {
     const setting = await service.getSetting(String(req.params.key));
     if (!setting) {
@@ -89,7 +89,7 @@ const pageSchema = z.object({
   isPublished: z.boolean().optional()
 });
 
-cmsRouter.get("/pages", authGuard, async (req, res, next) => {
+cmsRouter.get("/pages", authGuard, requirePermission("cms:manage"), async (req, res, next) => {
   try {
     const publishedOnly = req.query.published === "true";
     const pages = await service.listPages({ publishedOnly });
@@ -113,7 +113,7 @@ cmsRouter.get("/pages/public/:slug", async (req, res, next) => {
   }
 });
 
-cmsRouter.get("/pages/:id", authGuard, async (req, res, next) => {
+cmsRouter.get("/pages/:id", authGuard, requirePermission("cms:manage"), async (req, res, next) => {
   try {
     const page = await service.getPageById(String(req.params.id));
     if (!page) {
@@ -167,7 +167,7 @@ const sectionSchema = z.object({
   isActive: z.boolean().optional()
 });
 
-cmsRouter.get("/sections", authGuard, async (_req, res, next) => {
+cmsRouter.get("/sections", authGuard, requirePermission("cms:manage"), async (_req, res, next) => {
   try {
     const sections = await service.listSections();
     res.json({ success: true, data: sections });
@@ -306,7 +306,7 @@ const mediaSchema = z.object({
   altText: z.string().max(240).nullable().optional()
 });
 
-cmsRouter.get("/media", authGuard, async (_req, res, next) => {
+cmsRouter.get("/media", authGuard, requirePermission("cms:manage"), async (_req, res, next) => {
   try {
     const items = await service.listMedia();
     res.json({ success: true, data: items });

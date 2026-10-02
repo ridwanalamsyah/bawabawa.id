@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 
 const importsRouter = Router();
 const previewStore = new Map<string, { validRows: number; invalidRows: number }>();
 
-importsRouter.post("/products", authGuard, (_req, res) => {
+importsRouter.post("/products", authGuard, requirePermission("inventory:manage"), (_req, res) => {
   const previewId = `preview_${Date.now()}`;
   previewStore.set(previewId, { validRows: 25, invalidRows: 0 });
   res.status(202).json({
@@ -18,7 +18,7 @@ importsRouter.post("/products", authGuard, (_req, res) => {
   });
 });
 
-importsRouter.post("/products/:previewId/commit", authGuard, (req, res) => {
+importsRouter.post("/products/:previewId/commit", authGuard, requirePermission("inventory:manage"), (req, res) => {
   const previewId = String(req.params.previewId);
   const preview = previewStore.get(previewId);
   if (!preview) {

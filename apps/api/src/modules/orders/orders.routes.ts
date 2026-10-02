@@ -11,7 +11,7 @@ const ordersRouter = Router();
 const service = new OrdersService();
 const workflowService = new WorkflowService(service);
 
-ordersRouter.get("/", authGuard, async (_req, res, next) => {
+ordersRouter.get("/", authGuard, requirePermission("orders:read"), async (_req, res, next) => {
   try {
     const data = await service.listRecent();
     res.json({ success: true, data });
@@ -127,7 +127,7 @@ ordersRouter.post(
   }
 );
 
-ordersRouter.post("/:id/payments", authGuard, idempotency(), (req, res, next) => {
+ordersRouter.post("/:id/payments", authGuard, requirePermission("finance:manage_finance"), idempotency(), (req, res, next) => {
   try {
     const orderId = String(req.params.id);
     const status = z.enum(["payment_dp", "payment_paid"]).parse(req.body.status);
@@ -140,7 +140,7 @@ ordersRouter.post("/:id/payments", authGuard, idempotency(), (req, res, next) =>
   }
 });
 
-ordersRouter.post("/:id/pack", authGuard, async (req, res, next) => {
+ordersRouter.post("/:id/pack", authGuard, requirePermission("orders:update"), async (req, res, next) => {
   try {
     const order = await service.transition(String(req.params.id), "packed");
     res.json({ success: true, data: order });
@@ -149,7 +149,7 @@ ordersRouter.post("/:id/pack", authGuard, async (req, res, next) => {
   }
 });
 
-ordersRouter.post("/:id/ship", authGuard, async (req, res, next) => {
+ordersRouter.post("/:id/ship", authGuard, requirePermission("orders:update"), async (req, res, next) => {
   try {
     const order = await workflowService.shipOrder(String(req.params.id));
     await logAudit({
@@ -181,7 +181,7 @@ ordersRouter.post("/:id/cancel", authGuard, requirePermission("orders:update"), 
   }
 });
 
-ordersRouter.post("/:id/reserve-stock", authGuard, async (req, res, next) => {
+ordersRouter.post("/:id/reserve-stock", authGuard, requirePermission("orders:update"), async (req, res, next) => {
   try {
     const order = await workflowService.reserveStock(String(req.params.id));
     await logAudit({
@@ -197,7 +197,7 @@ ordersRouter.post("/:id/reserve-stock", authGuard, async (req, res, next) => {
   }
 });
 
-ordersRouter.post("/:id/invoice", authGuard, async (req, res, next) => {
+ordersRouter.post("/:id/invoice", authGuard, requirePermission("orders:update"), async (req, res, next) => {
   try {
     const order = await service.transition(String(req.params.id), "invoiced");
     res.json({ success: true, data: order });

@@ -117,6 +117,17 @@ dokuRouter.post("/doku", jsonWithRawBody, async (req, res, next) => {
       return;
     }
 
+    // Reject stale deliveries so a captured notification can't be replayed
+    // much later. DOKU retries within minutes, so 15 minutes is generous.
+    const sentAt = Date.parse(headers.requestTimestamp);
+    if (!Number.isFinite(sentAt) || Math.abs(Date.now() - sentAt) > 15 * 60 * 1000) {
+      res.status(401).json({
+        success: false,
+        error: { code: "STALE_NOTIFICATION", message: "Request-Timestamp kedaluwarsa" }
+      });
+      return;
+    }
+
     const result = await withTransaction((client) =>
       processDokuNotification(client, notification)
     );

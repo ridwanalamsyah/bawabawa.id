@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import * as XLSX from "xlsx";
 import { getPool } from "../../infrastructure/db/pool";
 
 const reportsRouter = Router();
 
-reportsRouter.get("/kpi", authGuard, (_req, res) => {
+reportsRouter.get("/kpi", authGuard, requirePermission("reports:export"), (_req, res) => {
   res.json({
     success: true,
     data: {
@@ -17,7 +17,7 @@ reportsRouter.get("/kpi", authGuard, (_req, res) => {
   });
 });
 
-reportsRouter.get("/sales.xlsx", authGuard, (_req, res) => {
+reportsRouter.get("/sales.xlsx", authGuard, requirePermission("reports:export"), (_req, res) => {
   const rows = [
     { orderNumber: "SO-001", totalAmount: 120000, paymentStatus: "paid" },
     { orderNumber: "SO-002", totalAmount: 80000, paymentStatus: "dp" }
@@ -43,8 +43,9 @@ reportsRouter.get("/sales.xlsx", authGuard, (_req, res) => {
  * must never 5xx because the DB is briefly unavailable).
  */
 reportsRouter.get("/summary", async (_req, res) => {
+  // Public endpoint: counts only. Revenue used to be returned here, which
+  // published the business's monthly turnover to anyone.
   const empty = {
-    revenueMonth: 0,
     activeOrders: 0,
     activeCustomers: 0,
     totalOrdersAllTime: 0,
@@ -53,18 +54,12 @@ reportsRouter.get("/summary", async (_req, res) => {
   };
   try {
     const db = await getPool();
-    const [customers, ordersAll, ordersMonth, revenueMonth, activeOrders] =
+    const [customers, ordersAll, ordersMonth, activeOrders] =
       await Promise.all([
         db.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM customers"),
         db.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM orders"),
         db.query<{ count: string }>(
           "SELECT COUNT(*)::text AS count FROM orders WHERE created_at >= date_trunc('month', NOW())"
-        ),
-        db.query<{ sum: string | null }>(
-          `SELECT COALESCE(SUM(total_amount), 0)::text AS sum
-             FROM orders
-            WHERE created_at >= date_trunc('month', NOW())
-              AND payment_status IN ('paid', 'dp')`
         ),
         db.query<{ count: string }>(
           `SELECT COUNT(*)::text AS count
@@ -76,7 +71,6 @@ reportsRouter.get("/summary", async (_req, res) => {
     res.json({
       success: true,
       data: {
-        revenueMonth: Number(revenueMonth.rows[0]?.sum ?? 0),
         activeOrders: Number(activeOrders.rows[0]?.count ?? 0),
         activeCustomers: Number(customers.rows[0]?.count ?? 0),
         totalOrdersAllTime: Number(ordersAll.rows[0]?.count ?? 0),

@@ -54,7 +54,7 @@ procurementRouter.post(
   }
 );
 
-procurementRouter.get("/purchase-orders", authGuard, async (_req, res, next) => {
+procurementRouter.get("/purchase-orders", authGuard, requirePermission("orders:read"), async (_req, res, next) => {
   try {
     const result = await (await getPool()).query(
       `SELECT po.id, po.supplier_id AS "supplierId", po.branch_id AS "branchId", po.total_amount AS "totalAmount", po.status,

@@ -37,7 +37,7 @@ hrRouter.post(
   }
 );
 
-hrRouter.post("/attendance", authGuard, async (req, res, next) => {
+hrRouter.post("/attendance", authGuard, requirePermission("users:manage_users"), async (req, res, next) => {
   try {
     const payload = z
       .object({
@@ -93,7 +93,7 @@ hrRouter.post(
   }
 );
 
-hrRouter.get("/employees", authGuard, async (_req, res, next) => {
+hrRouter.get("/employees", authGuard, requirePermission("users:manage_users"), async (_req, res, next) => {
   try {
     const rows = await (await getPool()).query(
       `SELECT id, user_id AS "userId", employee_code AS "employeeCode",
@@ -109,7 +109,7 @@ hrRouter.get("/employees", authGuard, async (_req, res, next) => {
   }
 });
 
-hrRouter.get("/attendance", authGuard, async (_req, res, next) => {
+hrRouter.get("/attendance", authGuard, requirePermission("users:manage_users"), async (_req, res, next) => {
   try {
     const rows = await (await getPool()).query(
       `SELECT a.id, a.employee_id AS "employeeId", a.attendance_date AS "attendanceDate",

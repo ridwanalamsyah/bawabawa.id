@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
@@ -24,7 +24,7 @@ const applySchema = z.object({
 
 chargesRouter.post(
   "/:id/charges",
-  authGuard,
+  authGuard, requirePermission("orders:update"),
   idempotency(),
   (req, res, next) => {
     applySchema
@@ -60,7 +60,7 @@ const previewSchema = z.object({
  * the customer sees subtotal / discount / service / tax / total before
  * committing an order.
  */
-chargesRouter.post("/charges/preview", authGuard, (req, res, next) => {
+chargesRouter.post("/charges/preview", authGuard, requirePermission("orders:read"), (req, res, next) => {
   previewSchema
     .parseAsync(req.body)
     .then((input) => {
@@ -70,7 +70,7 @@ chargesRouter.post("/charges/preview", authGuard, (req, res, next) => {
     .catch(next);
 });
 
-chargesRouter.get("/charges/defaults", authGuard, (_req, res) => {
+chargesRouter.get("/charges/defaults", authGuard, requirePermission("orders:read"), (_req, res) => {
   res.json({
     success: true,
     data: {

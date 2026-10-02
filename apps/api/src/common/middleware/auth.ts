@@ -41,3 +41,18 @@ export function requirePermission(permission: string) {
     next();
   };
 }
+
+/** Passes when the caller holds at least one of the listed permissions. */
+export function requireAnyPermission(...required: string[]) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const permissions = req.user?.permissions ?? [];
+    if (!required.some((permission) => permissions.includes(permission))) {
+      throw new AppError(403, "FORBIDDEN", "Akses ditolak");
+    }
+    next();
+  };
+}
+
+export function hasPermission(req: Request, permission: string): boolean {
+  return (req.user?.permissions ?? []).includes(permission);
+}

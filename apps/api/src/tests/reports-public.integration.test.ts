@@ -36,7 +36,8 @@ describe.skipIf(!hasPostgres)("public reports endpoints (PR #49)", () => {
     expect(typeof res.body.data.activeCustomers).toBe("number");
     expect(typeof res.body.data.totalOrdersAllTime).toBe("number");
     expect(typeof res.body.data.activeOrders).toBe("number");
-    expect(typeof res.body.data.revenueMonth).toBe("number");
+    // Revenue is deliberately not public.
+    expect(res.body.data.revenueMonth).toBeUndefined();
   });
 
   it("GET /reports/activity returns array; masks customer names to first + last initial", async () => {

@@ -186,6 +186,14 @@ const envSchema = z.object({
           "GOOGLE_OAUTH_CLIENT_ID is required in production (Google sign-in is the only auth flow)"
       });
     }
+    if (env.CORS_ALLOWED_ORIGINS.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["CORS_ALLOWED_ORIGINS"],
+        message:
+          "CORS_ALLOWED_ORIGINS is required in production (comma-separated list of the site + admin origins)"
+      });
+    }
     if (!env.DATABASE_URL) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

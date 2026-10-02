@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
@@ -28,7 +28,7 @@ const createVoucherSchema = z.object({
   endsAt: z.string().optional()
 });
 
-vouchersRouter.post("/", authGuard, idempotency(), (req, res, next) => {
+vouchersRouter.post("/", authGuard, requirePermission("orders:update"), idempotency(), (req, res, next) => {
   createVoucherSchema
     .parseAsync(req.body)
     .then(async (input) => {
@@ -47,7 +47,7 @@ vouchersRouter.post("/", authGuard, idempotency(), (req, res, next) => {
     .catch(next);
 });
 
-vouchersRouter.get("/", authGuard, async (_req, res, next) => {
+vouchersRouter.get("/", authGuard, requirePermission("orders:read"), async (_req, res, next) => {
   try {
     const db = await getPool();
     const result = await db.query(
@@ -63,7 +63,7 @@ vouchersRouter.get("/", authGuard, async (_req, res, next) => {
   }
 });
 
-vouchersRouter.get("/:code", authGuard, async (req, res, next) => {
+vouchersRouter.get("/:code", authGuard, requirePermission("orders:read"), async (req, res, next) => {
   try {
     const voucher = await getVoucherByCode(await getPool(), String(req.params.code));
     res.json({ success: true, data: voucher });
@@ -78,7 +78,7 @@ const previewSchema = z.object({
   customerId: z.string().uuid().optional()
 });
 
-vouchersRouter.post("/preview", authGuard, (req, res, next) => {
+vouchersRouter.post("/preview", authGuard, requirePermission("orders:read"), (req, res, next) => {
   previewSchema
     .parseAsync(req.body)
     .then(async (input) => {
@@ -111,7 +111,7 @@ const applySchema = z.object({ code: z.string().min(2).max(40) });
  * order already has a redemption — voucher stacking is a separate feature.
  */
 const applyVoucherRouter = Router({ mergeParams: true });
-applyVoucherRouter.post("/:id/voucher", authGuard, idempotency(), (req, res, next) => {
+applyVoucherRouter.post("/:id/voucher", authGuard, requirePermission("orders:update"), idempotency(), (req, res, next) => {
   applySchema
     .parseAsync(req.body)
     .then(async (input) => {
@@ -258,7 +258,7 @@ const patchVoucherSchema = z.object({
   description: z.string().max(200).nullable().optional()
 });
 
-vouchersRouter.patch("/:id", authGuard, (req, res, next) => {
+vouchersRouter.patch("/:id", authGuard, requirePermission("orders:update"), (req, res, next) => {
   patchVoucherSchema
     .parseAsync(req.body)
     .then(async (input) => {

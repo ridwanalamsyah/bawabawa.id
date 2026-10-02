@@ -1,9 +1,28 @@
 import { Router } from "express";
-import { authGuard } from "../../common/middleware/auth";
+import type { Request } from "express";
+import { authGuard, hasPermission } from "../../common/middleware/auth";
+import { AppError } from "../../common/errors/app-error";
 import { getPool } from "../../infrastructure/db/pool";
 import { loadInvoiceData, renderInvoicePdf } from "./invoice.service";
 
 const invoiceRouter = Router({ mergeParams: true });
+
+/**
+ * Staff with `orders:read` may open any invoice; everyone else (customers)
+ * only invoices for orders they created. Answers 404 rather than 403 so the
+ * endpoint can't be used to probe which order ids exist.
+ */
+async function assertCanViewOrder(req: Request, orderId: string) {
+  if (hasPermission(req, "orders:read")) return;
+  const result = await (await getPool()).query<{ created_by: string | null }>(
+    "SELECT created_by FROM orders WHERE id = $1",
+    [orderId]
+  );
+  const owner = result.rows[0]?.created_by;
+  if (!owner || owner !== req.user?.sub) {
+    throw new AppError(404, "ORDER_NOT_FOUND", "Order tidak ditemukan");
+  }
+}
 
 /**
  * GET /api/v1/orders/:id/invoice.pdf — stream a PDF invoice for the order.
@@ -14,6 +33,7 @@ const invoiceRouter = Router({ mergeParams: true });
 invoiceRouter.get("/:id/invoice.pdf", authGuard, async (req, res, next) => {
   try {
     const orderId = String(req.params.id);
+    await assertCanViewOrder(req, orderId);
     const data = await loadInvoiceData(await getPool(), orderId);
     // Sanitize orderNumber before interpolating into the Content-Disposition
     // header. Strip anything outside [A-Za-z0-9._-] so a malicious order
@@ -42,6 +62,7 @@ invoiceRouter.get("/:id/invoice.pdf", authGuard, async (req, res, next) => {
 invoiceRouter.get("/:id/invoice", authGuard, async (req, res, next) => {
   try {
     const orderId = String(req.params.id);
+    await assertCanViewOrder(req, orderId);
     const data = await loadInvoiceData(await getPool(), orderId);
     res.json({ success: true, data });
   } catch (err) {

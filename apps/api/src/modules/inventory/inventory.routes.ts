@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { AppError } from "../../common/errors/app-error";
 import { withTransaction } from "../../infrastructure/db/transaction-manager";
@@ -9,7 +9,7 @@ import { getPool } from "../../infrastructure/db/pool";
 
 const inventoryRouter = Router();
 
-inventoryRouter.post("/adjustments", authGuard, idempotency(), (req, res, next) => {
+inventoryRouter.post("/adjustments", authGuard, requirePermission("inventory:manage"), idempotency(), (req, res, next) => {
   z.object({
     productId: z.string().uuid(),
     branchId: z.string().uuid(),
@@ -121,7 +121,7 @@ inventoryRouter.get("/items", async (req, res, next) => {
   }
 });
 
-inventoryRouter.get("/movements", authGuard, async (_req, res, next) => {
+inventoryRouter.get("/movements", authGuard, requirePermission("orders:read"), async (_req, res, next) => {
   try {
     const rows = await (await getPool()).query(
       `SELECT id, product_id AS "productId", branch_id AS "branchId", movement_type AS "movementType",

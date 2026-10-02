@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/ui/card";
 import { formatIDR, formatNumber } from "@/lib/utils";
 
 type Summary = {
-  revenueMonth: number;
+  ordersThisMonth: number;
   activeOrders: number;
   activeCustomers: number;
   totalOrdersAllTime: number;
@@ -16,7 +16,7 @@ type Summary = {
 };
 
 const SOFT_LAUNCH_FALLBACK: Summary = {
-  revenueMonth: 0,
+  ordersThisMonth: 0,
   activeOrders: 0,
   activeCustomers: 0,
   totalOrdersAllTime: 0,
@@ -36,9 +36,9 @@ function buildStats(s: Summary): Stat[] {
   return [
     {
       icon: TrendingUp,
-      label: "Total transaksi (bulan ini)",
-      value: s.revenueMonth,
-      format: "idr",
+      label: "Pesanan bulan ini",
+      value: s.ordersThisMonth,
+      format: "number",
       tone: "from-[hsl(var(--sage-500))] to-[hsl(var(--emerald-500))]",
     },
     {
@@ -95,7 +95,7 @@ export function LiveStats() {
   const isEmpty =
     data.totalOrdersAllTime === 0 &&
     data.activeCustomers === 0 &&
-    data.revenueMonth === 0;
+    data.ordersThisMonth === 0;
 
   return (
     <div className="mt-14 sm:mt-20">

@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { getPool } from "../../infrastructure/db/pool";
 
 const crmRouter = Router();
 
-crmRouter.post("/customers", authGuard, idempotency(), async (req, res, next) => {
+crmRouter.post("/customers", authGuard, requirePermission("crm:manage"), idempotency(), async (req, res, next) => {
   try {
     const payload = z
       .object({
@@ -29,7 +29,7 @@ crmRouter.post("/customers", authGuard, idempotency(), async (req, res, next) =>
   }
 });
 
-crmRouter.get("/customers", authGuard, async (_req, res, next) => {
+crmRouter.get("/customers", authGuard, requirePermission("crm:manage"), async (_req, res, next) => {
   try {
     const result = await (await getPool()).query(
       `SELECT id, name, phone, branch_id AS "branchId"
@@ -42,7 +42,7 @@ crmRouter.get("/customers", authGuard, async (_req, res, next) => {
   }
 });
 
-crmRouter.post("/leads", authGuard, idempotency(), async (req, res, next) => {
+crmRouter.post("/leads", authGuard, requirePermission("crm:manage"), idempotency(), async (req, res, next) => {
   try {
     const payload = z
       .object({
@@ -64,7 +64,7 @@ crmRouter.post("/leads", authGuard, idempotency(), async (req, res, next) => {
   }
 });
 
-crmRouter.get("/leads", authGuard, async (_req, res, next) => {
+crmRouter.get("/leads", authGuard, requirePermission("crm:manage"), async (_req, res, next) => {
   try {
     const result = await (await getPool()).query(
       `SELECT id, customer_id AS "customerId", name, stage, owner_id AS "ownerId",

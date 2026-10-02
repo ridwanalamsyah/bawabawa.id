@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { WhatsAppService } from "./whatsapp.service";
 import { getPool } from "../../infrastructure/db/pool";
 
 const whatsappRouter = Router();
 const service = new WhatsAppService();
 
-whatsappRouter.post("/messages/send", authGuard, async (req, res, next) => {
+whatsappRouter.post("/messages/send", authGuard, requirePermission("comms:send"), async (req, res, next) => {
   try {
     const payload = z
       .object({
@@ -45,7 +45,7 @@ whatsappRouter.post("/messages/send", authGuard, async (req, res, next) => {
   }
 });
 
-whatsappRouter.get("/messages/logs", authGuard, async (_req, res) => {
+whatsappRouter.get("/messages/logs", authGuard, requirePermission("comms:send"), async (_req, res) => {
   (await getPool())
     .query(
       `SELECT id, template_code AS "templateCode", recipient_phone AS "to", status,

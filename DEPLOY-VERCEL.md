@@ -13,16 +13,21 @@ This is the **no-CC deployment path**. All three services (public site, ERP web 
 
 ---
 
-## Pre-generated secrets (copy these as-is)
+## Secrets (generate your own — never commit them)
+
+> ⚠️ An earlier revision of this file contained real secrets and a database
+> URL. They must be treated as leaked: rotate the Neon password and every
+> secret below, then update the Vercel env vars and redeploy.
 
 ```env
-JWT_ACCESS_SECRET=acb62a2fb3b29763945ed5be7aea6fd724a5ac1373a0514fa143195dfa295bd9
-JWT_REFRESH_SECRET=f0976a4c7aa35525a5579617d14337e543ae821f22492033878d8e9274d72a52
-SESSION_JWT_SECRET=74a552266aaf8117b0b4c6cf8a29d03481453b732aef9d14f147b2afb9e7fab5
-ERP_WEBHOOK_SECRET=baa18bdfb582b4732965f991b1dc33306a78818734afb95d
+JWT_ACCESS_SECRET=<run: openssl rand -hex 32>
+JWT_REFRESH_SECRET=<run: openssl rand -hex 32>
+SESSION_JWT_SECRET=<run: openssl rand -hex 32>
+ERP_WEBHOOK_SECRET=<run: openssl rand -hex 32>
 ```
 
-All four are random 32-byte hex strings, safe to use directly.
+Generate each value separately with `openssl rand -hex 32` and paste it
+only into the Vercel dashboard (Settings → Environment Variables).
 
 ---
 
@@ -35,7 +40,7 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
 1. Sign up at https://console.neon.tech/signup with GitHub.
 2. Create project: name `bawabawa`, region **AWS Asia Pacific (Singapore)**, Postgres 16.
 3. From the dashboard, copy the **pooled** connection string. Format:
-   `postgresql://neondb_owner:npg_…@ep-…-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require`
+   `<pooled connection string from Neon Console — never commit it>`
 4. Save it as `DATABASE_URL` — paste it into the API project later.
 
 > **Migrations already applied?** This repo's 15 migrations were applied to the existing `bawabawa` Neon project. You only re-run them when new migration files are added in `apps/api/src/infrastructure/db/migrations/`.
@@ -55,11 +60,11 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    NODE_ENV=production
 
    # Database (Neon pooled URL from step 1)
-   DATABASE_URL=postgresql://neondb_owner:npg_DR17rywVdBub@ep-nameless-violet-aol57e24-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+   DATABASE_URL=<pooled connection string from Neon Console — never commit it>
 
    # JWT secrets
-   JWT_ACCESS_SECRET=acb62a2fb3b29763945ed5be7aea6fd724a5ac1373a0514fa143195dfa295bd9
-   JWT_REFRESH_SECRET=f0976a4c7aa35525a5579617d14337e543ae821f22492033878d8e9274d72a52
+   JWT_ACCESS_SECRET=<run: openssl rand -hex 32>
+   JWT_REFRESH_SECRET=<run: openssl rand -hex 32>
 
    # Required-in-production placeholder. Replace with a real Google OAuth
    # Client ID later when you wire Google sign-in. Email/password login is
@@ -67,10 +72,10 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    GOOGLE_OAUTH_CLIENT_ID=placeholder.apps.googleusercontent.com
 
    # Webhook signing (used when ERP fires updates toward the public site)
-   ERP_WEBHOOK_SECRET=baa18bdfb582b4732965f991b1dc33306a78818734afb95d
+   ERP_WEBHOOK_SECRET=<run: openssl rand -hex 32>
 
-   # CORS — leave blank for now, fill in once site + web URLs are known:
-   # CORS_ALLOWED_ORIGINS=https://bawabawa-site.vercel.app,https://bawabawa-web.vercel.app
+   # CORS — required in production (the API refuses to boot without it):
+   CORS_ALLOWED_ORIGINS=https://bawabawa.id,https://bawabawa-site.vercel.app,https://bawabawa-web.vercel.app
 
    # Optional integrations (leave empty for MVP):
    # DOKU_CLIENT_ID=
@@ -103,10 +108,10 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    ERP_API_BASE_URL=https://bawabawa-api.vercel.app
 
    # Site-level session signing
-   SESSION_JWT_SECRET=74a552266aaf8117b0b4c6cf8a29d03481453b732aef9d14f147b2afb9e7fab5
+   SESSION_JWT_SECRET=<run: openssl rand -hex 32>
 
    # ERP webhook receiver verifies this HMAC
-   ERP_WEBHOOK_SECRET=baa18bdfb582b4732965f991b1dc33306a78818734afb95d
+   ERP_WEBHOOK_SECRET=<run: openssl rand -hex 32>
 
    # Public URL (used in canonical tags, OG, sitemap)
    NEXT_PUBLIC_SITE_URL=https://bawabawa-site.vercel.app
@@ -115,7 +120,7 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
 6. Click **Deploy**. ~2 min.
 7. Smoke-test: open `https://bawabawa-site.vercel.app` — landing page should load with hero, KPI cards, glass surfaces.
 8. Test auth gate: `https://bawabawa-site.vercel.app/admin` → redirects to `/login?next=/admin`.
-9. Test login: `aulia.putri@example.com` / `password` (customer) and `indra@bawabawa.id` / `password` (owner). Mock auth handles these because ERP email/password is disabled in production until Google OAuth is configured.
+9. Test login with Google: a new Google account becomes a `customer` (only `/dashboard`). Staff are invited from `/admin/users`; their division (admin, finance, operations, gudang, sales, support, marketing) decides their permissions — see `apps/api/src/common/security/permissions.ts`.
 
 ---
 

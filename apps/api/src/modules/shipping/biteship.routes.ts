@@ -1,6 +1,6 @@
 import { Router, json } from "express";
 import { z } from "zod";
-import { authGuard } from "../../common/middleware/auth";
+import { authGuard, requirePermission } from "../../common/middleware/auth";
 import { idempotency } from "../../common/middleware/idempotency";
 import { logAudit } from "../../common/audit/audit-log";
 import { loadEnv } from "../../config/env";
@@ -68,7 +68,7 @@ const bookSchema = z.object({
 
 const shippingRouter = Router();
 
-shippingRouter.post("/quote", authGuard, json({ limit: "100kb" }), (req, res, next) => {
+shippingRouter.post("/quote", authGuard, requirePermission("orders:read"), json({ limit: "100kb" }), (req, res, next) => {
   quoteSchema
     .parseAsync(req.body)
     .then(async (input) => {
@@ -88,7 +88,7 @@ shippingRouter.post("/quote", authGuard, json({ limit: "100kb" }), (req, res, ne
 
 shippingRouter.post(
   "/book",
-  authGuard,
+  authGuard, requirePermission("orders:update"),
   idempotency(),
   json({ limit: "100kb" }),
   (req, res, next) => {
