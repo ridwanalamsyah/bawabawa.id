@@ -14,21 +14,6 @@ const POSTS: Record<string, {
   date: string;
   paragraphs: string[];
 }> = {
-  "panduan-belanja-pasar-baru-bandung": {
-    title: "Panduan lengkap belanja di Pasar Baru Bandung untuk pemula",
-    description:
-      "Pasar Baru = surga fashion distro Bandung. Tapi kalau pertama kali, gampang nyasar & ditipu. Ini panduannya.",
-    category: "Tips Belanja",
-    readTime: "6 min",
-    date: "12 Apr 2025",
-    paragraphs: [
-      "Pasar Baru di Bandung adalah salah satu destinasi belanja paling legendaris di Indonesia. Berdiri sejak 1906, kawasan ini dikenal sebagai pusat fashion grosir dengan harga distro yang super terjangkau.",
-      "Tapi buat pemula yang baru pertama kali ke sini, Pasar Baru bisa terasa sangat membingungkan. Bangunan 8 lantai dengan ratusan kios, harga yang bisa berbeda 50%+ antar lapak, dan teknik tawar-menawar yang khas Bandung — semuanya bisa bikin pusing.",
-      "Pertama, ketahuilah area khusus per lantai. Lantai 1–2 untuk perlengkapan haji & busana muslim. Lantai 3–4 fashion casual & distro. Lantai 5–6 textile & bahan kain. Lantai 7–8 bordir, aksesoris, dan tas.",
-      "Tips menawar: harga awal biasanya bisa diturunkan 30–40%. Jangan beli di lapak pertama yang kamu lihat — keliling dulu 15–20 menit untuk benchmark harga.",
-      "Dan kalau kamu tinggal di luar Bandung, jasa titip seperti Bawabawa.id bisa bantu kamu belanja di Pasar Baru tanpa harus datang langsung. Personal shopper kami sudah tahu lapak-lapak terpercaya dengan harga terbaik.",
-    ],
-  },
   "review-oleh-oleh-bandung-legendaris": {
     title: "10 oleh-oleh Bandung legendaris yang wajib dicicipi",
     description:

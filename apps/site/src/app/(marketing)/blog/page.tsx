@@ -15,15 +15,6 @@ export const metadata: Metadata = {
 // these at render time (see fetchAdminPosts below).
 const POSTS = [
   {
-    slug: "panduan-belanja-pasar-baru-bandung",
-    title: "Panduan lengkap belanja di Pasar Baru Bandung untuk pemula",
-    excerpt:
-      "Pasar Baru = surga fashion harga distro. Tapi kalau pertama kali, gampang nyasar & ditipu harga turis. Tips dari shopper kami.",
-    category: "Tips Belanja",
-    readTime: "6 min",
-    date: "12 Apr 2025",
-  },
-  {
     slug: "review-oleh-oleh-bandung-legendaris",
     title: "10 oleh-oleh Bandung legendaris yang wajib dicicipi",
     excerpt:

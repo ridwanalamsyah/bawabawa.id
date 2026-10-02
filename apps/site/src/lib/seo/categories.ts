@@ -46,7 +46,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip skincare Bandung",
     heroHeadline: "Skincare & beauty Bandung → Samarinda",
     heroDescription:
-      "Somethinc, Skintific, Wardah, Emina, Avoskin, Whitelab, Scarlett — semua diambil langsung dari Watsons, Guardian, atau official store di Paris Van Java & TSM Bandung.",
+      "Somethinc, Skintific, Wardah, Emina, Avoskin, Whitelab, Scarlett — dari official store atau toko mana pun di Bandung yang kamu sebut. Tanggal kedaluwarsa dicek sebelum kamu setuju.",
     examples: ["Somethinc Niacinamide", "Skintific MSH", "Avoskin Miraculous", "Whitelab Acne", "Wardah Crystal"],
     faq: [
       {
@@ -68,7 +68,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip fashion Bandung",
     heroHeadline: "Fashion Bandung → Samarinda",
     heroDescription:
-      "Pasar Baru Bandung punya distro lokal terbaik: Eiger, Erigo, 3Second, Cardinal, Greenlight, Wakai, Cotton On. Tulis ukuran & warna yang kamu mau; kami belikan setelah kamu setuju harganya.",
+      "Brand lokal Bandung favorit: Eiger, Erigo, 3Second, Cardinal, Greenlight, Wakai, Cotton On. Tulis ukuran & warna yang kamu mau; kami belikan setelah kamu setuju harganya.",
     examples: ["Erigo Outerwear", "Eiger Backpack", "3Second Tee", "Cardinal Polo", "Greenlight Hoodie"],
     faq: [
       {
@@ -104,12 +104,12 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip elektronik Bandung",
     heroHeadline: "Elektronik & gadget Bandung → Samarinda",
     heroDescription:
-      "BEC Mall Bandung & toko-toko resmi: iPhone, Samsung, Xiaomi, laptop, headset, smartwatch. Beli di toko resmi pilihanmu, nota & kartu garansi dikirim bersama barang.",
-    examples: ["iPhone 15 Pro iBox", "Samsung Galaxy S24", "Xiaomi Redmi Note 13", "MacBook Air M3", "Apple Watch SE"],
+      "iPhone, Samsung, Xiaomi, laptop, headset, smartwatch dari toko resmi pilihanmu, nota & kartu garansi dikirim bersama barang.",
+    examples: ["iPhone 15 Pro", "Samsung Galaxy S24", "Xiaomi Redmi Note 13", "MacBook Air M3", "Apple Watch SE"],
     faq: [
       {
         q: "Garansi resmi tetap dapat?",
-        a: "Garansi mengikuti kebijakan toko resmi tempat membeli (mis. iBox, Erafone, Samsung Store). Nota dan kartu garansi kami kirim utuh bersama barang.",
+        a: "Garansi mengikuti kebijakan toko resmi tempat membeli. Nota dan kartu garansi kami kirim utuh bersama barang.",
       },
       {
         q: "Bagaimana dengan gadget mahal?",
@@ -118,7 +118,7 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     ],
     metaTitle: "Jastip iPhone, Samsung, Laptop Bandung ke Samarinda | Bawabawa.id",
     metaDescription:
-      "Jastip elektronik & gadget Bandung (iPhone iBox, Samsung, MacBook) ke Samarinda. Beli di toko resmi, nota & kartu garansi ikut dikirim.",
+      "Jastip elektronik & gadget Bandung (iPhone, Samsung, MacBook) ke Samarinda. Beli di toko resmi, nota & kartu garansi ikut dikirim.",
   },
   "jastip-buku": {
     slug: "jastip-buku",
@@ -126,17 +126,17 @@ export const CATEGORY_PAGES: Record<string, CategoryPage> = {
     heroEyebrow: "Jastip buku Bandung",
     heroHeadline: "Buku & stationery Bandung → Samarinda",
     heroDescription:
-      "Gramedia, Periplus, Toga Mas, Palasari book street, dan import dari Aksaramaya. Buku langka, manga import, light novel — kami beli dan kirim aman.",
-    examples: ["Buku import Aksaramaya", "Manga Tokopedia BL", "Light novel Comic House", "Stationery Gramedia"],
+      "Buku baru maupun langka, manga, light novel, buku impor, dan alat tulis dari toko buku mana pun di Bandung — kami belikan dan kirim dengan aman.",
+    examples: ["Novel & nonfiksi", "Manga & light novel", "Buku impor", "Alat tulis"],
     faq: [
       {
         q: "Aman untuk buku import?",
         a: "Buku dikemas dengan kardus dan bubble wrap, sampul plastik asli dipertahankan. Kalau ada kerusakan saat pengiriman, hubungi kami lewat WhatsApp — ketentuannya ada di halaman Refund.",
       },
     ],
-    metaTitle: "Jastip Buku Bandung ke Samarinda — Gramedia, Palasari, Import | Bawabawa.id",
+    metaTitle: "Jastip Buku & Alat Tulis Bandung ke Samarinda | Bawabawa.id",
     metaDescription:
-      "Jastip buku & stationery dari Bandung (Gramedia, Periplus, Palasari) ke Samarinda. Dikemas rapi, bayar setelah harga disetujui.",
+      "Jastip buku & alat tulis dari Bandung ke Samarinda. Dikemas rapi, bayar setelah harga disetujui.",
   },
 };
 

@@ -590,7 +590,7 @@ function ItemsStep({ items, setItems, errors }: { items: Item[]; setItems: (v: I
                     id={fid("notes")}
                     value={it.notes}
                     onChange={(ev) => update(it.id, { notes: ev.target.value })}
-                    placeholder="Contoh: beli di outlet Riau Junction, minta dus asli."
+                    placeholder="Contoh: kalau hitam habis, ambil abu-abu. Minta dus asli."
                   />
                 </div>
               </div>

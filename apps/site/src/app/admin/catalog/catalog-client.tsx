@@ -264,7 +264,7 @@ function ProductForm({
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor={fid("store")}>Toko asal</Label>
-          <Input id={fid("store")} value={form.originStore} onChange={(e) => set({ originStore: e.target.value })} placeholder="Kartika Sari, Jl. Dago" />
+          <Input id={fid("store")} value={form.originStore} onChange={(e) => set({ originStore: e.target.value })} placeholder="Nama toko (opsional)" />
         </div>
         <div className="sm:col-span-2 grid gap-1.5">
           <Label htmlFor={fid("variants")}>Varian (pisahkan dengan koma)</Label>
