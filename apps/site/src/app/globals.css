@@ -492,3 +492,20 @@ h1, h2, h3, .font-display {
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-step { animation: none; opacity: 1; }
 }
+
+/* Accessibility baseline (WCAG 2.4.7): a visible focus ring for every
+   keyboard-focusable element that doesn't define its own. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Respect "reduce motion" for CSS-driven hero/entrance animations too. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,46 +1,47 @@
+import { Download } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { GlassCard } from "@/components/ui/card";
-import { MiniAreaChart, MiniDonut } from "@/components/dashboard/area-chart";
-import { revenueLast14Days, ordersByCategory } from "@/lib/mock/analytics";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { callErpAsCustomer } from "@/lib/customer-bff";
+import { ORDER_FLOW, ORDER_STEP_LABEL } from "@/lib/order-requests";
 
-export default function AdminReportsPage() {
+// Previously rendered hardcoded revenue charts. Now: real counts per status
+// from the order-request queue, plus a CSV export of real orders.
+export default async function AdminReportsPage() {
+  const data = await callErpAsCustomer<{ counts: Record<string, number> }>({ path: "/admin/orders/requests?limit=1" });
+  const counts = data?.counts ?? {};
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
   return (
     <>
-      <PageHeader eyebrow="Analytics" title="Laporan & analytics" description="Insight bisnis realtime — revenue, kategori, retention." />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <GlassCard className="lg:col-span-8 p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-              Revenue trend
-            </p>
-            <Badge variant="success">+24% MoM</Badge>
-          </div>
-          <MiniAreaChart data={revenueLast14Days} height={220} />
+      <PageHeader
+        eyebrow="Laporan"
+        title="Laporan"
+        description="Angka langsung dari database. Untuk analisis lanjut, unduh CSV dan buka di Excel / Google Sheets."
+        actions={
+          <Button asChild variant="outline">
+            <a href="/api/admin/reports">
+              <Download className="h-4 w-4" aria-hidden /> Unduh CSV pesanan
+            </a>
+          </Button>
+        }
+      />
+      {data === null ? (
+        <GlassCard className="p-6 text-sm text-[hsl(var(--muted-foreground))]">
+          Data belum bisa dimuat (sesi kedaluwarsa atau server tidak terjangkau). Muat ulang halaman.
         </GlassCard>
-        <GlassCard className="lg:col-span-4 p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] mb-3">
-            Distribusi kategori
-          </p>
-          <MiniDonut data={ordersByCategory} />
+      ) : (
+        <GlassCard className="p-6">
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">Total pesanan dari situs: <strong className="text-[hsl(var(--foreground))]">{total}</strong></p>
+          <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[...ORDER_FLOW, "cancelled" as const].map((s) => (
+              <div key={s} className="rounded-xl border border-[hsl(var(--border))] p-3">
+                <dt className="text-xs text-[hsl(var(--muted-foreground))]">{ORDER_STEP_LABEL[s]}</dt>
+                <dd className="mt-1 text-2xl font-semibold tabular-nums">{counts[s] ?? 0}</dd>
+              </div>
+            ))}
+          </dl>
         </GlassCard>
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {[
-          { label: "Conversion rate landing → request", value: "12.4%", delta: "+1.2pp" },
-          { label: "Retention 30 hari", value: "68.1%", delta: "+3.4pp" },
-          { label: "AOV (Average Order Value)", value: "Rp 638rb", delta: "+9%" },
-        ].map((s) => (
-          <GlassCard key={s.label} className="p-5">
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">{s.label}</p>
-            <div className="mt-2 flex items-end justify-between">
-              <p className="text-2xl font-semibold tabular-nums">{s.value}</p>
-              <Badge variant="success">{s.delta}</Badge>
-            </div>
-          </GlassCard>
-        ))}
-      </div>
+      )}
     </>
   );
 }

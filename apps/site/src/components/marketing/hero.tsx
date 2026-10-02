@@ -27,7 +27,7 @@ export function Hero() {
           <div className="lg:col-span-6">
             <div className="animate-hero-rise inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.8)] backdrop-blur px-3 py-1 text-xs font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
               <Sparkles className="h-3.5 w-3.5" />
-              Layanan jasa titip Bandung → Samarinda · resmi & terpercaya
+              Jasa titip Bandung → Samarinda
             </div>
             <h1
               className="animate-hero-rise-lg mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-[1.05]"
@@ -46,9 +46,9 @@ export function Hero() {
               className="animate-hero-rise mt-5 max-w-xl text-base sm:text-lg text-[hsl(var(--muted-foreground))] leading-relaxed"
               style={{ animationDelay: "0.15s" }}
             >
-              Personal shopper terverifikasi membelikan barang di Bandung —
-              dari Pasar Baru, Trans Studio Mall, hingga toko favorit kamu — lalu
-              dikirim aman sampai depan rumah di Samarinda. Cepat, transparan, dan terpercaya.
+              Pilih dari katalog atau titip barang apa saja dari toko di Bandung.
+              Kami cek stok & harga dulu, kamu bayar setelah setuju, lalu barang
+              dikirim sampai rumah di Samarinda.
             </p>
 
             <div
@@ -62,7 +62,7 @@ export function Hero() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/open-trip">Lihat Open Trip</Link>
+                <Link href="/katalog">Lihat katalog</Link>
               </Button>
             </div>
 
@@ -71,12 +71,12 @@ export function Hero() {
               style={{ animationDelay: "0.4s" }}
             >
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-[hsl(var(--emerald-500))]" />
-                Garansi barang aman
+                <ShieldCheck className="h-4 w-4 text-[hsl(var(--emerald-500))]" aria-hidden />
+                Bayar setelah harga disetujui
               </div>
               <div className="flex items-center gap-2">
-                <BadgeCheck className="h-4 w-4 text-[hsl(var(--sage-600))]" />
-                <span>Soft launch — early customer welcome</span>
+                <BadgeCheck className="h-4 w-4 text-[hsl(var(--sage-600))]" aria-hidden />
+                <span>Mulai Rp43rb/kg</span>
               </div>
             </div>
           </div>

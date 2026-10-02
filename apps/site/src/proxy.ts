@@ -4,6 +4,35 @@ import {
   SESSION_COOKIE,
   verifyTokenEdge,
 } from "@/lib/auth-edge";
+import {
+  ERP_REFRESH_COOKIE,
+  ERP_TOKEN_COOKIE,
+  erpCookieOptions,
+  refreshErpTokens,
+  tokenExpiresWithin,
+} from "@/lib/erp-session";
+
+/**
+ * Server components under /admin and /dashboard call the ERP with the
+ * access-token cookie but cannot write cookies. Refresh here, before they
+ * render: the new tokens go onto the forwarded request (so this render
+ * sees them) and onto the response (so the browser keeps them).
+ */
+async function continueWithFreshErpToken(req: NextRequest): Promise<NextResponse> {
+  const access = req.cookies.get(ERP_TOKEN_COOKIE)?.value;
+  const refresh = req.cookies.get(ERP_REFRESH_COOKIE)?.value;
+  if (!refresh || !tokenExpiresWithin(access, 60)) return NextResponse.next();
+
+  const pair = await refreshErpTokens(refresh);
+  if (!pair) return NextResponse.next();
+
+  req.cookies.set(ERP_TOKEN_COOKIE, pair.accessToken);
+  req.cookies.set(ERP_REFRESH_COOKIE, pair.refreshToken);
+  const res = NextResponse.next({ request: { headers: req.headers } });
+  res.cookies.set({ name: ERP_TOKEN_COOKIE, value: pair.accessToken, ...erpCookieOptions });
+  res.cookies.set({ name: ERP_REFRESH_COOKIE, value: pair.refreshToken, ...erpCookieOptions });
+  return res;
+}
 
 /**
  * Auth gate for `/admin/*` and `/dashboard/*`. Next.js 16 renamed
@@ -32,14 +61,14 @@ export async function proxy(req: NextRequest) {
     if (!isAdminRole(session.role)) {
       return redirectToLogin(req, pathname, search, "forbidden");
     }
-    return NextResponse.next();
+    return continueWithFreshErpToken(req);
   }
 
   if (pathname.startsWith("/dashboard")) {
     if (!session) {
       return redirectToLogin(req, pathname, search);
     }
-    return NextResponse.next();
+    return continueWithFreshErpToken(req);
   }
 
   return NextResponse.next();
@@ -66,5 +95,6 @@ function redirectToLogin(
 }
 
 export const config = {
+  // /api/admin/* BFF routes do their own session check + 401 retry.
   matcher: ["/admin/:path*", "/dashboard/:path*"],
 };

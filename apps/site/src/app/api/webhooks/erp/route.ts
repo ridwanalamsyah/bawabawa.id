@@ -40,7 +40,8 @@ const TAG_MAP: Record<string, string[]> = {
 export async function POST(req: Request) {
   const raw = await req.text();
   const sig = req.headers.get("x-bawabawa-signature");
-  if (!verifyWebhookSignature(raw, sig)) {
+  const ts = req.headers.get("x-bawabawa-timestamp");
+  if (!(await verifyWebhookSignature(raw, sig, ts))) {
     return Response.json({ error: "invalid signature" }, { status: 401 });
   }
 

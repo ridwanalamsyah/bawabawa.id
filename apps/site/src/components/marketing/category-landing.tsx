@@ -89,12 +89,12 @@ export function CategoryLanding({ page }: { page: CategoryPage }) {
             </div>
             <ul className="mt-4 space-y-3 text-sm">
               {[
-                "Original 100% dari outlet / toko resmi",
-                "Foto barang sebelum bayar (di toko)",
-                "Tracking 9-step realtime di dashboard",
-                "Garansi sampai Rp 5jt (default), asuransi opsional",
-                "Refund 100% kalau pembatalan sebelum belanja",
-                "Personal shopper KYC & rating publik",
+                "Dibelikan langsung di toko yang kamu pilih",
+                "Harga final dikirim dulu — bayar setelah setuju",
+                "Tidak melebihi batas harga tanpa persetujuanmu",
+                "Link tracking + update status via WhatsApp",
+                "Refund kalau barang tidak tersedia",
+                "Tarif terbuka: jasa 8% + ongkir sesuai berat",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2.5">
                   <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--sage-700))] text-white shrink-0">

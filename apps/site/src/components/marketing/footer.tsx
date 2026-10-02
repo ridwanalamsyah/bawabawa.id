@@ -17,10 +17,11 @@ export function Footer() {
     {
       title: "Layanan",
       links: [
-        { label: "Titip Sekarang", href: "/request" },
+        { label: "Katalog", href: "/katalog" },
+        { label: "Titip Barang", href: "/request" },
         { label: "Open Trip (kargo batch)", href: "/open-trip" },
         { label: "Pengiriman Langsung", href: "/pengiriman-langsung" },
-        { label: "Dashboard", href: "/dashboard" },
+        { label: "Lacak Pesanan", href: "/lacak" },
       ],
     },
     {
@@ -55,8 +56,8 @@ export function Footer() {
             <Logo />
             <p className="mt-4 max-w-sm text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
               Bawabawa.id adalah jasa titip lokal modern dari Bandung ke Samarinda.
-              Cepat, aman, terpercaya — didukung oleh personal shopper terverifikasi
-              dan ekosistem digital terintegrasi.
+              Pilih dari katalog atau titip barang apa saja — kami cek harga dulu,
+              kamu bayar setelah setuju.
             </p>
             <div className="mt-5 flex items-center gap-2">
               <a href="#" aria-label="Instagram" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">

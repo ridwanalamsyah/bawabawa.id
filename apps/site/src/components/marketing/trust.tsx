@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import { ShieldCheck, Lock, Headphones, Wallet, BadgeCheck, RefreshCcw } from "lucide-react";
 
+// Only promises the operation actually keeps (see /terms and /refund).
 const ITEMS = [
-  { icon: ShieldCheck, title: "Garansi barang aman", desc: "Setiap titipan dijamin hingga Rp 5.000.000" },
-  { icon: Lock, title: "Pembayaran via DOKU", desc: "Diproses gateway resmi yang diawasi OJK" },
-  { icon: BadgeCheck, title: "Personal shopper terverifikasi", desc: "Identitas & alamat tervalidasi" },
-  { icon: Headphones, title: "Live chat 24/7", desc: "Tim support dari kantor Bandung" },
-  { icon: Wallet, title: "Tarif transparan", desc: "Tanpa biaya tersembunyi" },
-  { icon: RefreshCcw, title: "Refund jika gagal", desc: "100% dana kembali jika request batal" },
+  { icon: Wallet, title: "Bayar setelah setuju", desc: "Harga final dikirim dulu, baru kamu bayar" },
+  { icon: BadgeCheck, title: "Batas harga darimu", desc: "Lebih mahal dari batas? Kami tanya dulu" },
+  { icon: RefreshCcw, title: "Refund kalau habis", desc: "Barang tidak tersedia = dana kembali" },
+  { icon: Headphones, title: "Update via WhatsApp", desc: "Setiap perubahan status dikabari" },
+  { icon: ShieldCheck, title: "Tarif terbuka", desc: "Jasa 8% (min Rp20rb) + ongkir sesuai berat" },
+  { icon: Lock, title: "Data aman", desc: "Nomor & alamat hanya untuk pengiriman" },
 ];
 
 export function TrustGrid() {

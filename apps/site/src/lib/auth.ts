@@ -99,12 +99,39 @@ export async function requireRole(req: Request, allowed: AuthRole[]) {
 }
 
 /**
- * HMAC stub for ERP webhooks. Replace with a real timing-safe compare
- * against `crypto.subtle.verify` for production webhooks issued by ERP.
+ * Verify an ERP → site webhook. The sender computes
+ *   hex(HMAC_SHA256(ERP_WEBHOOK_SECRET, `${timestamp}.${rawBody}`))
+ * and sends it as `x-bawabawa-signature: sha256=<hex>` together with
+ * `x-bawabawa-timestamp: <unix seconds>`. Deliveries older than five
+ * minutes are rejected so a captured request can't be replayed.
+ *
+ * Fails closed: without ERP_WEBHOOK_SECRET every delivery is refused.
  */
-export function verifyWebhookSignature(_body: string, signature: string | null, secret = "whsec_dev_only") {
-  if (!signature) return false;
-  return signature.startsWith(secret);
+export async function verifyWebhookSignature(
+  body: string,
+  signature: string | null,
+  timestamp: string | null,
+  secret = process.env.ERP_WEBHOOK_SECRET,
+  nowSeconds = Math.floor(Date.now() / 1000),
+): Promise<boolean> {
+  if (!secret || !signature || !timestamp) return false;
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(nowSeconds - ts) > 300) return false;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${ts}.${body}`));
+  const expected = Array.from(new Uint8Array(mac), (b) => b.toString(16).padStart(2, "0")).join("");
+  const provided = signature.replace(/^sha256=/i, "").trim().toLowerCase();
+  if (provided.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ provided.charCodeAt(i);
+  return diff === 0;
 }
 
 export const audit = {

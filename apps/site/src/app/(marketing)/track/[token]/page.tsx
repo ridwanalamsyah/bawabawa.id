@@ -24,8 +24,8 @@ export default async function TrackPage({
         Status pesananmu
       </h1>
       <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-        Token tracking <span className="font-mono">{token}</span>. Bookmark
-        halaman ini supaya bisa dipantau kapan saja tanpa login.
+        Simpan link ini — bisa dibuka dari perangkat mana pun tanpa login.
+        Jangan bagikan ke orang lain.
       </p>
 
       <TrackingClient token={token} />

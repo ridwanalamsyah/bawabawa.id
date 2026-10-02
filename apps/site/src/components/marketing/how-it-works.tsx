@@ -6,28 +6,28 @@ import { ClipboardList, ShoppingBag, PackageCheck, Truck, Home } from "lucide-re
 const STEPS = [
   {
     icon: ClipboardList,
-    title: "Buat request",
-    desc: "Upload link Shopee/Tokopedia, foto barang, atau ketik manual. Pilih kategori & catatan tambahan.",
+    title: "Pilih atau titip",
+    desc: "Ambil dari katalog, atau tempel link / tulis nama barang apa saja dari Bandung beserta batas harganya.",
   },
   {
     icon: ShoppingBag,
-    title: "Personal shopper belanja",
-    desc: "Shopper terverifikasi membelikan barang langsung di toko favoritmu di Bandung.",
+    title: "Cek & penawaran",
+    desc: "Tim kami cek stok & harga asli, lalu kirim penawaran final ke WhatsApp-mu.",
   },
   {
     icon: PackageCheck,
-    title: "Packing aman",
-    desc: "Barang dipacking rapi & difoto. Kamu lihat semua dari dashboard secara realtime.",
+    title: "Setujui & bayar",
+    desc: "Kamu bayar setelah setuju. Barang lalu dibelikan, ditimbang, dan dikemas.",
   },
   {
     icon: Truck,
-    title: "Kirim Bandung → Samarinda",
-    desc: "Berangkat sesuai jadwal Open Trip. Tracking live, transit, hingga kurir lokal.",
+    title: "Dikirim ke Samarinda",
+    desc: "Reguler (3–4 hari kerja) atau gabung Open Trip yang lebih hemat untuk barang berat.",
   },
   {
     icon: Home,
-    title: "Diterima di rumah",
-    desc: "Kurir lokal Samarinda mengantar door-to-door. Konfirmasi & rating shopper.",
+    title: "Pantau dari link",
+    desc: "Setiap update — termasuk nomor resi — masuk ke WhatsApp dan halaman tracking.",
   },
 ];
 

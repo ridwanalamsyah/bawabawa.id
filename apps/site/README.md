@@ -24,26 +24,36 @@ Next.js 16 (Web `Request` / `Response`, async `params`/`searchParams`).
 
 ## ERP integration
 
-Lihat `src/lib/erp-client.ts` untuk klien HTTP minimal yang dipakai oleh
-route handler di sisi server. Pola umum: panggil `erpSafe()` dulu, kalau ERP
-tidak menjawab dalam timeout pendek, fallback ke mock dataset di
-`src/lib/mock/*` supaya halaman tetap render. Contoh:
+Semua data asli datang dari ERP (`apps/api`) lewat `src/lib/erp-client.ts`.
+Tidak ada lagi fallback ke data mock di halaman pelanggan — kalau ERP tidak
+menjawab, halaman menampilkan empty/error state yang jujur.
 
-- `GET /api/health` → probe `GET /api/v1/health` di ERP, fallback `status: "fallback"`
-- `POST /api/auth/login` → forward ke `POST /api/v1/auth/login`, fallback ke mock account demo
-- `GET /api/orders` → forward ke `GET /api/v1/orders`, fallback ke `src/lib/mock/orders`
+Alur pemesanan:
 
-Konfigurasi via env (lihat `.env.example`):
+| Halaman | Route handler | ERP endpoint |
+| --- | --- | --- |
+| `/request`, `/katalog/checkout` | `POST /api/orders` | `POST /api/v1/public/order-requests` |
+| `/track/[token]` | `GET /api/order-requests/[token]` (+ `/approve`, `/cancel`) | `/api/v1/public/order-requests/:token` |
+| `/katalog` | server component | `GET /api/v1/catalog`, `GET /api/v1/trips` |
+| `/dashboard` | `GET /api/order-requests/mine` | `GET /api/v1/order-requests/mine` |
+| `/admin/orders`, `/admin/payments` | `/api/admin/order-requests/*` | `/api/v1/admin/orders/requests/*` |
+| `/admin/catalog` | `/api/admin/catalog/*`, `/api/admin/uploads` | `/api/v1/admin/catalog/*`, `/api/v1/uploads` |
+
+Token ERP (access + refresh) hanya disimpan di cookie httpOnly
+(`bb_erp_token`, `bb_erp_refresh`) dan di-refresh otomatis oleh `src/proxy.ts`
+dan BFF (`src/lib/erp-authed-fetch.ts`) — tidak pernah dikirim ke JavaScript browser.
+
+Konfigurasi via env:
 
 ```
-ERP_API_BASE_URL=http://localhost:4000
-ERP_API_TOKEN=...
+ERP_API_BASE_URL=https://bawabawa-api.vercel.app
+SESSION_JWT_SECRET=<openssl rand -hex 32>
+ERP_WEBHOOK_SECRET=<sama dengan di API>   # HMAC ERP → site, header x-bawabawa-signature + x-bawabawa-timestamp
+SITE_PROXY_SECRET=<sama dengan di API>    # rate-limit per pembeli, bukan per server
 NEXT_PUBLIC_SITE_URL=https://bawabawa.id
+NEXT_PUBLIC_WA_NUMBER=62812xxxxxxx
+NEXT_PUBLIC_PPN_ENABLED=false             # true hanya jika sudah PKP
 ```
-
-Route handler lain (`/api/trips`, `/api/customers`, `/api/analytics/overview`,
-`/api/webhooks/erp`, `/api/events/stream`) tinggal mengikuti pola yang sama
-ketika modul ERP-nya siap.
 
 ## Local dev
 

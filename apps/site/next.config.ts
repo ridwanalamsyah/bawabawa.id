@@ -31,7 +31,7 @@ const csp = [
   `default-src 'self'`,
   `script-src 'self' 'unsafe-inline' ${PLAUSIBLE_HOST} ${GOOGLE_GSI}`,
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com`,
-  `img-src 'self' data: blob: https://api.dicebear.com https://images.unsplash.com https://*.r2.dev https://*.amazonaws.com https://*.googleusercontent.com`,
+  `img-src 'self' data: blob: https://api.dicebear.com https://images.unsplash.com https://*.r2.dev https://*.amazonaws.com https://*.googleusercontent.com https://*.public.blob.vercel-storage.com`,
   `font-src 'self' https://fonts.gstatic.com data:`,
   `connect-src 'self' ${SITE_URL} ${ERP_API_BASE} ${PLAUSIBLE_HOST} https://accounts.google.com`,
   `frame-src 'self' https://accounts.google.com`,

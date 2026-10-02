@@ -15,8 +15,10 @@ import { cn } from "@/lib/utils";
 // Dashboard intentionally not in the public nav either; users land there
 // automatically after login via the avatar/menu in the dashboard layout.
 const NAV = [
+  { href: "/katalog", label: "Katalog" },
+  { href: "/request", label: "Titip Barang" },
   { href: "/open-trip", label: "Open Trip" },
-  { href: "/request", label: "Titip Sekarang" },
+  { href: "/lacak", label: "Lacak Pesanan" },
 ];
 
 export function MarketingNav() {

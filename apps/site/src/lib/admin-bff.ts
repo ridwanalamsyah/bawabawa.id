@@ -9,7 +9,8 @@
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { ERP_TOKEN_COOKIE, SESSION_COOKIE } from "@/lib/auth-edge";
-import { erpFetch, ErpError } from "@/lib/erp-client";
+import { ErpError } from "@/lib/erp-client";
+import { erpFetchAsUser } from "@/lib/erp-authed-fetch";
 
 const ADMIN_ROLES: ReadonlySet<string> = new Set([
   "owner",
@@ -67,13 +68,15 @@ export async function callErpAsAdmin<T>(opts: {
   const ctxResult = await requireAdminContext();
   if (!ctxResult.ok) return ctxResult;
   try {
-    const data = await erpFetch<T>({
-      path: opts.path,
-      method: opts.method ?? "GET",
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-      token: ctxResult.ctx.erpToken,
-      timeoutMs: 8000,
-    });
+    const data = await erpFetchAsUser<T>(
+      {
+        path: opts.path,
+        method: opts.method ?? "GET",
+        body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+        timeoutMs: 8000,
+      },
+      ctxResult.ctx.erpToken,
+    );
     return { ok: true, data };
   } catch (error) {
     if (error instanceof ErpError) {

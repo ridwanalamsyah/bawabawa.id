@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { signToken, audit, type AuthRole } from "@/lib/auth";
 import { SESSION_COOKIE } from "@/lib/auth-edge";
 import { erpSafe } from "@/lib/erp-client";
+import { ERP_REFRESH_COOKIE, ERP_TOKEN_COOKIE, erpCookieOptions } from "@/lib/erp-session";
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8h
 
@@ -47,15 +48,19 @@ export async function POST(req: Request) {
     const erpUser: NonNullable<ErpLoginResponse["user"]> = erp.data.user ?? {
       id: email,
     };
-    const role = ((erpUser.role ?? "customer") as AuthRole);
+    const erpRoles = (erp.data.user as { roles?: string[] } | undefined)?.roles;
+    const role = ((erpRoles?.[0] ?? erpUser.role ?? "customer") as AuthRole);
     const sessionToken = await signToken({
       userId: erpUser.id ?? email,
       role,
     }, SESSION_TTL_SECONDS);
     await setSessionCookie(sessionToken);
+    const jar = await cookies();
+    jar.set({ name: ERP_TOKEN_COOKIE, value: erp.data.accessToken, ...erpCookieOptions });
+    if (erp.data.refreshToken) {
+      jar.set({ name: ERP_REFRESH_COOKIE, value: erp.data.refreshToken, ...erpCookieOptions });
+    }
     return Response.json({
-      token: erp.data.accessToken,
-      refreshToken: erp.data.refreshToken,
       user: erpUser,
       expiresIn: SESSION_TTL_SECONDS,
       source: "erp",

@@ -56,8 +56,9 @@ export default function TentangPage() {
             dashboard internal.
           </li>
           <li>
-            Pembayaran melalui DOKU (registered di OJK) sebagai payment
-            gateway. Bawabawa sendiri belum punya lisensi finansial.
+            Pembayaran mengikuti instruksi di halaman tracking setelah harga
+            disetujui. Bawabawa tidak punya lisensi finansial dan tidak
+            menyimpan dana di luar transaksi pesananmu.
           </li>
           <li>
             Volume awal kecil — slot Open Trip terbatas. Kami sengaja jaga

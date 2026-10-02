@@ -30,9 +30,9 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
       <ul className="list-disc pl-5 space-y-1">
         <li><strong>Data identitas:</strong> nama, nomor telepon, email, alamat pengiriman.</li>
         <li><strong>Data transaksi:</strong> detail request, harga barang, riwayat pembayaran.</li>
-        <li><strong>Data pembayaran:</strong> diproses oleh DOKU (kami tidak menyimpan nomor kartu kredit).</li>
+        <li><strong>Data pembayaran:</strong> bukti transfer yang kamu kirim untuk konfirmasi. Kami tidak menyimpan data kartu.</li>
         <li><strong>Data teknis:</strong> alamat IP, jenis perangkat, browser, untuk keamanan & analitik agregat.</li>
-        <li><strong>Cookie:</strong> esensial (sesi login, keranjang) & analitik (opsional, dengan persetujuan).</li>
+        <li><strong>Cookie:</strong> hanya cookie esensial untuk sesi login. Keranjang & daftar link tracking disimpan di penyimpanan lokal perangkatmu. Analitik (Plausible) tidak memakai cookie dan tidak mengumpulkan data pribadi.</li>
       </ul>
     ),
   },
@@ -41,7 +41,7 @@ const SECTIONS: Array<{ title: string; body: React.ReactNode }> = [
     body: (
       <ul className="list-disc pl-5 space-y-1">
         <li>Memproses request, pembayaran, dan pengiriman barang.</li>
-        <li>Komunikasi status order (email, WhatsApp, push notification).</li>
+        <li>Komunikasi status order (WhatsApp, email).</li>
         <li>Mencegah penipuan & melindungi keamanan akun.</li>
         <li>Riset internal, analitik agregat (tidak dapat mengidentifikasi individu).</li>
         <li>Memenuhi kewajiban hukum (pajak, audit, permintaan otoritas berwenang).</li>
