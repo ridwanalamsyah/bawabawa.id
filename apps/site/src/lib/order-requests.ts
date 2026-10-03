@@ -12,6 +12,10 @@ export type OrderRequestStatus =
   | "delivered"
   | "cancelled";
 
+export const ORDER_REQUEST_STATUSES_LIST: OrderRequestStatus[] = [
+  "submitted", "quoted", "approved", "paid", "purchasing", "packed", "shipped", "delivered", "cancelled",
+];
+
 /** Customer-facing order of steps (cancelled is shown separately). */
 export const ORDER_FLOW: OrderRequestStatus[] = [
   "submitted",

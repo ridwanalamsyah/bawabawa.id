@@ -7,7 +7,6 @@ export default function AdminPaymentsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Keuangan"
         title="Menunggu pembayaran"
         description="Cek mutasi / bukti transfer dari WhatsApp, lalu klik “Tandai sudah dibayar”."
       />

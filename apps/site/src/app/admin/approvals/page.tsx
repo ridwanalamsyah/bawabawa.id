@@ -5,8 +5,7 @@ export default function AdminApprovalsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Approvals"
-        title="Antrian persetujuan"
+        title="Menunggu persetujuan"
         description="Permintaan approval multi-level untuk transaksi yang butuh tanda tangan (finance, harga manual, dst.)."
       />
       <ApprovalsClient />

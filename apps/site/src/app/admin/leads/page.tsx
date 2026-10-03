@@ -5,8 +5,7 @@ export default function AdminLeadsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="CRM"
-        title="Leads & funnel"
+        title="Calon pelanggan"
         description="Calon customer yang masih di tahap pre-order (form kontak, DM, follow-up sales)."
       />
       <LeadsClient />

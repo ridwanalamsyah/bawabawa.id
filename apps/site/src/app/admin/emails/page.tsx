@@ -5,8 +5,7 @@ export default function AdminEmailsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Email"
-        title="Outbox email"
+        title="Riwayat email"
         description="Log email transactional yang dikirim via Resend (konfirmasi order, invoice, dst.)."
       />
       <EmailsClient />

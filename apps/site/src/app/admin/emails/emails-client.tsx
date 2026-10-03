@@ -47,7 +47,7 @@ export function EmailsClient() {
       columns={COLUMNS}
       emptyMessage="Belum ada email terkirim. Resend belum diaktifkan / belum ada trigger."
       rowKey={(r) => r.id}
-      footer="Resend API key di-config via env RESEND_API_KEY + RESEND_FROM_EMAIL."
+      footer="Email terkirim otomatis untuk update pesanan."
     />
   );
 }

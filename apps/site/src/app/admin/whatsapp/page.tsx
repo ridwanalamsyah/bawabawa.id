@@ -5,9 +5,8 @@ export default function AdminWhatsappPage() {
   return (
     <>
       <PageHeader
-        eyebrow="WhatsApp"
-        title="Outbox notifikasi WhatsApp"
-        description="Log notifikasi WA yang dikirim via Fonnte. Pesan transactional (konfirmasi order, update tracking) di-enqueue otomatis dari ERP."
+        title="Riwayat WhatsApp"
+        description="Pesan WhatsApp otomatis yang terkirim ke pelanggan dan tim (konfirmasi pesanan, update pengiriman)."
       />
       <WhatsappClient />
     </>

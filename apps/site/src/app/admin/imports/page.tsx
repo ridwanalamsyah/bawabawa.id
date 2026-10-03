@@ -5,8 +5,7 @@ export default function AdminImportsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Imports"
-        title="Import data ke ERP"
+        title="Impor data"
         description="Upload CSV untuk import produk secara massal. Hasil preview ditampilkan sebelum commit."
       />
       <ImportsClient />

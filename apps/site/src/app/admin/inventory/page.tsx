@@ -5,8 +5,7 @@ export default function AdminInventoryPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Inventory"
-        title="Stok produk & log pergerakan"
+        title="Stok barang"
         description="Pantau stok per produk + cabang dan riwayat adjustment / transfer."
       />
       <InventoryClient />

@@ -38,8 +38,7 @@ export default function RolesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Tim"
-        title="Hak akses per divisi"
+        title="Hak akses tim"
         description="Akses ditentukan dari divisi akun. Ubah divisi seseorang di halaman Tim & Admin. Divisi yang tidak dikenal hanya bisa melihat pesanan."
       />
       <Card className="p-0 overflow-x-auto">
