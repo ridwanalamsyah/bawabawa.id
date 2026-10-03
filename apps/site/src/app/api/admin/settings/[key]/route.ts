@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { callErpAsAdmin } from "@/lib/admin-bff";
 
 type CmsSetting = {
@@ -34,5 +35,7 @@ export async function PUT(
     body,
   });
   if (!result.ok) return result.response;
+  // Public settings (brand, site_motion, …) are cached by the site; refresh them.
+  revalidateTag("cms-public", "max");
   return Response.json(result.data);
 }

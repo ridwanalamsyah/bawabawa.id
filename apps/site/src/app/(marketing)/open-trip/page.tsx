@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { TripFilterTabs } from "./filter-tabs";
 import { WA_NUMBER } from "@/lib/contact";
+import { delay } from "@/lib/motion";
 
 export const metadata: Metadata = {
   title: "Open Trip Bandung → Samarinda",
@@ -66,12 +67,12 @@ export default async function OpenTripPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-10">
           <div className="grid lg:grid-cols-12 gap-8 items-end">
             <div className="lg:col-span-7">
-              <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+              <p className="animate-rise text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
                 Open Trip
               </p>
-              <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+              <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Jadwal keberangkatan{" "}
-                <span>
+                <span className="text-gradient-brand">
                   Bandung → Samarinda
                 </span>
               </h1>

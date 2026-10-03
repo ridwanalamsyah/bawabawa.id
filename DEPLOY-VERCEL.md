@@ -92,6 +92,8 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    # PICKUP_POINT_ADDRESS=
    # Daily cron (vercel.json → /api/v1/cron/run): quote reminders + outbox flush
    CRON_SECRET=<run: openssl rand -hex 32>
+   # Login is staff-only; add team emails in Admin → Tim & Admin first
+   PUBLIC_SIGNUP=false
 
    # Optional integrations (leave empty for MVP):
    # DOKU_CLIENT_ID=

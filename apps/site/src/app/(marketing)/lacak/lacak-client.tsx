@@ -86,8 +86,7 @@ export function LacakClient() {
         Link hilang?{" "}
         <a href={waLink("Halo Bawabawa, saya kehilangan link tracking pesanan saya.")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline">
           <MessageCircle className="h-4 w-4" aria-hidden /> Minta lewat WhatsApp
-        </a>{" "}
-        atau <Link href="/login" className="underline">masuk</Link> untuk melihat semua pesananmu.
+        </a>
       </p>
     </div>
   );

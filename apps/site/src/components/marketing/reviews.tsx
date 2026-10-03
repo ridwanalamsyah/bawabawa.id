@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
+import { delay } from "@/lib/motion";
 
 type Review = {
   id: string;
@@ -28,15 +29,15 @@ export async function Reviews() {
   return (
     <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="reviews-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <h2 id="reviews-title" className="text-2xl sm:text-3xl">
+        <h2 id="reviews-title" data-reveal className="text-2xl sm:text-3xl">
           Kata yang sudah titip
         </h2>
         <p className="mt-2 text-[15px] text-[hsl(var(--muted-foreground))]">
           Ulasan dari pesanan yang sudah sampai.
         </p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((r) => (
-            <li key={r.id} className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
+          {items.map((r, i) => (
+            <li key={r.id} data-reveal style={delay(i * 90)} className="lift rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
               <div className="flex gap-0.5" aria-label={`${r.rating} dari 5 bintang`}>
                 {Array.from({ length: 5 }, (_, i) => (
                   <Star

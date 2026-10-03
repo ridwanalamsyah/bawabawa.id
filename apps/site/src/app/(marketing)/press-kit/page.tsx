@@ -42,12 +42,12 @@ export default function PressKitPage() {
         <h2 className="text-xl font-semibold tracking-tight">Logo</h2>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 flex items-center justify-center">
-            <span className="text-3xl font-bold text-[hsl(var(--sage-700))]">
+            <span className="text-3xl font-bold bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
               Bawabawa.id
             </span>
           </div>
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[#2A2C28] p-8 flex items-center justify-center">
-            <span className="text-3xl font-bold text-[hsl(var(--sage-700))]">
+            <span className="text-3xl font-bold bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--emerald-400))] bg-clip-text text-transparent">
               Bawabawa.id
             </span>
           </div>

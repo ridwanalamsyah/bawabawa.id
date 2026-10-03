@@ -37,8 +37,8 @@ const FAQ_QUICK: Array<{ q: string; a: React.ReactNode }> = [
     q: "Pesanan saya belum sampai, harus bagaimana?",
     a: (
       <>
-        Cek status di <Link href="/dashboard/tracking" className="underline decoration-dotted underline-offset-2">/dashboard/tracking</Link> menggunakan
-        nomor resi. Jika status &ldquo;in transit&rdquo; sudah &gt;7 hari, hubungi CS dengan
+        Cek status lewat link tracking yang kami kirim ke WhatsApp, atau di{" "}
+        <Link href="/lacak" className="underline decoration-dotted underline-offset-2">Lacak Pesanan</Link>. Jika status &ldquo;in transit&rdquo; sudah &gt;7 hari, hubungi CS dengan
         kode order.
       </>
     ),
@@ -48,8 +48,7 @@ const FAQ_QUICK: Array<{ q: string; a: React.ReactNode }> = [
     a: (
       <>
         Lihat <Link href="/refund" className="underline decoration-dotted underline-offset-2">Kebijakan Refund</Link>. Pembatalan
-        sebelum personal shopper belanja → 100% refund otomatis dari{" "}
-        <Link href="/dashboard/orders" className="underline decoration-dotted underline-offset-2">/dashboard/orders</Link>.
+        sebelum personal shopper belanja → 100% refund — tombol &ldquo;Batalkan&rdquo; ada di halaman tracking pesananmu.
       </>
     ),
   },

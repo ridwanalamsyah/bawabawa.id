@@ -29,7 +29,7 @@ export default function PengirimanLangsungPage() {
               </p>
               <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
                 Kirim langsung,{" "}
-                <span>
+                <span className="text-gradient-brand">
                   satu pengirim
                 </span>{" "}
                 tanpa tunggu trip

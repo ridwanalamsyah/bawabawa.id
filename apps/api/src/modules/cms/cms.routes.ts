@@ -35,7 +35,7 @@ cmsRouter.get("/settings", authGuard, requirePermission("cms:manage"), async (_r
 cmsRouter.get("/settings/public", async (_req, res, next) => {
   try {
     const all = await service.listSettings();
-    const publicKeys = ["brand", "seo", "feature_flags"];
+    const publicKeys = ["brand", "seo", "feature_flags", "site_motion"];
     res.json({
       success: true,
       data: all.filter((s) => publicKeys.includes(s.key))

@@ -38,6 +38,7 @@ import {
   KILAT_BLOCKED_CATEGORIES,
 } from "@/lib/pricing";
 import { track } from "@/lib/analytics";
+import { delay } from "@/lib/motion";
 import { rememberOrderLink } from "@/lib/local-orders";
 import { cart, type CartLine } from "@/lib/cart";
 import { waLink } from "@/lib/contact";
@@ -386,7 +387,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-8">
         <Stepper step={step} onJump={(s) => s < step && setStep(s)} />
-        <div className="mt-6">
+        <div key={step} className="animate-rise mt-6">
           {step === 1 &&
             (isCatalog ? (
               <CartStep lines={cartLines} />
@@ -491,7 +492,14 @@ function Stepper({ step, onJump }: { step: number; onJump: (s: number) => void }
             >
               {s.label}
             </span>
-            {idx < STEPS.length - 1 && <div className="hidden sm:block h-px w-6 bg-[hsl(var(--border))]" />}
+            {idx < STEPS.length - 1 && (
+              <div className="hidden sm:block relative h-0.5 w-8 rounded-full bg-[hsl(var(--border))] overflow-hidden">
+                <span
+                  className="absolute inset-0 origin-left rounded-full bg-[hsl(var(--emerald-500))] transition-transform duration-500"
+                  style={{ transform: `scaleX(${done ? 1 : 0})` }}
+                />
+              </div>
+            )}
           </li>
         );
       })}
@@ -1107,8 +1115,11 @@ function SuccessCard({
   const [copied, setCopied] = useState(false);
   return (
     <GlassCard className="p-8 sm:p-10 text-center max-w-2xl mx-auto">
-      <div className="mx-auto h-16 w-16 rounded-2xl bg-linear-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
-        <CircleCheck className="h-8 w-8" aria-hidden />
+      <div className="animate-hero-pop mx-auto h-16 w-16 rounded-2xl bg-linear-to-br from-[hsl(var(--emerald-400))] to-[hsl(var(--emerald-600))] grid place-items-center text-white">
+        <svg viewBox="0 0 24 24" className="h-9 w-9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <circle cx="12" cy="12" r="10" pathLength={1} className="animate-draw" style={delay(150)} />
+          <path d="m8 12.5 2.7 2.7L16 9.8" pathLength={1} className="animate-draw" style={delay(550)} />
+        </svg>
       </div>
       <h2 className="mt-5 text-2xl font-semibold tracking-tight">
         {isCatalog ? "Pesanan tercatat!" : "Request terkirim!"}

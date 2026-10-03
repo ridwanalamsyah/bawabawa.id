@@ -1,10 +1,13 @@
 import { Hero } from "@/components/marketing/hero";
+import { CategoryMarquee } from "@/components/marketing/category-marquee";
+import { TickerBand } from "@/components/marketing/ticker-band";
 import { PromotionBanner } from "@/components/marketing/promotion-banner";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { Pricing } from "@/components/marketing/pricing";
 import { TripPreview } from "@/components/marketing/trip-preview";
 import { Reviews } from "@/components/marketing/reviews";
 import { Faq } from "@/components/marketing/faq";
+import { FinalCTA } from "@/components/marketing/cta";
 
 /**
  * Landing page: hero with a working price calculator, how it works, rates
@@ -15,11 +18,14 @@ export default function HomePage() {
     <>
       <PromotionBanner />
       <Hero />
+      <TickerBand />
+      <CategoryMarquee />
       <HowItWorks />
       <Pricing />
       <TripPreview />
       <Reviews />
       <Faq />
+      <FinalCTA />
     </>
   );
 }

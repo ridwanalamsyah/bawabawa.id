@@ -31,7 +31,7 @@ export default async function ReferralPage({ params }: { params: Promise<Params>
   return (
     <article className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-16">
       <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">Undangan</p>
-      <h1 className="mt-3 text-3xl sm:text-4xl leading-tight">Kamu diajak titip barang dari Bandung.</h1>
+      <h1 className="mt-3 text-3xl sm:text-4xl leading-tight">Kamu diajak titip barang dari <span className="text-gradient-brand">Bandung</span>.</h1>
       <p className="mt-4 text-lg leading-relaxed text-[hsl(var(--muted-foreground))]">
         Tulis kode <strong className="font-mono text-[hsl(var(--foreground))]">{normalized}</strong> di kolom
         &ldquo;Pesan untuk tim&rdquo; saat mengirim request. Kalau sedang ada promo untuk pengguna baru, tim kami

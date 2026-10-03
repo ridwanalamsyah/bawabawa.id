@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { KILAT } from "@/lib/pricing";
 import { formatIDR } from "@/lib/utils";
+import { delay } from "@/lib/motion";
 
 /**
  * Rates written out in full — the honest version of a "trust" section.
@@ -10,7 +11,7 @@ export function Pricing() {
   return (
     <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="pricing-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-4">
+        <div data-reveal className="lg:col-span-4">
           <h2 id="pricing-title" className="text-2xl sm:text-3xl">
             Tarif
           </h2>
@@ -19,7 +20,7 @@ export function Pricing() {
             memilih pengiriman yang lebih hemat untuk berat barangmu.
           </p>
         </div>
-        <div className="lg:col-span-8 overflow-x-auto">
+        <div data-reveal style={delay(100)} className="lg:col-span-8 overflow-x-auto">
           <table className="w-full text-left text-[15px]">
             <caption className="sr-only">Perbandingan layanan pengiriman</caption>
             <thead>
@@ -39,7 +40,7 @@ export function Pricing() {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[hsl(var(--border))]">
+            <tbody className="divide-y divide-[hsl(var(--border))] [&>tr]:transition-colors [&>tr:hover]:bg-[hsl(var(--surface-2)/0.6)]">
               <tr>
                 <th scope="row" className="py-3 pr-4 font-medium text-[hsl(var(--muted-foreground))]">Ongkir</th>
                 <td className="py-3 pr-4 tabular-nums">Rp43.000 / kg</td>

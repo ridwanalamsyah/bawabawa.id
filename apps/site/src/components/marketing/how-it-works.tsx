@@ -1,3 +1,5 @@
+import { delay } from "@/lib/motion";
+
 const STEPS = [
   {
     title: "Kirim barangnya",
@@ -21,12 +23,13 @@ export function HowItWorks() {
   return (
     <section className="py-16 sm:py-20" aria-labelledby="how-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <h2 id="how-title" className="text-2xl sm:text-3xl">
+        <h2 id="how-title" data-reveal className="text-2xl sm:text-3xl">
           Cara kerjanya
         </h2>
         <ol className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="border-t-2 border-[hsl(var(--foreground))] pt-4">
+            <li key={s.title} data-reveal style={delay(i * 110)} className="relative pt-4">
+              <span aria-hidden className="reveal-bar absolute inset-x-0 top-0 h-0.5 bg-[hsl(var(--foreground))]" />
               <span className="text-sm font-semibold tabular-nums text-[hsl(var(--muted-foreground))]">
                 {i + 1}
               </span>

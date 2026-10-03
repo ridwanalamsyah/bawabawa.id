@@ -269,12 +269,12 @@ h1, h2, h3 {
 }
 
 /* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */
-/* Solid surface + hairline border. Frosted glass over blurred blobs was
-   the main "generic template" tell, and hurt text contrast. */
 .glass {
-  background: hsl(var(--surface));
-  border: 1px solid hsl(var(--border));
-  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 .glass-strong {
   background: var(--glass-bg-strong);
@@ -395,9 +395,248 @@ h1, h2, h3 {
 .route-progress-bar {
   animation: route-progress 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
-@media (prefers-reduced-motion: reduce) {
-  .route-progress-bar { animation: none; opacity: 0; }
+
+/* Gentle vertical float — used by hero "Tiba di Samarinda" card and other
+   ambient floating glass cards. Tailwind v4 doesn't ship a `float` animation
+   utility by default, so we register the keyframe + class here. */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
 }
+.animate-float {
+  animation: float 4.5s ease-in-out infinite;
+}
+
+/* Hero entrance animations — CSS-only fallback so above-the-fold copy
+   doesn't depend on framer-motion hydration. Previously the hero h1/p/cta
+   stack used `motion.*` with `initial={{ opacity: 0 }}` which SSR-rendered
+   them at opacity:0 and waited on JS hydration to animate them in. If the
+   JS chunks failed or hydrated late the entire hero text stayed invisible.
+   Registering the keyframes in CSS means the animation runs on first paint
+   without any JS, and the `forwards` fill mode keeps the final state. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-rise-lg {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-slide-in-left {
+  from { opacity: 0; transform: translate(-40px, 30px); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes hero-slide-in-right {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-hero-rise {
+  animation: hero-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-rise-lg {
+  animation: hero-rise-lg 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-pop {
+  animation: hero-pop 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-left {
+  animation: hero-slide-in-left 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-right {
+  animation: hero-slide-in-right 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+
+
+/* Ambient orbs drift slowly behind the hero. */
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, 30px) scale(1.06); }
+  66%      { transform: translate(-20px, -10px) scale(0.96); }
+}
+.animate-orb-drift { animation: orb-drift var(--orb-duration, 28s) ease-in-out infinite; }
+
+/* CTA map: dashes flow toward Samarinda, pins pulse. */
+@keyframes dash-flow { to { stroke-dashoffset: -56; } }
+.animate-dash-flow { animation: dash-flow 1.4s linear infinite; }
+@keyframes pin-pulse {
+  0%   { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.animate-pin-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pin-pulse 2.4s ease-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* Category strip under the hero. */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.animate-marquee { animation: marquee 38s linear infinite; }
+
+/* Request success: circle + check draw in. */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.animate-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 0.6s var(--ease-out-soft, ease-out) forwards; animation-delay: var(--d, 0s); }
+
+/* Tracking timeline connector fills down to the current step. */
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.animate-grow-y { animation: grow-y 0.5s var(--ease-out-soft, ease-out) both; animation-delay: var(--d, 0s); }
+
+/* Cart icon bump when an item is added. */
+@keyframes bump {
+  0%, 100% { transform: scale(1); }
+  40%      { transform: scale(1.25) rotate(-8deg); }
+}
+.animate-bump { animation: bump 0.45s var(--ease-out-soft, ease-out); }
+
+/* Hero headline: words take turns sliding up into the slot (5 words,
+   2.4s each). Every word sits in the same grid cell, so the slot keeps
+   the width of the longest word and nothing below it jumps. */
+@keyframes word-cycle {
+  0%        { opacity: 0; transform: translateY(100%); }
+  3%, 20%   { opacity: 1; transform: translateY(0); }
+  23%, 100% { opacity: 0; transform: translateY(-100%); }
+}
+.word-cycle { overflow: hidden; clip-path: inset(0 -0.15em); }
+.word-cycle > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  animation: word-cycle 12s var(--ease-out-soft, ease-out) infinite both;
+}
+.word-cycle > span:nth-child(2) { animation-delay: 2.4s; }
+.word-cycle > span:nth-child(3) { animation-delay: 4.8s; }
+.word-cycle > span:nth-child(4) { animation-delay: 7.2s; }
+.word-cycle > span:nth-child(5) { animation-delay: 9.6s; }
+/* With animation off (admin switch) show the first word only. */
+[data-motion="off"] .word-cycle > span:first-child { opacity: 1; }
+
+/* Sticker badges: pop in, then wiggle now and then. */
+@keyframes sticker-in {
+  from { opacity: 0; transform: scale(0.4) rotate(var(--r, 0deg)); }
+  70%  { opacity: 1; transform: scale(1.08) rotate(var(--r, 0deg)); }
+  to   { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); }
+}
+@keyframes sticker-wiggle {
+  0%, 86%, 100% { transform: rotate(var(--r, 0deg)); }
+  90%           { transform: rotate(calc(var(--r, 0deg) - 6deg)); }
+  95%           { transform: rotate(calc(var(--r, 0deg) + 5deg)); }
+}
+.sticker {
+  transform: rotate(var(--r, 0deg));
+  animation: sticker-in 0.6s var(--ease-out-soft, ease-out) both, sticker-wiggle 5s ease-in-out infinite;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + 1.2s);
+}
+
+/* Tilted ticker band under the hero. */
+.animate-ticker { animation: marquee 26s linear infinite; }
+.animate-ticker-reverse { animation: marquee 32s linear infinite reverse; }
+
+/* Brand gradient for one highlighted word in a headline. */
+.text-gradient-brand {
+  background-image: linear-gradient(135deg, hsl(var(--sage-700)), hsl(var(--olive-500)), hsl(var(--emerald-600)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .text-gradient-brand {
+  background-image: linear-gradient(135deg, hsl(var(--sage-300)), hsl(var(--olive-500)), hsl(var(--emerald-400)));
+}
+
+/* Admin switch (Admin → Pengaturan → Animasi): data-motion="off" on the
+   marketing wrapper stops every animation and shows reveal content as-is. */
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.reveal-ready [data-motion="off"] [data-reveal],
+html.reveal-ready [data-motion="off"] [data-reveal] .reveal-bar {
+  opacity: 1;
+  transform: none;
+}
+
+
+/* ------------------------------------------------------------------
+   Motion. Small, purposeful, CSS-first:
+   - .animate-rise / .animate-pop: first-paint entrance (hero), no JS needed.
+   - [data-reveal]: fades sections in on scroll. Hidden only once
+     RevealObserver has put .reveal-ready on <html>, so content is always
+     visible without JS or before hydration.
+   - .reveal-bar: lines/progress bars that draw in when their section shows.
+   - .lift: hover feedback on clickable cards.
+   Stagger with style={{ "--d": "120ms" }}.
+------------------------------------------------------------------- */
+:root {
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  interpolate-size: allow-keywords;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes tick {
+  from { opacity: 0.35; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-rise { animation: rise 0.7s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
+.animate-pop  { animation: pop 0.8s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes spin-in {
+  from { opacity: 0; transform: rotate(-90deg) scale(0.7); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-drop { animation: drop 0.25s var(--ease-out-soft) both; }
+.animate-spin-in { animation: spin-in 0.25s var(--ease-out-soft) both; }
+.animate-tick { animation: tick 0.35s var(--ease-out-soft); display: inline-block; }
+
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s var(--ease-out-soft), transform 0.6s var(--ease-out-soft);
+  transition-delay: var(--d, 0s);
+}
+html.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+.reveal-bar { transform-origin: left center; }
+html.reveal-ready [data-reveal] .reveal-bar {
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out-soft);
+  transition-delay: calc(var(--d, 0s) + 0.15s);
+}
+html.reveal-ready [data-reveal].is-visible .reveal-bar { transform: none; }
+
+.lift {
+  transition: transform 0.2s var(--ease-out-soft), box-shadow 0.2s var(--ease-out-soft), border-color 0.2s;
+}
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -8px hsl(var(--foreground) / 0.18);
+}
+.lift:active { transform: translateY(0); }
+
+/* Arrow nudge on links/buttons that carry a trailing icon. */
+.nudge svg:last-child { transition: transform 0.2s var(--ease-out-soft); }
+.nudge:hover svg:last-child { transform: translateX(3px); }
+
+/* FAQ: animate <details> open/close where the browser supports it. */
+details.smooth::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition: block-size 0.3s var(--ease-out-soft), content-visibility 0.3s allow-discrete;
+}
+details.smooth[open]::details-content { block-size: auto; }
 
 
 /* Accessibility baseline (WCAG 2.4.7): a visible focus ring for every
@@ -407,12 +646,3 @@ h1, h2, h3 {
   outline-offset: 2px;
 }
 
-/* Respect "reduce motion" for CSS-driven hero/entrance animations too. */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
