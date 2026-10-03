@@ -18,7 +18,7 @@ export function TickerBand() {
   return (
     <div aria-hidden className="relative h-36 sm:h-44 overflow-hidden select-none">
       {/* Two tapes crossing in an X; the dark one sits on top. */}
-      <div className="absolute inset-x-[-5%] top-1/2 -translate-y-1/2 rotate-[2.5deg] bg-[hsl(var(--emerald-400))] text-[hsl(var(--sage-900))] py-2.5">
+      <div className="absolute inset-x-[-5%] top-1/2 -translate-y-1/2 rotate-[2.5deg] bg-[hsl(var(--amber-400))] text-[hsl(var(--sage-900))] py-2.5">
         <div className="animate-ticker-reverse flex w-max">{[row("c"), row("d")]}</div>
       </div>
       <div className="absolute inset-x-[-5%] top-1/2 -translate-y-1/2 -rotate-[2.5deg] bg-[hsl(var(--sage-800))] text-[hsl(var(--cream-100))] py-3 shadow-xl">
