@@ -107,7 +107,10 @@ export function Sidebar({
             )}
             <div className="flex flex-col gap-0.5">
               {g.items.map((it) => {
-                const active = pathname === it.href || pathname.startsWith(it.href + "/");
+                // Section roots ("/admin", "/dashboard") only match exactly, otherwise
+                // "Overview" lights up on every page.
+                const isRoot = it.href.split("/").filter(Boolean).length === 1;
+                const active = pathname === it.href || (!isRoot && pathname.startsWith(it.href + "/"));
                 const Icon = ICONS[it.icon];
                 return (
                   <Link

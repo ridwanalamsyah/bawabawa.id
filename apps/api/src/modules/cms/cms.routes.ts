@@ -32,14 +32,29 @@ cmsRouter.get("/settings", authGuard, requirePermission("cms:manage"), async (_r
 
 // Public read for the small subset that's safe to expose without auth (brand,
 // SEO defaults). Used by the frontend during boot before login.
+// Public read for the small subset that's safe to expose without auth (brand,
+// SEO defaults, animation switches). `contact` and `social` are shown on the
+// public footer, so only their whitelisted, public-facing fields go out —
+// anything else staff store there stays private.
+const PUBLIC_KEYS = ["brand", "seo", "feature_flags", "site_motion"];
+const PUBLIC_FIELDS: Record<string, string[]> = {
+  contact: ["email", "phone", "address", "supportHours"],
+  social: ["instagram", "tiktok", "youtube"]
+};
+
 cmsRouter.get("/settings/public", async (_req, res, next) => {
   try {
     const all = await service.listSettings();
-    const publicKeys = ["brand", "seo", "feature_flags", "site_motion"];
-    res.json({
-      success: true,
-      data: all.filter((s) => publicKeys.includes(s.key))
+    const data = all.flatMap((s): Array<{ key: string; value: unknown }> => {
+      if (PUBLIC_KEYS.includes(s.key)) return [s];
+      const fields = PUBLIC_FIELDS[s.key];
+      if (!fields || !s.value || typeof s.value !== "object" || Array.isArray(s.value)) return [];
+      const value = Object.fromEntries(
+        fields.filter((f) => f in (s.value as Record<string, unknown>)).map((f) => [f, (s.value as Record<string, unknown>)[f]])
+      );
+      return [{ key: s.key, value }];
     });
+    res.json({ success: true, data });
   } catch (error) {
     next(error);
   }

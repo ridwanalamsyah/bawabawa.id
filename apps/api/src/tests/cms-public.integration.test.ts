@@ -17,7 +17,7 @@ describe("cms public endpoints", () => {
     // No-op: the SQLite path is per-process and gets reset by the suite runner.
   });
 
-  it("GET /api/v1/cms/settings/public returns brand + seo + feature_flags without auth", async () => {
+  it("GET /api/v1/cms/settings/public returns brand + seo + feature_flags (and only public contact fields) without auth", async () => {
     const app = createApp();
     const res = await request(app).get("/api/v1/cms/settings/public");
     expect(res.status).toBe(200);
@@ -28,9 +28,15 @@ describe("cms public endpoints", () => {
     expect(keys).toContain("brand");
     expect(keys).toContain("seo");
     expect(keys).toContain("feature_flags");
-    // Auth-sensitive payloads (contact email, etc.) must NOT be exposed publicly.
-    expect(keys).not.toContain("contact");
-    expect(keys).not.toContain("social");
+    // contact/social are public-facing (footer) but only whitelisted fields
+    // go out, and without the admin metadata (description, updatedAt).
+    for (const key of ["contact", "social"]) {
+      const row = rows.find((r) => r.key === key) as { key: string; value?: Record<string, unknown>; description?: unknown } | undefined;
+      if (!row) continue;
+      expect(row.description).toBeUndefined();
+      const allowed = key === "contact" ? ["email", "phone", "address", "supportHours"] : ["instagram", "tiktok", "youtube"];
+      for (const field of Object.keys(row.value ?? {})) expect(allowed).toContain(field);
+    }
   });
 
   it("GET /api/v1/cms/nav returns the seeded navigation tree", async () => {
