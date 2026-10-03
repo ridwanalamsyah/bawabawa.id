@@ -55,6 +55,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Vercel restores .next/cache between deploys and the Turbopack build
+    // cache (on by default since 16.3) served a stale compiled globals.css:
+    // new markup shipped with the previous deploy's CSS, so new animation
+    // classes had no styles. Always compile CSS fresh.
+    turbopackFileSystemCacheForBuild: false,
+  },
   turbopack: {
     root: monorepoRoot,
   },

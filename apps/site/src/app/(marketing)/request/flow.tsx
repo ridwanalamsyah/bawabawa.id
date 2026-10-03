@@ -112,6 +112,26 @@ const newItem = (id: string = crypto.randomUUID()): Item => ({
   notes: "",
 });
 
+/**
+ * Best-effort item name from a product URL (Tokopedia/Shopee/etc. put the
+ * product name in the last path segment). Empty when nothing useful.
+ */
+function nameFromLink(raw: string): string {
+  try {
+    const url = new URL(raw);
+    const seg = decodeURIComponent(url.pathname.split("/").filter(Boolean).pop() ?? "");
+    const words = seg
+      .replace(/\.[a-z]+$/i, "")
+      .replace(/-i\.\d+\.\d+$/i, "")
+      .split(/[-_+]/)
+      .filter((w) => w && !/^\d{4,}$/.test(w));
+    const name = words.join(" ").trim();
+    return name.length >= 3 ? name.charAt(0).toUpperCase() + name.slice(1, 120) : "";
+  } catch {
+    return "";
+  }
+}
+
 const emptyContact: Contact = {
   name: "",
   phone: "",
@@ -200,6 +220,25 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
     } catch {
       /* ignore broken drafts */
     }
+  }, [isCatalog]);
+
+  // "Tempel link" from the homepage: /request?link=… or ?name=… prefills an item.
+  useEffect(() => {
+    if (isCatalog) return;
+    const params = new URLSearchParams(window.location.search);
+    const rawLink = params.get("link")?.trim() ?? "";
+    const link = /^https?:\/\//i.test(rawLink) ? rawLink.slice(0, 500) : "";
+    const name = (params.get("name")?.trim() ?? "").slice(0, 160);
+    if (!link && !name) return;
+    const item = { ...newItem(), link, name: name || nameFromLink(link) };
+    // Reads the URL, which only exists after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItems((prev) => {
+      if (prev.some((i) => (link ? i.link === link : i.name === item.name))) return prev;
+      const blank = prev.length === 1 && !prev[0].name && !prev[0].link;
+      return blank ? [{ ...item, id: prev[0].id }] : [...prev, item];
+    });
+    track("request_step", { step: "link_prefill" });
   }, [isCatalog]);
 
   useEffect(() => {
