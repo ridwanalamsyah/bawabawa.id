@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Logo } from "@/components/brand/logo";
 import { Mail, MessageCircle } from "lucide-react";
-import { WA_NUMBER } from "@/lib/contact";
+import { Logo } from "@/components/brand/logo";
+import { getSiteContact } from "@/lib/site-contact";
 
 function Instagram(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -13,91 +13,96 @@ function Instagram(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-export function Footer() {
-  const sections = [
-    {
-      title: "Layanan",
-      links: [
-        { label: "Katalog", href: "/katalog" },
-        { label: "Titip Barang", href: "/request" },
-        { label: "Open Trip (kargo batch)", href: "/open-trip" },
-        { label: "Pengiriman Langsung", href: "/pengiriman-langsung" },
-        { label: "Lacak Pesanan", href: "/lacak" },
-      ],
-    },
-    {
-      title: "Kategori",
-      links: [
-        { label: "Jastip Sepatu", href: "/jastip-sepatu" },
-        { label: "Jastip Skincare", href: "/jastip-skincare" },
-        { label: "Jastip Fashion", href: "/jastip-fashion" },
-        { label: "Jastip Makanan", href: "/jastip-makanan" },
-        { label: "Jastip Elektronik", href: "/jastip-elektronik" },
-      ],
-    },
-    {
-      title: "Perusahaan",
-      links: [
-        { label: "Tentang", href: "/tentang" },
-        { label: "Blog", href: "/blog" },
-        { label: "Reseller & B2B", href: "/reseller" },
-        { label: "Afiliasi", href: "/afiliasi" },
-        { label: "Hubungi Kami", href: "/kontak" },
-        { label: "Syarat & Ketentuan", href: "/terms" },
-        { label: "Pembatalan & Refund", href: "/refund" },
-      ],
-    },
-  ];
-
+function TikTok(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <footer className="relative border-t border-[hsl(var(--border))] mt-24">
-      <div className="absolute inset-0 dot-grid opacity-40 pointer-events-none" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-10">
-          <div className="col-span-2">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
+
+function YouTube(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M2.5 17a24.1 24.1 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.1 24.1 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+      <path d="m10 15 5-3-5-3z" />
+    </svg>
+  );
+}
+
+const SOCIAL_ICON = { instagram: Instagram, tiktok: TikTok, youtube: YouTube } as const;
+const SOCIAL_LABEL = { instagram: "Instagram", tiktok: "TikTok", youtube: "YouTube" } as const;
+
+const LINKS = [
+  { label: "Katalog", href: "/katalog" },
+  { label: "Titip Barang", href: "/request" },
+  { label: "Open Trip", href: "/open-trip" },
+  { label: "Lacak Pesanan", href: "/lacak" },
+  { label: "Reseller & B2B", href: "/reseller" },
+  { label: "Blog", href: "/blog" },
+  { label: "Tentang", href: "/tentang" },
+  { label: "Kontak", href: "/kontak" },
+];
+
+const iconBtn =
+  "lift rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-10 w-10 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]";
+
+/**
+ * Compact footer: brand + contact on one row, one line of the pages people
+ * actually use, legal links at the bottom. Contact and social links come
+ * from Admin → Pengaturan; a social icon only shows once its URL is set.
+ */
+export async function Footer() {
+  const c = await getSiteContact();
+  return (
+    <footer className="border-t border-[hsl(var(--border))] mt-16">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
             <Logo />
-            <p className="mt-4 max-w-sm text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
-              Bawabawa.id adalah jasa titip lokal modern dari Bandung ke Samarinda.
-              Pilih dari katalog atau titip barang apa saja — kami cek harga dulu,
-              kamu bayar setelah setuju.
+            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
+              Jastip Bandung → Samarinda. Cek harga dulu, bayar setelah setuju.
             </p>
-            <div className="mt-5 flex items-center gap-2">
-              <a href="#" aria-label="Instagram" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
-                <Instagram className="h-4 w-4" />
-              </a>
-              <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
-                <MessageCircle className="h-4 w-4" />
-              </a>
-              <a href="mailto:hello@bawabawa.id" aria-label="Email" className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-9 w-9 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]">
-                <Mail className="h-4 w-4" />
-              </a>
-            </div>
           </div>
-          {sections.map((s) => (
-            <div key={s.title}>
-              <p className="text-sm font-semibold mb-3">{s.title}</p>
-              <ul className="flex flex-col gap-2">
-                {s.links.map((l) => (
-                  <li key={l.label}>
-                    <Link href={l.href} className="text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="flex items-center gap-2">
+            <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className={iconBtn}>
+              <MessageCircle className="h-4 w-4" />
+            </a>
+            {c.socials.map(({ key, url }) => {
+              const Icon = SOCIAL_ICON[key];
+              return (
+                <a key={key} href={url} target="_blank" rel="noopener noreferrer" aria-label={SOCIAL_LABEL[key]} className={iconBtn}>
+                  <Icon className="h-4 w-4" />
+                </a>
+              );
+            })}
+            <a href={`mailto:${c.email}`} aria-label="Email" className={iconBtn}>
+              <Mail className="h-4 w-4" />
+            </a>
+          </div>
         </div>
 
-        <div className="mt-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-6 border-t border-[hsl(var(--border))]">
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
-            © {new Date().getFullYear()} Bawabawa.id — Made with love in Bandung 🌿 untuk Samarinda.
+        <nav aria-label="Footer" className="mt-8">
+          <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+            {LINKS.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="mt-8 flex flex-col gap-3 border-t border-[hsl(var(--border))] pt-6 text-xs text-[hsl(var(--muted-foreground))] md:flex-row md:items-center md:justify-between">
+          <p>
+            © {new Date().getFullYear()} Bawabawa.id
+            {c.supportHours ? ` · ${c.supportHours}` : ""}
           </p>
-          <div className="flex items-center gap-4 text-xs text-[hsl(var(--muted-foreground))]">
-            <Link href="/privacy" className="hover:text-[hsl(var(--foreground))]">Privacy</Link>
-            <Link href="/terms" className="hover:text-[hsl(var(--foreground))]">Terms</Link>
+          <div className="flex gap-4">
+            <Link href="/terms" className="hover:text-[hsl(var(--foreground))]">Syarat &amp; Ketentuan</Link>
             <Link href="/refund" className="hover:text-[hsl(var(--foreground))]">Refund</Link>
-            <Link href="/kontak" className="hover:text-[hsl(var(--foreground))]">Kontak</Link>
+            <Link href="/privacy" className="hover:text-[hsl(var(--foreground))]">Privasi</Link>
           </div>
         </div>
       </div>

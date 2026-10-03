@@ -56,6 +56,8 @@ async function fetchAdminPosts(): Promise<AdminPost[]> {
   const erp = await erpSafe<AdminPost[]>({
     path: "/blog-posts",
     timeoutMs: 4000,
+    cache: "force-cache",
+    next: { revalidate: 60, tags: ["blog"] },
   });
   return erp.ok && Array.isArray(erp.data) ? erp.data : [];
 }

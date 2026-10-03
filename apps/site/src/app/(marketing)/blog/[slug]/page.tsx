@@ -80,6 +80,10 @@ async function fetchAdminPost(slug: string): Promise<AdminBlogPost | null> {
   const erp = await erpSafe<AdminBlogPost | null>({
     path: `/blog-posts/${encodeURIComponent(slug)}`,
     timeoutMs: 4000,
+    // Cached so slugs published after the deploy render as ISR pages
+    // instead of failing the static→dynamic check; admin saves revalidate.
+    cache: "force-cache",
+    next: { revalidate: 60, tags: ["blog"] },
   });
   return erp.ok && erp.data ? erp.data : null;
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Settings, FileText, Megaphone, Plane } from "lucide-react";
+import { ArrowRight, Settings, FileText, Megaphone, Plane, Star, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { GlassCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,8 @@ type Shortcut = {
 const SHORTCUTS: Shortcut[] = [
   {
     href: "/admin/settings",
-    label: "Brand, kontak & sosial",
-    description: "Edit nama brand, monogram, warna, kontak WhatsApp, dan link sosial.",
+    label: "Kontak & sosial media",
+    description: "Email, WhatsApp, alamat, jam operasional, dan link Instagram/TikTok yang tampil di footer & halaman Kontak.",
     icon: <Settings className="h-5 w-5" />,
   },
   {
@@ -25,10 +25,22 @@ const SHORTCUTS: Shortcut[] = [
     icon: <FileText className="h-5 w-5" />,
   },
   {
-    href: "/admin/cms/banner",
+    href: "/admin/vouchers",
     label: "Banner promosi",
-    description: "Atur banner di atas hero (judul, CTA, jadwal aktif).",
+    description: "Strip promo di atas beranda diambil dari voucher. Buat voucher, lalu pilih “Tampilkan di banner”.",
     icon: <Megaphone className="h-5 w-5" />,
+  },
+  {
+    href: "/admin/reviews",
+    label: "Ulasan customer",
+    description: "Setujui ulasan dari halaman lacak supaya tampil di beranda.",
+    icon: <Star className="h-5 w-5" />,
+  },
+  {
+    href: "/admin/settings",
+    label: "Animasi situs",
+    description: "Nyalakan/matikan animasi dan efek latar di situs publik (bagian Animasi).",
+    icon: <Sparkles className="h-5 w-5" />,
   },
   {
     href: "/admin/trips",
@@ -44,7 +56,7 @@ export default function CMSPage() {
       <PageHeader
         eyebrow="CMS"
         title="Konten & pengaturan"
-        description="Semua konten website diatur dari sini. Tidak ada nilai yang di-hardcode di kode."
+        description="Yang bisa kamu ubah sendiri tanpa developer: artikel, promo, jadwal trip, ulasan, kontak, dan animasi."
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {SHORTCUTS.map((s) => (
