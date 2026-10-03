@@ -267,6 +267,7 @@ export function TrackingClient({ token }: { token: string }) {
             <Row label="Jasa titip" value={formatIDR(pricing.jastipFee)} />
             <Row label={`Ongkir ${TIERS[order.tier]?.label ?? ""}`} value={formatIDR(pricing.shippingFee)} />
             {pricing.ppn > 0 && <Row label="PPN (atas jasa & ongkir)" value={formatIDR(pricing.ppn)} />}
+            {pricing.discount ? <Row label={`Promo ${pricing.voucherCode ?? ""}`} value={`−${formatIDR(pricing.discount)}`} /> : null}
             <div className="flex items-center justify-between pt-1 font-semibold">
               <span>{isFinalPrice ? "Total" : "Estimasi maks."}</span>
               <span className="tabular-nums">{formatIDR(pricing.total)}</span>

@@ -124,7 +124,7 @@ function VoucherRow({ v, onPatch }: { v: Voucher; onPatch: (b: Record<string, un
 
 function CreateVoucher({ onCreated }: { onCreated: () => Promise<void> }) {
   const [open, setOpen] = React.useState(false);
-  const [f, setF] = React.useState({ code: "", type: "fixed", value: "", min: "", ends: "", desc: "" });
+  const [f, setF] = React.useState({ code: "", type: "fixed", value: "", min: "", ends: "", desc: "", quota: "", once: true });
   const [busy, setBusy] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value });
@@ -145,11 +145,13 @@ function CreateVoucher({ onCreated }: { onCreated: () => Promise<void> }) {
         minOrderAmount: Number(f.min) > 0 ? Number(f.min) : undefined,
         endsAt: f.ends ? new Date(`${f.ends}T23:59:59`).toISOString() : undefined,
         description: f.desc.trim() || undefined,
+        maxUses: Number(f.quota) > 0 ? Math.round(Number(f.quota)) : undefined,
+        perUserLimit: f.once ? 1 : undefined,
       }),
     });
     setBusy(false);
     if (!res.ok) return setErr(errorMessage(await res.json().catch(() => null), "Gagal membuat voucher"));
-    setF({ code: "", type: "fixed", value: "", min: "", ends: "", desc: "" });
+    setF({ code: "", type: "fixed", value: "", min: "", ends: "", desc: "", quota: "", once: true });
     setOpen(false);
     await onCreated();
   }
@@ -188,9 +190,20 @@ function CreateVoucher({ onCreated }: { onCreated: () => Promise<void> }) {
           <Input id="v-ends" type="date" value={f.ends} onChange={set("ends")} />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="v-desc">Catatan internal</Label>
+          <Label htmlFor="v-quota">Kuota pemakaian (opsional)</Label>
+          <Input id="v-quota" value={f.quota} onChange={set("quota")} inputMode="numeric" placeholder="100" />
+        </div>
+        <div className="grid gap-1.5 sm:col-span-2">
+          <Label htmlFor="v-desc">Catatan untuk tim (tidak tampil ke pelanggan)</Label>
           <Input id="v-desc" value={f.desc} onChange={set("desc")} />
         </div>
+        <label className="sm:col-span-3 flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={f.once} onChange={(e) => setF({ ...f, once: e.target.checked })} />
+          Satu kali per pelanggan (per nomor WhatsApp)
+        </label>
+        <p className="sm:col-span-3 text-xs text-[hsl(var(--muted-foreground))]">
+          Potongan berlaku untuk jasa titip + ongkir, tidak memotong harga barang dari toko.
+        </p>
         {err && <p className="sm:col-span-3 text-sm text-[hsl(var(--rose-700))]">{err}</p>}
         <div className="sm:col-span-3 flex gap-2">
           <Button type="submit" disabled={busy}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Simpan</Button>

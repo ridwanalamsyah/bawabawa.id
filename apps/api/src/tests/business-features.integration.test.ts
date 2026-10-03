@@ -143,4 +143,65 @@ describe.skipIf(!hasPostgres)("business features", () => {
     const second = await request(app).get("/api/v1/cron/run").set("authorization", "Bearer cron-secret-value");
     expect(second.body.data.quoteReminders).toBe(0);
   });
+
+  it("applies a promo code to jasa + ongkir, recomputes it on the quote and releases it on cancel", async () => {
+    const code = `HEMAT${randomUUID().slice(0, 5).toUpperCase()}`;
+    const created = await request(app)
+      .post("/api/v1/vouchers")
+      .set("authorization", `Bearer ${staff}`)
+      .send({ code, discountType: "fixed", discountValue: 15000, minOrderAmount: 100000, maxUses: 5 });
+    expect(created.status).toBe(201);
+
+    const tooSmall = await request(app)
+      .post("/api/v1/public/order-requests/voucher-check")
+      .send({ code, itemsTotal: 50000 });
+    expect(tooSmall.status).toBe(422);
+    expect(tooSmall.body.error.message).toMatch(/minimal/);
+
+    const check = await request(app).post("/api/v1/public/order-requests/voucher-check").send({ code: code.toLowerCase(), itemsTotal: 250000 });
+    expect(check.status).toBe(200);
+    expect(check.body.data).toMatchObject({ code, type: "fixed", value: 15000 });
+
+    const order = await request(app)
+      .post("/api/v1/public/order-requests")
+      .send({ ...base, tier: "fast", voucherCode: code });
+    expect(order.status).toBe(201);
+    expect(order.body.data.estimate.discount).toBe(15000);
+    expect(order.body.data.estimate.voucherCode).toBe(code);
+    const est = order.body.data.estimate;
+    expect(est.total).toBe(est.itemsTotal + est.jastipFee + est.shippingFee + est.ppn - 15000);
+
+    const db = await getPool();
+    const used = async () => Number((await db.query("SELECT used_count FROM vouchers WHERE code = $1", [code])).rows[0].used_count);
+    expect(await used()).toBe(1);
+
+    const quoted = await request(app)
+      .post(`/api/v1/admin/orders/requests/${order.body.data.id}/quote`)
+      .set("authorization", `Bearer ${staff}`)
+      .send({ itemsTotal: 240000, shippingFee: 43000 });
+    expect(quoted.status).toBe(200);
+    expect(quoted.body.data.quote.discount).toBe(15000);
+    expect(quoted.body.data.quote.total).toBe(240000 + quoted.body.data.quote.jastipFee + 43000 - 15000);
+
+    const cancel = await request(app).post(`/api/v1/public/order-requests/${order.body.data.trackingToken}/cancel`).send({});
+    expect(cancel.status).toBe(200);
+    expect(await used()).toBe(0);
+
+    const bad = await request(app).post("/api/v1/public/order-requests").send({ ...base, tier: "fast", voucherCode: "TIDAKADA" });
+    expect(bad.status).toBe(422);
+  });
+
+  it("resends the tracking link without revealing whether the order exists", async () => {
+    const order = await request(app).post("/api/v1/public/order-requests").send({ ...base, tier: "fast" });
+    const ok = await request(app)
+      .post("/api/v1/public/order-requests/resend-link")
+      .send({ phone: "0812 9999 0000", code: order.body.data.code });
+    const unknown = await request(app)
+      .post("/api/v1/public/order-requests/resend-link")
+      .send({ phone: "0812 9999 0000", code: "BWB-XXXXXX" });
+    expect(ok.status).toBe(200);
+    expect(unknown.status).toBe(200);
+    expect(ok.body).toEqual(unknown.body);
+    expect(JSON.stringify(ok.body)).not.toContain(order.body.data.trackingToken);
+  });
 });

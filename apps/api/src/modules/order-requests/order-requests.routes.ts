@@ -5,6 +5,8 @@ import { authGuard, requirePermission, type AuthUser } from "../../common/middle
 import { publicOrderActionRateLimit, publicOrderRateLimit } from "../../common/security/rate-limit";
 import { requireEnv } from "../../common/security/env";
 import { logAudit } from "../../common/audit/audit-log";
+import { getPool } from "../../infrastructure/db/pool";
+import { loadVoucher } from "./order-vouchers";
 import {
   ORDER_REQUEST_STATUSES,
   approveByToken,
@@ -14,6 +16,7 @@ import {
   getPublicView,
   listForAdmin,
   listForUser,
+  resendTrackingLink,
   setQuote,
   setStatus
 } from "./order-requests.service";
@@ -53,6 +56,7 @@ const createSchema = z
     outOfStockPreference: z.enum(["cancel", "substitute", "ask"]).default("ask"),
     customerNotes: z.string().trim().max(1000).optional(),
     estimatedKg: z.number().min(0).max(500).optional(),
+    voucherCode: z.string().trim().max(40).optional().or(z.literal("").transform(() => undefined)),
     // Honeypot: real visitors never see this field. Bots that fill every
     // input get a fake success so they don't retry with variations.
     website: z.string().optional()
@@ -98,6 +102,37 @@ publicOrderRequestsRouter.post("/", publicOrderRateLimit, async (req, res, next)
       userId: optionalUserId(req.header("authorization"))
     });
     res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/v1/public/order-requests/voucher-check — validates a promo code
+ * for the order form so it can show the discount before submitting. The
+ * real check (incl. one-per-customer) runs again when the order is placed.
+ */
+const voucherCheckSchema = z.object({
+  code: z.string().trim().min(2).max(40),
+  itemsTotal: z.number().min(0).max(1_000_000_000).default(0)
+});
+publicOrderRequestsRouter.post("/voucher-check", publicOrderActionRateLimit, async (req, res, next) => {
+  try {
+    const body = voucherCheckSchema.parse(req.body);
+    const { snapshot } = await loadVoucher(await getPool(), body.code, { itemsTotal: body.itemsTotal });
+    res.json({ success: true, data: snapshot });
+  } catch (error) {
+    next(error);
+  }
+});
+
+const resendSchema = z.object({
+  phone: z.string().trim().min(9).max(20),
+  code: z.string().trim().min(4).max(20)
+});
+publicOrderRequestsRouter.post("/resend-link", publicOrderRateLimit, async (req, res, next) => {
+  try {
+    res.json({ success: true, data: await resendTrackingLink(resendSchema.parse(req.body)) });
   } catch (error) {
     next(error);
   }
