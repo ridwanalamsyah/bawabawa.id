@@ -51,7 +51,7 @@ export function InvoicesClient() {
         if (Array.isArray(data)) {
           setRows(data);
         } else {
-          setError(data.error ?? "Format response tak terduga");
+          setError(data.error ?? "Data belum bisa dimuat. Coba muat ulang.");
         }
       } catch (e) {
         if (!cancelled) {
@@ -70,7 +70,7 @@ export function InvoicesClient() {
     <GlassCard className="p-0 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[hsl(var(--surface-2))] text-left text-xs uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+          <thead className="bg-[hsl(var(--surface-2))] text-left text-xs font-medium text-[hsl(var(--muted-foreground))]">
             <tr>
               <th className="px-4 py-3">No. Invoice</th>
               <th className="px-4 py-3">Order</th>

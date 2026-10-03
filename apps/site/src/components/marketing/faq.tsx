@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { delay } from "@/lib/motion";
 import { jsonLd, faqPageSchema } from "@/lib/seo/schema";
+import { getFaq } from "@/lib/site-content";
 
 // Every answer must match how the business actually operates today (see
 // /tentang, /terms, /refund). No claims about guarantees, licences, loyalty
@@ -44,7 +45,8 @@ export const FAQS = [
   },
 ];
 
-export function Faq() {
+export async function Faq() {
+  const faqs = await getFaq(FAQS);
   return (
     <section className="py-16 sm:py-20 border-t border-[hsl(var(--border))]" aria-labelledby="faq-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -57,7 +59,7 @@ export function Faq() {
           </p>
         </div>
         <div data-reveal style={delay(100)} className="lg:col-span-8 divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
-          {FAQS.map((f, i) => (
+          {faqs.map((f, i) => (
             <details key={f.q} className="smooth group py-1" open={i === 0}>
               <summary className="flex cursor-pointer transition-colors hover:text-[hsl(var(--sage-700))] dark:hover:text-[hsl(var(--sage-300))] list-none items-center justify-between gap-4 py-4 font-medium [&::-webkit-details-marker]:hidden">
                 {f.q}
@@ -70,7 +72,7 @@ export function Faq() {
       </div>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(faqPageSchema(FAQS.map((f) => ({ question: f.q, answer: f.a }))))}
+        dangerouslySetInnerHTML={jsonLd(faqPageSchema(faqs.map((f) => ({ question: f.q, answer: f.a }))))}
       />
     </section>
   );

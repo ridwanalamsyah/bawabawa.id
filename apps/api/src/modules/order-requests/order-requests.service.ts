@@ -5,6 +5,7 @@ import { withTransaction } from "../../infrastructure/db/transaction-manager";
 import { loadEnv } from "../../config/env";
 import { enqueueWhatsApp, normalizePhone, sendQueuedWhatsApp } from "../whatsapp/fonnte.service";
 import { reviewStateForToken } from "./reviews";
+import { claimVoucher, loadVoucher, releaseVoucher, voucherDiscount, type VoucherSnapshot } from "./order-vouchers";
 import {
   KILAT_BLOCKED_CATEGORIES,
   computePricing,
@@ -81,6 +82,7 @@ export type CreateOrderRequestInput = {
   estimatedKg?: number;
   deliveryMethod?: "delivery" | "pickup";
   userId?: string | null;
+  voucherCode?: string;
 };
 
 type Row = {
@@ -108,12 +110,13 @@ type Row = {
   created_at: string;
   updated_at: string;
   delivery_method: string | null;
+  voucher: any;
 };
 
 const COLUMNS = `id, code, tracking_token, source, status, user_id, customer_name, customer_phone,
   customer_email, address, tier, trip_id, items, out_of_stock_preference, customer_notes,
   estimate, quote, quote_note, payment_method, tracking_number, history, created_at, updated_at,
-  delivery_method`;
+  delivery_method, voucher`;
 
 function parseJson<T>(value: unknown, fallback: T): T {
   if (value == null) return fallback;
@@ -259,7 +262,22 @@ export async function createOrderRequest(input: CreateOrderRequestInput) {
         throw new AppError(422, "PO_CLOSED", "PO untuk trip ini sudah ditutup. Pilih trip berikutnya atau layanan Reguler.");
       }
     }
-    const { items, estimate } = await priceItems(qc, input);
+    const priced = await priceItems(qc, input);
+    const { items } = priced;
+    let estimate = priced.estimate;
+    let voucher: VoucherSnapshot | null = null;
+    if (input.voucherCode?.trim()) {
+      const found = await loadVoucher(qc, input.voucherCode, { itemsTotal: estimate.itemsTotal, phone });
+      await claimVoucher(qc, found.id);
+      voucher = found.snapshot;
+      estimate = computePricing({
+        itemsTotal: estimate.itemsTotal,
+        totalKg: priced.weightKg,
+        tier: input.tier,
+        discount: voucherDiscount(voucher, estimate.itemsTotal, estimate.jastipFee + estimate.shippingFee),
+        voucherCode: voucher.code
+      });
+    }
     const id = randomUUID();
     const code = newCode();
     const token = newTrackingToken();
@@ -272,9 +290,9 @@ export async function createOrderRequest(input: CreateOrderRequestInput) {
       `INSERT INTO order_requests
          (id, code, tracking_token, source, status, user_id, customer_name, customer_phone,
           customer_email, address, tier, trip_id, items, out_of_stock_preference,
-          customer_notes, estimate, quote, history, approved_at, delivery_method)
+          customer_notes, estimate, quote, history, approved_at, delivery_method, voucher)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12, $13::jsonb, $14,
-               $15, $16::jsonb, $17::jsonb, $18::jsonb, $19, $20)`,
+               $15, $16::jsonb, $17::jsonb, $18::jsonb, $19, $20, $21::jsonb)`,
       [
         id,
         code,
@@ -295,7 +313,8 @@ export async function createOrderRequest(input: CreateOrderRequestInput) {
         status === "approved" ? JSON.stringify(estimate) : null,
         JSON.stringify(history),
         status === "approved" ? new Date().toISOString() : null,
-        input.deliveryMethod ?? "delivery"
+        input.deliveryMethod ?? "delivery",
+        voucher ? JSON.stringify(voucher) : null
       ]
     );
     return { id, code, token, status, estimate, phone };
@@ -423,6 +442,9 @@ async function transition(
     cancelled: "cancelled_at"
   };
   if (stamp[next]) sets.push(`${stamp[next]} = NOW()`);
+  // A cancelled order gives its promo-code use back.
+  const voucher = parseJson<VoucherSnapshot | null>(row.voucher, null);
+  if (next === "cancelled" && voucher?.code) await releaseVoucher(qc, voucher.code);
   for (const [column, value] of Object.entries(extra.sets ?? {})) {
     values.push(value);
     sets.push(`${column} = $${values.length}${column === "quote" ? "::jsonb" : ""}`);
@@ -549,12 +571,15 @@ export async function setQuote(
     const base = computePricing({ itemsTotal: input.itemsTotal, totalKg: 0.5, tier: current.tier, withPpn: input.withPpn });
     const jastipFee = input.jastipFee ?? base.jastipFee;
     const ppn = (input.withPpn ?? false) ? Math.round((jastipFee + input.shippingFee) * 0.11) : 0;
+    const voucher = parseJson<VoucherSnapshot | null>(current.voucher, null);
+    const discount = voucherDiscount(voucher, input.itemsTotal, jastipFee + input.shippingFee);
     const quote = {
       ...base,
       jastipFee,
       shippingFee: input.shippingFee,
       ppn,
-      total: input.itemsTotal + jastipFee + input.shippingFee + ppn
+      total: input.itemsTotal + jastipFee + input.shippingFee + ppn - discount,
+      ...(discount > 0 ? { discount, voucherCode: voucher?.code ?? null } : {})
     };
     await transition(qc, current, "quoted", {
       note: input.note ?? "Penawaran harga dikirim",
@@ -600,4 +625,27 @@ export async function setStatus(
     row.id
   );
   return getForAdmin(id);
+}
+
+/**
+ * "Lupa link tracking": if the phone + order code match, send the tracking
+ * link again to that WhatsApp number. The response never says whether they
+ * matched, so the endpoint can't be used to look up other people's orders.
+ */
+export async function resendTrackingLink(input: { phone: string; code: string }) {
+  const phone = normalizePhone(input.phone);
+  const code = input.code.trim().toUpperCase();
+  const { rows } = await (await getPool()).query<Pick<Row, "id" | "code" | "tracking_token" | "customer_name" | "customer_phone">>(
+    "SELECT id, code, tracking_token, customer_name, customer_phone FROM order_requests WHERE UPPER(code) = $1 LIMIT 1",
+    [code]
+  );
+  const row = rows[0];
+  if (row && normalizePhone(row.customer_phone) === phone) {
+    void notifyWhatsApp(
+      row.customer_phone,
+      `Halo ${row.customer_name}, ini link untuk melacak pesanan ${row.code}: ${siteUrl()}/track/${row.tracking_token}`,
+      row.id
+    );
+  }
+  return { sent: true };
 }

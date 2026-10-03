@@ -120,7 +120,7 @@ export function PosClient() {
       <GlassCard className="lg:col-span-7 p-6">
         <h2 className="font-semibold">Form pesanan manual</h2>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-          Isi data customer dan total estimasi. Pesanan akan masuk ke ERP dengan
+          Isi data customer dan total estimasi. Pesanan akan tercatat dengan
           channel asalnya — jadi semua orderan offline + online tercatat di satu
           tempat.
         </p>
@@ -216,7 +216,7 @@ export function PosClient() {
 
           <div className="flex items-center gap-3">
             <Button type="submit" variant="primary" disabled={submitting}>
-              {submitting ? "Mengirim…" : "Simpan ke ERP"}
+              {submitting ? "Menyimpan…" : "Simpan pesanan"}
             </Button>
             <Button
               type="button"

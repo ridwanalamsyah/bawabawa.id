@@ -14,7 +14,6 @@ export default async function AdminReportsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Laporan"
         title="Laporan"
         description="Angka langsung dari database. Untuk analisis lanjut, unduh CSV dan buka di Excel / Google Sheets."
         actions={

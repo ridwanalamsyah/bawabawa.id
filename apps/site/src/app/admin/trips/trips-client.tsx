@@ -94,7 +94,7 @@ export function TripsClient() {
       const res = await fetch("/api/admin/trips", { cache: "no-store" });
       if (!res.ok) {
         const payload = (await res.json().catch(() => ({}))) as { error?: string };
-        setError(payload.error ?? `HTTP ${res.status}`);
+        setError(payload.error ?? "Terjadi kesalahan. Coba lagi.");
         return;
       }
       const data = (await res.json()) as Trip[];
@@ -113,7 +113,7 @@ export function TripsClient() {
         if (cancelled) return;
         if (!res.ok) {
           const payload = (await res.json().catch(() => ({}))) as { error?: string };
-          setError(payload.error ?? `HTTP ${res.status}`);
+          setError(payload.error ?? "Terjadi kesalahan. Coba lagi.");
           return;
         }
         const data = (await res.json()) as Trip[];
@@ -255,7 +255,7 @@ function TripForm({
       });
       if (!res.ok) {
         const payload = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(payload.error ?? `HTTP ${res.status}`);
+        throw new Error(payload.error ?? "Terjadi kesalahan. Coba lagi.");
       }
       onCreated();
     } catch (e) {
@@ -417,7 +417,7 @@ function TripRow({
       });
       if (!res.ok) {
         const payload = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(payload.error ?? `HTTP ${res.status}`);
+        throw new Error(payload.error ?? "Terjadi kesalahan. Coba lagi.");
       }
       await onChanged();
     } catch (e) {
@@ -436,7 +436,7 @@ function TripRow({
       const res = await fetch(`/api/admin/trips/${trip.id}`, { method: "DELETE" });
       if (!res.ok && res.status !== 204) {
         const payload = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(payload.error ?? `HTTP ${res.status}`);
+        throw new Error(payload.error ?? "Terjadi kesalahan. Coba lagi.");
       }
       await onChanged();
     } catch (e) {

@@ -115,6 +115,8 @@ export type PricingInput = {
   itemsTotal: number;
   totalKg: number;
   tier: TierId;
+  discount?: number;
+  voucherCode?: string | null;
 };
 
 export type PricingBreakdown = {
@@ -125,20 +127,42 @@ export type PricingBreakdown = {
   total: number;
   billingKg: number;
   tier: TierId;
+  /** Promo discount on jasa titip + ongkir. */
+  discount?: number;
+  voucherCode?: string | null;
 };
 
-export function computePricing({ itemsTotal, totalKg, tier }: PricingInput): PricingBreakdown {
+/** Promo code terms as returned by /api/order-requests/voucher-check. */
+export type VoucherSnapshot = {
+  code: string;
+  type: "percentage" | "fixed";
+  value: number;
+  maxDiscount: number | null;
+  minOrder: number;
+};
+
+/** Mirrors apps/api order-vouchers.ts: only jasa + ongkir are discounted. */
+export function voucherDiscount(v: VoucherSnapshot | null, itemsTotal: number, serviceTotal: number): number {
+  if (!v || itemsTotal < v.minOrder) return 0;
+  let d = v.type === "percentage" ? (serviceTotal * v.value) / 100 : v.value;
+  if (v.maxDiscount != null) d = Math.min(d, v.maxDiscount);
+  return Math.max(0, Math.round(Math.min(d, serviceTotal)));
+}
+
+export function computePricing({ itemsTotal, totalKg, tier, discount: rawDiscount, voucherCode }: PricingInput): PricingBreakdown {
   const goods = Math.max(0, Math.round(itemsTotal));
   const jastipFee = goods > 0 ? Math.max(JASTIP_FEE_MIN, Math.round(goods * JASTIP_FEE_RATE)) : 0;
   const shippingFee = shippingFeeFor(tier, totalKg);
   const ppn = PPN_ENABLED ? Math.round((jastipFee + shippingFee) * PPN_RATE) : 0;
+  const discount = Math.max(0, Math.min(Math.round(rawDiscount ?? 0), jastipFee + shippingFee));
   return {
     itemsTotal: goods,
     jastipFee,
     shippingFee,
     ppn,
-    total: goods + jastipFee + shippingFee + ppn,
+    total: goods + jastipFee + shippingFee + ppn - discount,
     billingKg: billingWeight(totalKg),
     tier,
+    ...(discount > 0 ? { discount, voucherCode: voucherCode ?? null } : {}),
   };
 }

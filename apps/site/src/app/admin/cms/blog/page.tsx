@@ -5,9 +5,8 @@ export default function AdminBlogPage() {
   return (
     <>
       <PageHeader
-        eyebrow="CMS"
-        title="Artikel blog"
-        description="Tulis artikel (format Markdown), simpan sebagai draf, lalu terbitkan. Artikel terbit tampil di /blog."
+        title="Artikel"
+        description="Tulis artikel, simpan sebagai draf, lalu terbitkan. Artikel yang terbit tampil di halaman Blog."
       />
       <BlogClient />
     </>

@@ -82,12 +82,69 @@ export function LacakClient() {
         </GlassCard>
       )}
 
-      <p className="text-sm text-[hsl(var(--muted-foreground))]">
-        Link hilang?{" "}
-        <a href={waLink("Halo Bawabawa, saya kehilangan link tracking pesanan saya.")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline">
-          <MessageCircle className="h-4 w-4" aria-hidden /> Minta lewat WhatsApp
-        </a>
-      </p>
+      <ResendLink />
     </div>
+  );
+}
+
+/** Lost the link? Phone + order code → we send it again by WhatsApp. */
+function ResendLink() {
+  const [phone, setPhone] = useState("");
+  const [code, setCode] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (phone.replace(/\D/g, "").length < 9) return setError("Isi nomor WhatsApp yang dipakai saat memesan.");
+    if (code.trim().length < 4) return setError("Isi kode pesanan, contoh BWB-ABC123.");
+    setState("sending");
+    try {
+      const res = await fetch("/api/order-requests/resend-link", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ phone: phone.trim(), code: code.trim() }),
+      });
+      setState(res.ok ? "sent" : "error");
+      if (!res.ok) setError("Belum bisa mengirim. Coba lagi beberapa menit lagi.");
+    } catch {
+      setState("error");
+      setError("Gagal terhubung. Periksa koneksi lalu coba lagi.");
+    }
+  }
+
+  return (
+    <GlassCard className="p-5 sm:p-6">
+      <h2 className="font-semibold">Link hilang?</h2>
+      {state === "sent" ? (
+        <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
+          Kalau nomor dan kode pesanannya cocok, link tracking sudah kami kirim ke WhatsApp {phone}. Belum masuk dalam
+          beberapa menit?{" "}
+          <a href={waLink(`Halo Bawabawa, saya minta link tracking pesanan ${code.trim()}.`)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline">
+            <MessageCircle className="h-4 w-4" aria-hidden /> Chat kami
+          </a>
+        </p>
+      ) : (
+        <form onSubmit={submit} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <div className="grid gap-1.5">
+            <Label htmlFor="rl-phone">Nomor WhatsApp</Label>
+            <Input id="rl-phone" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" autoComplete="tel" placeholder="0812…" />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="rl-code">Kode pesanan</Label>
+            <Input id="rl-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="BWB-ABC123" />
+          </div>
+          <Button type="submit" variant="outline" disabled={state === "sending"}>
+            {state === "sending" ? "Mengirim…" : "Kirim ke WhatsApp"}
+          </Button>
+          {error && (
+            <p role="alert" className="sm:col-span-3 text-xs text-[hsl(var(--danger))]">
+              {error}
+            </p>
+          )}
+        </form>
+      )}
+    </GlassCard>
   );
 }

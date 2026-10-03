@@ -72,6 +72,9 @@ export type PricingBreakdown = {
   total: number;
   billingKg: number;
   tier: TierId;
+  /** Promo discount on jasa titip + ongkir (0 when no code). */
+  discount?: number;
+  voucherCode?: string | null;
 };
 
 export function computePricing(input: {
@@ -79,19 +82,23 @@ export function computePricing(input: {
   totalKg: number;
   tier: TierId;
   withPpn?: boolean;
+  discount?: number;
+  voucherCode?: string | null;
 }): PricingBreakdown {
   const itemsTotal = Math.max(0, Math.round(input.itemsTotal));
   const jastipFee = itemsTotal > 0 ? Math.max(JASTIP_FEE_MIN, Math.round(itemsTotal * JASTIP_FEE_RATE)) : 0;
   const shippingFee = shippingFeeFor(input.tier, input.totalKg);
   const withPpn = input.withPpn ?? ppnEnabled();
   const ppn = withPpn ? Math.round((jastipFee + shippingFee) * PPN_RATE) : 0;
+  const discount = Math.max(0, Math.min(Math.round(input.discount ?? 0), jastipFee + shippingFee));
   return {
     itemsTotal,
     jastipFee,
     shippingFee,
     ppn,
-    total: itemsTotal + jastipFee + shippingFee + ppn,
+    total: itemsTotal + jastipFee + shippingFee + ppn - discount,
     billingKg: billingWeight(input.totalKg),
-    tier: input.tier
+    tier: input.tier,
+    ...(discount > 0 ? { discount, voucherCode: input.voucherCode ?? null } : {})
   };
 }

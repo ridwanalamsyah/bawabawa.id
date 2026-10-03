@@ -1,64 +1,58 @@
 import Link from "next/link";
-import { Sidebar, type SidebarGroup } from "@/components/dashboard/sidebar";
+import { Sidebar, MobileNav, type SidebarGroup, type SidebarItem } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 import { readSession } from "@/lib/customer-bff";
 import { isAdminRole } from "@/lib/auth-edge";
 
-// Sidebar removed: "ERP Integration" entry (system-language leak) and the
-// hardcoded badge counts on Pesanan/Pembayaran (those were faking activity
-// before the admin loads the actual list).
+// Main menu holds only what the team uses every day, in plain words.
+// Back-office modules (stock, HR, invoices, …) stay reachable under the
+// folded "Lainnya" group.
+const PRIMARY: SidebarItem[] = [
+  { href: "/admin", label: "Beranda", icon: "home" },
+  { href: "/admin/orders", label: "Pesanan", icon: "package" },
+  { href: "/admin/catalog", label: "Katalog", icon: "bag" },
+  { href: "/admin/trips", label: "Open Trip", icon: "plane" },
+];
+
 const groups: SidebarGroup[] = [
+  { items: PRIMARY },
   {
-    label: "Operasional",
+    label: "Promosi & konten",
     items: [
-      { href: "/admin", label: "Overview", icon: "dashboard" },
-      { href: "/admin/orders", label: "Pesanan masuk", icon: "package" },
-      { href: "/admin/catalog", label: "Katalog", icon: "receipt" },
-      { href: "/admin/trips", label: "Open Trip", icon: "plane" },
-      { href: "/admin/customers", label: "Customer", icon: "users" },
+      { href: "/admin/vouchers", label: "Promo & banner", icon: "megaphone" },
+      { href: "/admin/reviews", label: "Ulasan", icon: "star" },
+      { href: "/admin/cms/blog", label: "Artikel", icon: "pen" },
+      { href: "/admin/partners", label: "Reseller & B2B", icon: "heart" },
+    ],
+  },
+  {
+    label: "Pengaturan",
+    items: [
+      { href: "/admin/settings", label: "Kontak & tampilan", icon: "settings" },
+      { href: "/admin/users", label: "Tim admin", icon: "users" },
+    ],
+  },
+  {
+    label: "Lainnya",
+    collapsible: true,
+    items: [
+      { href: "/admin/customers", label: "Pelanggan", icon: "users" },
       { href: "/admin/payments", label: "Pembayaran", icon: "card" },
       { href: "/admin/invoices", label: "Invoice", icon: "receipt" },
-      { href: "/admin/pos", label: "POS / Order Manual", icon: "package" },
-      { href: "/admin/approvals", label: "Approvals", icon: "shield" },
-    ],
-  },
-  {
-    label: "Inventory & Logistik",
-    items: [
-      { href: "/admin/inventory", label: "Stok produk", icon: "package" },
-      { href: "/admin/procurement", label: "Purchase Order", icon: "card" },
-      { href: "/admin/imports", label: "Import CSV", icon: "file" },
-    ],
-  },
-  {
-    label: "CRM & Marketing",
-    items: [
-      { href: "/admin/leads", label: "Leads", icon: "users" },
-      { href: "/admin/partners", label: "Reseller & B2B", icon: "heart" },
-      { href: "/admin/vouchers", label: "Voucher & Promo", icon: "receipt" },
-      { href: "/admin/whatsapp", label: "WhatsApp Outbox", icon: "chat" },
-      { href: "/admin/emails", label: "Email Outbox", icon: "bell" },
-    ],
-  },
-  {
-    label: "Keuangan & HR",
-    items: [
-      { href: "/admin/bagi-hasil", label: "Bagi Hasil", icon: "wallet" },
-      { href: "/admin/hr", label: "Pegawai & Absensi", icon: "users" },
-      { href: "/admin/reports", label: "Laporan & Analytics", icon: "chart" },
-    ],
-  },
-  {
-    label: "Konten & Tim",
-    items: [
-      { href: "/admin/cms", label: "CMS", icon: "file" },
-      { href: "/admin/reviews", label: "Ulasan", icon: "chat" },
-      { href: "/admin/support", label: "Customer Support", icon: "support" },
-      { href: "/admin/users", label: "Tim & Admin", icon: "users" },
-      { href: "/admin/roles", label: "Role & Permission", icon: "shield" },
-      { href: "/admin/settings", label: "Pengaturan", icon: "settings" },
+      { href: "/admin/pos", label: "Order manual", icon: "package" },
+      { href: "/admin/approvals", label: "Persetujuan", icon: "shield" },
+      { href: "/admin/inventory", label: "Stok barang", icon: "package" },
+      { href: "/admin/procurement", label: "Pembelian stok", icon: "card" },
+      { href: "/admin/leads", label: "Calon pelanggan", icon: "users" },
+      { href: "/admin/whatsapp", label: "Riwayat WhatsApp", icon: "chat" },
+      { href: "/admin/emails", label: "Riwayat email", icon: "bell" },
+      { href: "/admin/bagi-hasil", label: "Bagi hasil", icon: "wallet" },
+      { href: "/admin/hr", label: "Pegawai & absensi", icon: "users" },
+      { href: "/admin/reports", label: "Laporan", icon: "chart" },
+      { href: "/admin/support", label: "Bantuan pelanggan", icon: "support" },
+      { href: "/admin/roles", label: "Hak akses", icon: "shield" },
     ],
   },
 ];
@@ -75,20 +69,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <Sidebar
         groups={groups}
         brandHref="/admin"
+        footer={
+          <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+            <Link href="/" target="_blank">
+              Lihat situs ↗
+            </Link>
+          </Button>
+        }
       />
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar
-          title="Admin Console"
-          subtitle="Bawabawa Bandung"
+          title="Admin Bawabawa"
+          subtitle="Kelola pesanan, katalog, dan promo"
         />
-        <main id="main" tabIndex={-1} className="px-4 sm:px-6 lg:px-8 py-6 flex-1">
-          <div className="lg:hidden mb-4 flex items-center gap-2">
-            <Button asChild size="sm" variant="outline">
-              <Link href="/">← Kembali ke beranda</Link>
-            </Button>
-          </div>
+        <main id="main" tabIndex={-1} className="px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6 flex-1">
           {children}
         </main>
+        <MobileNav groups={groups} primary={PRIMARY} />
       </div>
     </div>
   );

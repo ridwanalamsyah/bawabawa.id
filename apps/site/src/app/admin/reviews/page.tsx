@@ -5,8 +5,7 @@ export default function AdminReviewsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Konten"
-        title="Ulasan customer"
+        title="Ulasan pelanggan"
         description="Ulasan masuk dari halaman lacak setelah pesanan diterima. Tampil di beranda hanya setelah dipublikasikan."
       />
       <ReviewsClient />

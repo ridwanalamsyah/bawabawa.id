@@ -156,7 +156,7 @@ function Editor({ original, initial, onDone }: { original: string | null; initia
   async function save(publish: boolean) {
     setErr(null);
     if (d.title.trim().length < 3) return setErr("Judul minimal 3 karakter.");
-    if (!d.slug) return setErr("Slug wajib diisi.");
+    if (!d.slug) return setErr("Alamat link wajib diisi.");
     if (d.contentMd.trim().length < 20) return setErr("Isi artikel minimal 20 karakter.");
     setBusy(true);
     const body = {
@@ -187,7 +187,7 @@ function Editor({ original, initial, onDone }: { original: string | null; initia
           <Input id="b-title" value={d.title} onChange={set("title")} placeholder="Cara titip barang dari Bandung ke Samarinda" />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="b-slug">Alamat (slug)</Label>
+          <Label htmlFor="b-slug">Alamat link</Label>
           <Input
             id="b-slug"
             value={d.slug}
@@ -211,7 +211,7 @@ function Editor({ original, initial, onDone }: { original: string | null; initia
           <Input id="b-hero" value={d.heroImageUrl} onChange={set("heroImageUrl")} placeholder="https://…" />
         </div>
         <div className="grid gap-1.5 sm:col-span-2">
-          <Label htmlFor="b-body">Isi artikel (Markdown: ## Subjudul, **tebal**, - daftar)</Label>
+          <Label htmlFor="b-body">Isi artikel (tulis ## di awal baris untuk subjudul, **kata** untuk tebal, - untuk daftar)</Label>
           <Textarea id="b-body" value={d.contentMd} onChange={set("contentMd")} rows={16} className="font-mono text-sm" />
           <p className="text-xs text-[hsl(var(--muted-foreground))]">± {readTime(d.contentMd)} baca</p>
         </div>

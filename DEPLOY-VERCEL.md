@@ -104,10 +104,13 @@ If you already created the `bawabawa` Neon project, skip to step 2. Otherwise:
    # RESEND_FROM_EMAIL=
    # FONNTE_DEVICE_TOKEN=
    # BITESHIP_API_KEY=
+   # Shared rate limit across all instances (Upstash / Vercel KV):
+   # UPSTASH_REDIS_REST_URL=
+   # UPSTASH_REDIS_REST_TOKEN=
    ```
 
 7. Click **Deploy**. Vercel runs the build (~2–4 min). Once green, copy the production URL — looks like `https://bawabawa-api.vercel.app`.
-8. Run migrations `020`–`022` against the production database before the first order (see `apps/api/src/infrastructure/db/migrations`).
+8. Run migrations `020`–`023` against the production database before the first order (see `apps/api/src/infrastructure/db/migrations`).
 9. Vercel Cron calls `/api/v1/cron/run` daily with `Authorization: Bearer $CRON_SECRET`; without `CRON_SECRET` the endpoint answers 503.
 10. Smoke-test: `https://bawabawa-api.vercel.app/api/v1/health` should return `{"success":true,"data":{"status":"ok"}}`.
 

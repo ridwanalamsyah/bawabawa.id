@@ -5,8 +5,7 @@ export default function AdminVouchersPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Vouchers & Promo"
-        title="Kode promo & voucher"
+        title="Promo & banner"
         description="Buat kode promo, lalu pilih &ldquo;Tampilkan di banner&rdquo; supaya muncul di strip promo atas beranda."
       />
       <VouchersClient />

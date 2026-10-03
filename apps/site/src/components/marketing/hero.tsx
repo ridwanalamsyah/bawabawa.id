@@ -5,8 +5,8 @@ import { AmbientOrbs } from "./ambient-orbs";
 import { LinkPaste } from "./link-paste";
 import { delay } from "@/lib/motion";
 import { getSiteMotion } from "@/lib/site-motion";
+import { getHomepageContent } from "@/lib/site-content";
 
-const WORDS = ["sepatu lokal", "skincare", "oleh-oleh", "baju distro", "buku"];
 
 const STICKERS = [
   { text: "Cek harga dulu", className: "-top-4 left-4 lg:-left-6", tone: "bg-[hsl(var(--coral-500))] text-white", r: "-6deg", d: 700 },
@@ -39,7 +39,9 @@ export function CalculatorWithStickers() {
  * wiggle. All CSS keyframes, so the copy shows on first paint without JS.
  */
 export async function Hero() {
-  const motion = await getSiteMotion();
+  const [motion, content] = await Promise.all([getSiteMotion(), getHomepageContent()]);
+  // The CSS cycle has five slots; repeat shorter lists to fill them.
+  const words = Array.from({ length: 5 }, (_, i) => content.words[i % content.words.length]);
 
   return (
     <section className="relative overflow-hidden">
@@ -50,12 +52,12 @@ export async function Hero() {
             style={delay(60)}
             className="animate-rise text-[2.6rem] sm:text-6xl lg:text-[4.25rem] font-bold leading-[1.02] tracking-[-0.03em]"
           >
-            <span className="sr-only">Titip barang dari Bandung sampai rumahmu di Samarinda.</span>
+            <span className="sr-only">Titip {content.words.join(", ")} dari Bandung sampai Samarinda.</span>
             <span aria-hidden>
               Titip{" "}
               <span className="word-cycle inline-grid align-bottom pb-1">
-                {WORDS.map((w) => (
-                  <span key={w} className="text-[hsl(var(--sage-700))] dark:text-[hsl(var(--emerald-400))]">
+                {words.map((w, i) => (
+                  <span key={`${i}-${w}`} className="text-[hsl(var(--sage-700))] dark:text-[hsl(var(--emerald-400))]">
                     {w}
                   </span>
                 ))}
@@ -75,7 +77,7 @@ export async function Hero() {
             </span>
           </h1>
           <p style={delay(140)} className="animate-rise mt-5 max-w-lg text-lg leading-relaxed text-[hsl(var(--muted-foreground))]">
-            Kami cek harga di toko, kamu bayar setelah setuju.
+            {content.subtitle}
           </p>
           <div style={delay(220)} className="animate-rise mt-7 max-w-xl">
             <LinkPaste />

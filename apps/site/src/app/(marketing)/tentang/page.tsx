@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Heart, MapPin, Truck, Sprout } from "lucide-react";
+import { getSiteContact } from "@/lib/site-contact";
 
 export const metadata: Metadata = {
   title: "Tentang Bawabawa.id",
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
 // belum 12.000 customer. Tujuan halaman ini menggantikan press-kit
 // dengan informasi yang lebih relevan untuk customer pertama.
 
-export default function TentangPage() {
+export default async function TentangPage() {
+  const contact = await getSiteContact();
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
       <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
@@ -95,8 +97,8 @@ export default function TentangPage() {
         <ul className="mt-3 space-y-2 text-[hsl(var(--muted-foreground))]">
           <li>
             Email umum:{" "}
-            <a href="mailto:hello@bawabawa.id" className="text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
-              hello@bawabawa.id
+            <a href={`mailto:${contact.email}`} className="text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+              {contact.email}
             </a>
           </li>
           <li>

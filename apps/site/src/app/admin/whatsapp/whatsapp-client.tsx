@@ -39,7 +39,7 @@ export function WhatsappClient() {
     <ErpListPage<WaLog>
       endpoint="/api/admin/whatsapp-logs"
       columns={COLUMNS}
-      emptyMessage="Belum ada log WhatsApp. Setelah ERP enqueue notifikasi, akan muncul di sini."
+      emptyMessage="Belum ada pesan WhatsApp terkirim."
       rowKey={(r) => r.id}
       footer="Fonnte device + template di-config di Pengaturan / ENV. Module siap pakai."
     />
