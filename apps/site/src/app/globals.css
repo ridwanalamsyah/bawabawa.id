@@ -450,36 +450,7 @@ h1, h2, h3 {
   animation: hero-slide-in-right 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-/* Continuous scan-line sweep used by HeroVisual. Replaces a framer-motion
-   loop so the effect still plays even if framer-motion fails to load. */
-@keyframes hero-scan {
-  0%   { transform: translateY(-30%); }
-  100% { transform: translateY(130%); }
-}
-.animate-hero-scan {
-  animation: hero-scan 8s linear infinite;
-}
 
-/* Sequential pulse used by the hero "Belanja → Packing → Kirim" pipeline.
-   Each step shares the same 3.6s animation but with staggered delays so
-   the brightening sweeps across the row like an actual progress bar — no
-   framer-motion required. */
-@keyframes pulse-step {
-  0%, 100% { opacity: 0.55; }
-  35%      { opacity: 1;    }
-  70%      { opacity: 0.55; }
-}
-.animate-pulse-step {
-  animation: pulse-step 3.6s ease-in-out infinite;
-}
-
-/* Hero visual: the route badge plane flies Bandung → Samarinda. */
-@keyframes plane-fly {
-  0%   { transform: translateX(-6px) rotate(-12deg); }
-  50%  { transform: translateX(6px) translateY(-2px) rotate(-12deg); }
-  100% { transform: translateX(-6px) rotate(-12deg); }
-}
-.animate-plane-fly { animation: plane-fly 3.2s ease-in-out infinite; }
 
 /* Ambient orbs drift slowly behind the hero. */
 @keyframes orb-drift {
@@ -521,6 +492,48 @@ h1, h2, h3 {
   40%      { transform: scale(1.25) rotate(-8deg); }
 }
 .animate-bump { animation: bump 0.45s var(--ease-out-soft, ease-out); }
+
+/* Hero headline: words take turns sliding up into the slot (5 words,
+   2.4s each). Every word sits in the same grid cell, so the slot keeps
+   the width of the longest word and nothing below it jumps. */
+@keyframes word-cycle {
+  0%        { opacity: 0; transform: translateY(100%); }
+  3%, 20%   { opacity: 1; transform: translateY(0); }
+  23%, 100% { opacity: 0; transform: translateY(-100%); }
+}
+.word-cycle { overflow: hidden; clip-path: inset(0 -0.15em); }
+.word-cycle > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  animation: word-cycle 12s var(--ease-out-soft, ease-out) infinite both;
+}
+.word-cycle > span:nth-child(2) { animation-delay: 2.4s; }
+.word-cycle > span:nth-child(3) { animation-delay: 4.8s; }
+.word-cycle > span:nth-child(4) { animation-delay: 7.2s; }
+.word-cycle > span:nth-child(5) { animation-delay: 9.6s; }
+/* With animation off (admin switch) show the first word only. */
+[data-motion="off"] .word-cycle > span:first-child { opacity: 1; }
+
+/* Sticker badges: pop in, then wiggle now and then. */
+@keyframes sticker-in {
+  from { opacity: 0; transform: scale(0.4) rotate(var(--r, 0deg)); }
+  70%  { opacity: 1; transform: scale(1.08) rotate(var(--r, 0deg)); }
+  to   { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); }
+}
+@keyframes sticker-wiggle {
+  0%, 86%, 100% { transform: rotate(var(--r, 0deg)); }
+  90%           { transform: rotate(calc(var(--r, 0deg) - 6deg)); }
+  95%           { transform: rotate(calc(var(--r, 0deg) + 5deg)); }
+}
+.sticker {
+  transform: rotate(var(--r, 0deg));
+  animation: sticker-in 0.6s var(--ease-out-soft, ease-out) both, sticker-wiggle 5s ease-in-out infinite;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + 1.2s);
+}
+
+/* Tilted ticker band under the hero. */
+.animate-ticker { animation: marquee 26s linear infinite; }
+.animate-ticker-reverse { animation: marquee 32s linear infinite reverse; }
 
 /* Brand gradient for one highlighted word in a headline. */
 .text-gradient-brand {

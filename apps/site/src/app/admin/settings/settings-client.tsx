@@ -258,11 +258,6 @@ const MOTION_SWITCHES = [
     hint: "Semua gerakan di situs publik: teks muncul bertahap, efek scroll, hover, transisi.",
   },
   {
-    key: "heroVisual",
-    label: "Ilustrasi hero",
-    hint: "Rute Bandung → Samarinda dengan pesawat, contoh pesanan, dan estimasi tiba di beranda.",
-  },
-  {
     key: "ambient",
     label: "Efek latar (orb)",
     hint: "Bulatan warna blur yang bergerak pelan di belakang hero.",

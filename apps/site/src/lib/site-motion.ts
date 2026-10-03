@@ -10,11 +10,9 @@ export type SiteMotion = {
   animations: boolean;
   /** Blurred colour orbs drifting behind the hero. */
   ambient: boolean;
-  /** Animated hero illustration (plane route, order card, ETA card). */
-  heroVisual: boolean;
 };
 
-export const DEFAULT_SITE_MOTION: SiteMotion = { animations: true, ambient: true, heroVisual: true };
+export const DEFAULT_SITE_MOTION: SiteMotion = { animations: true, ambient: true };
 
 export async function getSiteMotion(): Promise<SiteMotion> {
   try {
@@ -25,7 +23,6 @@ export async function getSiteMotion(): Promise<SiteMotion> {
     return {
       animations: flag(v.animations, DEFAULT_SITE_MOTION.animations),
       ambient: flag(v.ambient, DEFAULT_SITE_MOTION.ambient),
-      heroVisual: flag(v.heroVisual, DEFAULT_SITE_MOTION.heroVisual),
     };
   } catch {
     return DEFAULT_SITE_MOTION;
