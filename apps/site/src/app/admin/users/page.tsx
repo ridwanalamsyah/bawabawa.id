@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { UsersAdminClient } from "./users-client";
 
 export const metadata = {
-  title: "Tim & Admin · Bawabawa.id",
+  title: "Tim admin · Bawabawa.id",
 };
 
 export default function AdminUsersPage() {
@@ -10,7 +10,7 @@ export default function AdminUsersPage() {
     <>
       <PageHeader
         title="Tim admin"
-        description="Daftar admin yang punya akses ke konsol internal. Approve pendaftar Google baru, kelola role, atau suspend akses lama."
+        description="Orang yang boleh membuka halaman admin ini."
       />
       <UsersAdminClient />
     </>

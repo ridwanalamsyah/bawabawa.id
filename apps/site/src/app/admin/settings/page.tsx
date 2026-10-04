@@ -5,7 +5,7 @@ export default function AdminSettingsPage() {
   return (
     <>
       <PageHeader
-        title="Kontak & tampilan"
+        title="Tampilan situs"
         description="Ubah kontak, sosial media, teks beranda, tanya-jawab, dan animasi situs. Perubahan tampil di situs dalam ±1 menit."
       />
       <SettingsClient />
