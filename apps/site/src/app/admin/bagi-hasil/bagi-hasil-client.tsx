@@ -38,7 +38,7 @@ export function BagiHasilClient() {
       try {
         const res = await fetch("/api/admin/bagi-hasil", { cache: "no-store" });
         if (!res.ok) {
-          if (!cancelled) setError(`Gagal memuat (${res.status})`);
+          if (!cancelled) setError("Data belum bisa dimuat. Coba muat ulang.");
           return;
         }
         const data = (await res.json()) as Settings;

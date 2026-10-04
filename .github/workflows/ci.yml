@@ -66,3 +66,64 @@ jobs:
       - name: Order flow + authorization tests
         run: npx vitest run src/tests/order-requests.integration.test.ts src/tests/business-features.integration.test.ts src/tests/authorization.unit.test.ts
         working-directory: apps/api
+
+  # Browser test of the real customer journey (request → promo → tracking →
+  # resend link) against the built site, a local API and Postgres.
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U test" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://test:test@127.0.0.1:5433/test
+      JWT_ACCESS_SECRET: ci-e2e-access-secret-not-for-production
+      JWT_REFRESH_SECRET: ci-e2e-refresh-secret-not-for-production
+      SITE_PROXY_SECRET: ci-e2e-proxy-secret-0123456789
+      SESSION_JWT_SECRET: ci-e2e-session-secret-0123456789abcdef
+      ERP_API_BASE_URL: http://127.0.0.1:3999
+      PUBLIC_SITE_URL: http://127.0.0.1:3100
+      NEXT_PUBLIC_WA_NUMBER: "6281111111111"
+      DEMO_MODE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install build tools for native addons
+        run: sudo apt-get install -y python3 make g++
+      - run: npm ci
+      - name: Apply migrations
+        run: npm run migrate --workspace @erp/api
+      - name: Start API
+        working-directory: apps/api
+        run: |
+          NODE_ENV=development PORT=3999 nohup npx tsx src/server.ts > /tmp/api.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3999/api/v1/health && break; sleep 1; done
+      - name: Build and start site
+        working-directory: apps/site
+        run: |
+          npm run build
+          nohup npx next start -p 3100 > /tmp/site.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:3100/ && break; sleep 1; done
+      - name: Install Chromium
+        working-directory: apps/e2e
+        run: npx playwright install --with-deps chromium
+      - name: Customer journey
+        working-directory: apps/e2e
+        env:
+          BAWABAWA_E2E_BASE_URL: http://127.0.0.1:3100
+          E2E_API_URL: http://127.0.0.1:3999
+          E2E_JWT_SECRET: ci-e2e-access-secret-not-for-production
+        run: npx playwright test tests/order-flow.local.spec.ts
+      - name: Server logs
+        if: failure()
+        run: tail -n 200 /tmp/api.log /tmp/site.log

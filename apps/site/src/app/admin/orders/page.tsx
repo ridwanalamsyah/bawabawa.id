@@ -3,12 +3,14 @@ import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { OrdersClient } from "./orders-client";
+import { ORDER_REQUEST_STATUSES_LIST } from "@/lib/order-requests";
 
-export default function AdminOrdersPage() {
+export default async function AdminOrdersPage({ searchParams }: { searchParams: Promise<{ antrean?: string }> }) {
+  const { antrean } = await searchParams;
+  const initialQueue = antrean === "all" || ORDER_REQUEST_STATUSES_LIST.includes(antrean as never) ? (antrean as never) : undefined;
   return (
     <>
       <PageHeader
-        eyebrow="Operasional"
         title="Pesanan masuk"
         description="Request & checkout katalog dari situs. Kerjakan per antrean: cek → kirim penawaran → tunggu bayar → belikan → kemas → kirim."
         actions={
@@ -19,7 +21,7 @@ export default function AdminOrdersPage() {
           </Button>
         }
       />
-      <OrdersClient />
+      <OrdersClient initialQueue={initialQueue} />
     </>
   );
 }

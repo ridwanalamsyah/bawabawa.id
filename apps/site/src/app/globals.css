@@ -232,7 +232,7 @@
 
   --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-display), "Playfair Display", Georgia, serif;
+  --font-display: var(--font-sans);
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
@@ -280,15 +280,14 @@ body {
   background-image: none;
 }
 
-/* Headings use the UI sans in a heavy weight — direct and legible.
-   Playfair stays available via .font-display for rare editorial use. */
+/* Headings use the UI sans in a heavy weight — direct and legible. */
 h1, h2, h3 {
   font-family: var(--font-sans);
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 .font-display {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   letter-spacing: -0.01em;
 }
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, MessageCircle, Package } from "lucide-react";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { waLink } from "@/lib/contact";
 
 // Pages that already have their own primary action (or a cart bar) at the
@@ -26,24 +25,18 @@ export function StickyMobileCTA() {
   if (HIDDEN_ON.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return null;
 
   return (
-    <AnimatePresence>
+    <>
       {visible && (
-        <motion.div
-          initial={{ y: 64, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 64, opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          className="fixed bottom-0 inset-x-0 z-30 md:hidden p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
+        <div
+          className="animate-rise fixed bottom-0 inset-x-0 z-30 md:hidden p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
         >
           <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface)/0.92)] shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.18)] px-3 py-2.5 flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-[hsl(var(--sage-500))] to-[hsl(var(--sage-700))] text-white shrink-0">
               <Package className="h-4 w-4" aria-hidden />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-medium">
-                Bandung → Samarinda
-              </p>
               <p className="text-sm font-semibold text-[hsl(var(--foreground))] truncate">Ongkir mulai Rp43rb/kg</p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] truncate">Bayar setelah setuju</p>
             </div>
             <a
               href={waLink("Halo Bawabawa, saya mau tanya soal titip barang dari Bandung.")}
@@ -62,8 +55,8 @@ export function StickyMobileCTA() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

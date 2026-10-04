@@ -36,7 +36,7 @@ cmsRouter.get("/settings", authGuard, requirePermission("cms:manage"), async (_r
 // SEO defaults, animation switches). `contact` and `social` are shown on the
 // public footer, so only their whitelisted, public-facing fields go out —
 // anything else staff store there stays private.
-const PUBLIC_KEYS = ["brand", "seo", "feature_flags", "site_motion"];
+const PUBLIC_KEYS = ["brand", "seo", "feature_flags", "site_motion", "homepage", "faq"];
 const PUBLIC_FIELDS: Record<string, string[]> = {
   contact: ["email", "phone", "address", "supportHours"],
   social: ["instagram", "tiktok", "youtube"]

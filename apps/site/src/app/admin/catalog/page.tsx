@@ -5,8 +5,7 @@ export default function AdminCatalogPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Katalog"
-        title="Katalog titipan"
+        title="Katalog"
         description="Barang dengan harga pasti yang bisa langsung dipesan di /katalog. Harga di sini sudah termasuk jasa titip; ongkir dihitung dari berat."
       />
       <CatalogAdminClient />

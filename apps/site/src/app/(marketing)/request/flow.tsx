@@ -36,6 +36,8 @@ import {
   availableTiers,
   KILAT,
   KILAT_BLOCKED_CATEGORIES,
+  voucherDiscount,
+  type VoucherSnapshot,
 } from "@/lib/pricing";
 import { track } from "@/lib/analytics";
 import { delay } from "@/lib/motion";
@@ -283,7 +285,12 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
 
   const recommended = recommendTier(totalKg);
   const tier: TierId = tierChoice ?? recommended;
-  const pricing = useMemo(() => computePricing({ itemsTotal, totalKg, tier }), [itemsTotal, totalKg, tier]);
+  const [voucher, setVoucher] = useState<VoucherSnapshot | null>(null);
+  const pricing = useMemo(() => {
+    const base = computePricing({ itemsTotal, totalKg, tier });
+    const discount = voucherDiscount(voucher, itemsTotal, base.jastipFee + base.shippingFee);
+    return discount > 0 ? computePricing({ itemsTotal, totalKg, tier, discount, voucherCode: voucher?.code }) : base;
+  }, [itemsTotal, totalKg, tier, voucher]);
   const trip = trips.find((t) => t.id === tripId) ?? null;
   const blockedItem = isCatalog ? null : items.find((it) => KILAT_BLOCKED_CATEGORIES.includes(it.category));
   const kilatBlocked = blockedItem
@@ -328,6 +335,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
       },
       tier,
       tripId: tier === "batch" ? tripId : null,
+      voucherCode: voucher?.code,
       deliveryMethod: PICKUP_POINT ? contact.deliveryMethod : "delivery",
       items: isCatalog
         ? cartLines.map((l) => ({ name: l.name, productId: l.productId, qty: l.qty, variant: l.variant || undefined }))
@@ -495,6 +503,7 @@ export function RequestFlow({ mode = "request" }: { mode?: "request" | "catalog"
           pricing={pricing}
           trip={trip}
           tier={tier}
+          promo={<PromoField itemsTotal={itemsTotal} voucher={voucher} setVoucher={setVoucher} />}
         />
       </aside>
     </div>
@@ -1198,12 +1207,14 @@ function SummaryCard({
   pricing,
   trip,
   tier,
+  promo,
 }: {
   isCatalog: boolean;
   lines: Array<{ label: string; qty: number; amount: number }>;
   pricing: PricingBreakdown;
   trip: TripRow | null;
   tier: TierId;
+  promo?: React.ReactNode;
 }) {
   return (
     <div className="lg:sticky lg:top-24">
@@ -1224,6 +1235,13 @@ function SummaryCard({
           <Row label="Jasa titip (8%, min Rp20rb)" value={formatIDR(pricing.jastipFee)} />
           <Row label={`Ongkir ${TIERS[tier].label} (${(tier === "air" && KILAT ? Math.max(pricing.billingKg, KILAT.minKg) : pricing.billingKg).toFixed(1)} kg)`} value={formatIDR(pricing.shippingFee)} />
           {PPN_ENABLED && <Row label="PPN 11% (atas jasa & ongkir)" value={formatIDR(pricing.ppn)} />}
+          {pricing.discount ? (
+            <div className="flex items-start justify-between gap-2 text-[hsl(var(--emerald-600))]">
+              <span>Promo {pricing.voucherCode}</span>
+              <span className="tabular-nums">−{formatIDR(pricing.discount)}</span>
+            </div>
+          ) : null}
+          {promo}
           <div className="h-px bg-[hsl(var(--border))]" />
           <div className="flex items-center justify-between">
             <span className="font-semibold">{isCatalog ? "Total" : "Total maks."}</span>
@@ -1248,6 +1266,83 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-3">
       <span className="text-[hsl(var(--muted-foreground))]">{label}</span>
       <span className="tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+/** "Punya kode promo?" — checks the code and shows the discount right away. */
+function PromoField({
+  itemsTotal,
+  voucher,
+  setVoucher,
+}: {
+  itemsTotal: number;
+  voucher: VoucherSnapshot | null;
+  setVoucher: (v: VoucherSnapshot | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  if (voucher) {
+    return (
+      <p className="flex items-center justify-between text-xs">
+        <span className="text-[hsl(var(--muted-foreground))]">
+          {itemsTotal < voucher.minOrder ? `Kode ${voucher.code} berlaku untuk belanja minimal ${formatIDR(voucher.minOrder)}` : `Kode ${voucher.code} dipakai`}
+        </span>
+        <button type="button" onClick={() => setVoucher(null)} className="font-medium underline underline-offset-2">
+          Hapus
+        </button>
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="text-left text-xs font-medium underline underline-offset-2">
+        Punya kode promo?
+      </button>
+    );
+  }
+  const apply = async () => {
+    if (code.trim().length < 2) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const res = await fetch("/api/order-requests/voucher-check", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: code.trim(), itemsTotal }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        setErr(errorMessage(json, "Kode promo tidak bisa dipakai"));
+        return;
+      }
+      setVoucher((json?.data ?? json) as VoucherSnapshot);
+      track("request_step", { step: "promo_applied" });
+    } catch {
+      setErr("Gagal terhubung. Coba lagi.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="space-y-1.5">
+      <div className="flex gap-2">
+        <Input
+          aria-label="Kode promo"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), void apply())}
+          placeholder="KODEPROMO"
+          className="h-9 uppercase"
+        />
+        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void apply()}>
+          {busy ? "…" : "Pakai"}
+        </Button>
+      </div>
+      {err && <p className="text-xs text-[hsl(var(--rose-700))]">{err}</p>}
     </div>
   );
 }

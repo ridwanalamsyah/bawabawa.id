@@ -25,7 +25,7 @@ export function CustomersClient() {
         const res = await fetch("/api/admin/customers", { cache: "no-store" });
         if (!res.ok) {
           const payload = (await res.json().catch(() => ({}))) as ErrorPayload;
-          if (!cancelled) setError(payload.error ?? `HTTP ${res.status}`);
+          if (!cancelled) setError(payload.error ?? "Terjadi kesalahan. Coba lagi.");
           return;
         }
         const data = (await res.json()) as Customer[];

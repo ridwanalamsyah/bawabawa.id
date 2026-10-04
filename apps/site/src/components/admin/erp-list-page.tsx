@@ -39,7 +39,7 @@ export function ErpListPage<Row extends Record<string, unknown>>({
       try {
         const res = await fetch(endpoint, { cache: "no-store" });
         if (!res.ok) {
-          if (!cancelled) setError(`Gagal memuat (${res.status})`);
+          if (!cancelled) setError("Data belum bisa dimuat. Coba muat ulang.");
           return;
         }
         const data = (await res.json()) as Row[] | { error?: string };
@@ -47,7 +47,7 @@ export function ErpListPage<Row extends Record<string, unknown>>({
         if (Array.isArray(data)) {
           setRows(data);
         } else {
-          setError(data.error ?? "Format response tak terduga");
+          setError(data.error ?? "Data belum bisa dimuat. Coba muat ulang.");
         }
       } catch (e) {
         if (!cancelled) {
@@ -66,7 +66,7 @@ export function ErpListPage<Row extends Record<string, unknown>>({
     <GlassCard className="p-0 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[hsl(var(--surface-2))] text-left text-xs uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+          <thead className="bg-[hsl(var(--surface-2))] text-left text-xs font-medium text-[hsl(var(--muted-foreground))]">
             <tr>
               {columns.map((c) => (
                 <th key={c.key} className={`px-4 py-3 ${c.className ?? ""}`}>

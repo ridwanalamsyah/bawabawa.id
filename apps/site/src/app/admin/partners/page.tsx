@@ -5,7 +5,6 @@ export default function AdminPartnersPage() {
   return (
     <>
       <PageHeader
-        eyebrow="CRM"
         title="Reseller & B2B"
         description="Pendaftar reseller, kulakan B2B, dan afiliasi dari halaman /reseller."
       />
