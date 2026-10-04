@@ -208,7 +208,7 @@ function ProductForm({
       const res = await fetch("/api/admin/uploads", { method: "POST", body });
       const json = (await res.json().catch(() => null)) as { data?: { url?: string } } | null;
       if (!res.ok || !json?.data?.url) {
-        setErr(errorMessage(json, "Upload gagal"));
+        setErr(errorMessage(json, "Foto gagal diunggah. Coba lagi."));
         return;
       }
       set({ imageUrl: json.data.url });

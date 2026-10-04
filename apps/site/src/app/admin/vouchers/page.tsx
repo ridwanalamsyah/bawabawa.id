@@ -5,8 +5,8 @@ export default function AdminVouchersPage() {
   return (
     <>
       <PageHeader
-        title="Promo & banner"
-        description="Buat kode promo, lalu pilih &ldquo;Tampilkan di banner&rdquo; supaya muncul di strip promo atas beranda."
+        title="Promo"
+        description="Kode diskon untuk pembeli. Nyalakan &ldquo;Tampil di banner&rdquo; supaya kodenya muncul di atas beranda."
       />
       <VouchersClient />
     </>

@@ -6,7 +6,7 @@ export default function AdminTripsPage() {
     <>
       <PageHeader
         title="Jadwal Open Trip"
-        description="Buat dan publish jadwal trip secara manual. Trip baru baru tampil di /open-trip setelah kamu publish."
+        description="Buat jadwal keberangkatan. Jadwal muncul di halaman Open Trip setelah kamu tekan &ldquo;Tampilkan&rdquo;."
       />
       <TripsClient />
     </>

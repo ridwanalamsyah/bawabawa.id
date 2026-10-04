@@ -6,9 +6,8 @@ import { redirect } from "next/navigation";
 import { readSession } from "@/lib/customer-bff";
 import { isAdminRole } from "@/lib/auth-edge";
 
-// Main menu holds only what the team uses every day, in plain words.
-// Back-office modules (stock, HR, invoices, …) stay reachable under the
-// folded "Lainnya" group.
+// Only what the team uses to run the jastip, in plain words. Older
+// back-office pages still exist by URL but are left out of the menu.
 const PRIMARY: SidebarItem[] = [
   { href: "/admin", label: "Beranda", icon: "home" },
   { href: "/admin/orders", label: "Pesanan", icon: "package" },
@@ -19,40 +18,19 @@ const PRIMARY: SidebarItem[] = [
 const groups: SidebarGroup[] = [
   { items: PRIMARY },
   {
-    label: "Promosi & konten",
+    label: "Jualan",
     items: [
-      { href: "/admin/vouchers", label: "Promo & banner", icon: "megaphone" },
-      { href: "/admin/reviews", label: "Ulasan", icon: "star" },
-      { href: "/admin/cms/blog", label: "Artikel", icon: "pen" },
-      { href: "/admin/partners", label: "Reseller & B2B", icon: "heart" },
+      { href: "/admin/vouchers", label: "Promo", icon: "megaphone", hint: "Kode diskon & banner" },
+      { href: "/admin/reviews", label: "Ulasan", icon: "star", hint: "Tayangkan ulasan pembeli" },
+      { href: "/admin/cms/blog", label: "Artikel", icon: "pen", hint: "Tulis tips & info" },
+      { href: "/admin/partners", label: "Reseller", icon: "heart", hint: "Pendaftar reseller & B2B" },
     ],
   },
   {
     label: "Pengaturan",
     items: [
-      { href: "/admin/settings", label: "Kontak & tampilan", icon: "settings" },
-      { href: "/admin/users", label: "Tim admin", icon: "users" },
-    ],
-  },
-  {
-    label: "Lainnya",
-    collapsible: true,
-    items: [
-      { href: "/admin/customers", label: "Pelanggan", icon: "users" },
-      { href: "/admin/payments", label: "Pembayaran", icon: "card" },
-      { href: "/admin/invoices", label: "Invoice", icon: "receipt" },
-      { href: "/admin/pos", label: "Order manual", icon: "package" },
-      { href: "/admin/approvals", label: "Persetujuan", icon: "shield" },
-      { href: "/admin/inventory", label: "Stok barang", icon: "package" },
-      { href: "/admin/procurement", label: "Pembelian stok", icon: "card" },
-      { href: "/admin/leads", label: "Calon pelanggan", icon: "users" },
-      { href: "/admin/whatsapp", label: "Riwayat WhatsApp", icon: "chat" },
-      { href: "/admin/emails", label: "Riwayat email", icon: "bell" },
-      { href: "/admin/bagi-hasil", label: "Bagi hasil", icon: "wallet" },
-      { href: "/admin/hr", label: "Pegawai & absensi", icon: "users" },
-      { href: "/admin/reports", label: "Laporan", icon: "chart" },
-      { href: "/admin/support", label: "Bantuan pelanggan", icon: "support" },
-      { href: "/admin/roles", label: "Hak akses", icon: "shield" },
+      { href: "/admin/settings", label: "Tampilan situs", icon: "settings", hint: "Kontak, teks beranda, FAQ" },
+      { href: "/admin/users", label: "Tim admin", icon: "users", hint: "Siapa yang boleh masuk" },
     ],
   },
 ];
@@ -78,10 +56,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         }
       />
       <div className="flex-1 min-w-0 flex flex-col">
-        <Topbar
-          title="Admin Bawabawa"
-          subtitle="Kelola pesanan, katalog, dan promo"
-        />
+        <Topbar title="Admin Bawabawa" />
         <main id="main" tabIndex={-1} className="px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6 flex-1">
           {children}
         </main>

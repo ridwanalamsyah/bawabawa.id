@@ -151,15 +151,15 @@ export function TripsClient() {
     <>
       <div className="mb-4 flex flex-wrap items-center gap-2 justify-between">
         <div className="flex flex-wrap gap-4 text-sm">
-          <Stat label="Total trip" value={trips.length.toString()} />
+          <Stat label="Semua jadwal" value={trips.length.toString()} />
           <Stat
-            label="Published"
+            label="Tampil di situs"
             value={trips.filter((t) => t.isPublished && t.status !== "closed").length.toString()}
           />
-          <Stat label="Closed" value={trips.filter((t) => t.status === "closed").length.toString()} />
+          <Stat label="Selesai" value={trips.filter((t) => t.status === "closed").length.toString()} />
         </div>
         <Button onClick={() => setShowForm((v) => !v)} variant="primary">
-          <Plus className="h-4 w-4" /> {showForm ? "Tutup form" : "Trip baru"}
+          <Plus className="h-4 w-4" /> {showForm ? "Tutup" : "Jadwal baru"}
         </Button>
       </div>
 
@@ -194,6 +194,13 @@ export function TripsClient() {
     </>
   );
 }
+
+const STATUS_LABEL: Record<string, string> = {
+  open: "Buka",
+  fullbooked: "Penuh",
+  in_transit: "Dalam perjalanan",
+  closed: "Selesai",
+};
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -270,7 +277,7 @@ function TripForm({
       <form onSubmit={submit} className="space-y-4">
         <h3 className="font-semibold">Trip baru</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Field label="Kode trip" hint="Huruf besar/angka/-, mis. BDG-SMD-244">
+          <Field label="Kode trip" hint="Contoh: BDG-SMD-244">
             <Input
               required
               value={form.code}
@@ -320,10 +327,10 @@ function TripForm({
               value={form.status}
               onChange={(e) => set("status", e.target.value as Trip["status"])}
             >
-              <option value="open">Open (slot tersedia)</option>
-              <option value="fullbooked">Fullbooked</option>
+              <option value="open">Buka (masih ada slot)</option>
+              <option value="fullbooked">Penuh</option>
               <option value="in_transit">Dalam perjalanan</option>
-              <option value="closed">Closed (sembunyi)</option>
+              <option value="closed">Selesai (disembunyikan)</option>
             </select>
           </Field>
           <Field label="Kapasitas (kg)">
@@ -342,7 +349,7 @@ function TripForm({
               onChange={(e) => set("bookedKg", e.target.value)}
             />
           </Field>
-          <Field label="Base fee (Rp)" hint="Optional">
+          <Field label="Biaya dasar (Rp)" hint="Boleh kosong">
             <Input
               type="number"
               min="0"
@@ -350,7 +357,7 @@ function TripForm({
               onChange={(e) => set("baseFee", e.target.value)}
             />
           </Field>
-          <Field label="Fee per kg (Rp)" hint="Optional">
+          <Field label="Tarif per kg (Rp)" hint="Boleh kosong">
             <Input
               type="number"
               min="0"
@@ -365,7 +372,7 @@ function TripForm({
               placeholder="Fashion, Sepatu, Skincare"
             />
           </Field>
-          <Field label="Catatan internal" hint="Tidak tampil ke customer">
+          <Field label="Catatan untuk tim" hint="Tidak tampil ke pembeli">
             <Input
               value={form.notes}
               onChange={(e) => set("notes", e.target.value)}
@@ -466,11 +473,11 @@ function TripRow({
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {trip.isPublished ? (
-            <Badge variant="success">Published</Badge>
+            <Badge variant="success">Tampil di situs</Badge>
           ) : (
-            <Badge variant="warning">Draft</Badge>
+            <Badge variant="warning">Disembunyikan</Badge>
           )}
-          <Badge variant="neutral">{trip.status}</Badge>
+          <Badge variant="neutral">{STATUS_LABEL[trip.status] ?? trip.status}</Badge>
         </div>
       </div>
 
@@ -482,7 +489,7 @@ function TripRow({
           </span>
         </span>
         <span>
-          Fee/kg:{" "}
+          Tarif/kg:{" "}
           <span className="text-[hsl(var(--foreground))] font-medium tabular-nums">
             Rp {trip.perKgFee.toLocaleString("id-ID")}
           </span>
@@ -520,11 +527,11 @@ function TripRow({
         >
           {trip.isPublished ? (
             <>
-              <EyeOff className="h-3.5 w-3.5" /> Unpublish
+              <EyeOff className="h-3.5 w-3.5" /> Sembunyikan
             </>
           ) : (
             <>
-              <Eye className="h-3.5 w-3.5" /> Publish
+              <Eye className="h-3.5 w-3.5" /> Tampilkan
             </>
           )}
         </Button>
@@ -534,7 +541,7 @@ function TripRow({
           disabled={busy}
           onClick={() => setEditing((v) => !v)}
         >
-          {editing ? "Tutup edit" : "Edit"}
+          {editing ? "Tutup" : "Ubah"}
         </Button>
         <Button size="sm" variant="ghost" disabled={busy} onClick={() => void destroy()}>
           <Trash2 className="h-3.5 w-3.5" /> Hapus
@@ -625,10 +632,10 @@ function InlineEdit({
             value={status}
             onChange={(e) => setStatus(e.target.value as Trip["status"])}
           >
-            <option value="open">Open</option>
-            <option value="fullbooked">Fullbooked</option>
+            <option value="open">Buka</option>
+            <option value="fullbooked">Penuh</option>
             <option value="in_transit">Dalam perjalanan</option>
-            <option value="closed">Closed</option>
+            <option value="closed">Selesai</option>
           </select>
         </Field>
       </div>

@@ -28,6 +28,9 @@ import {
   Home,
   ShoppingBag,
   type LucideIcon,
+  Menu,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
@@ -88,6 +91,8 @@ export type SidebarItem = {
   label: string;
   icon: SidebarIconName;
   badge?: string;
+  /** One-line explanation shown on the phone menu tile. */
+  hint?: string;
 };
 
 export type SidebarGroup = {
@@ -221,26 +226,60 @@ export function MobileNav({ groups, primary }: { groups: SidebarGroup[]; primary
               onClick={() => setOpen(true)}
               className="flex w-full flex-col items-center gap-0.5 py-2 text-[11px] text-[hsl(var(--muted-foreground))]"
             >
-              <Settings className="h-5 w-5" aria-hidden />
-              Menu
+              <Menu className="h-5 w-5" aria-hidden />
+              Lainnya
             </button>
           </li>
         </ul>
       </nav>
       {open && (
-        <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Semua menu">
+        <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu lainnya">
           <button type="button" aria-label="Tutup" className="absolute inset-0 bg-black/30" onClick={() => setOpen(false)} />
-          <div className="animate-drop absolute inset-x-0 bottom-0 max-h-[80svh] overflow-y-auto rounded-t-3xl bg-[hsl(var(--bg))] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-            {groups.map((g, idx) => (
-              <div key={idx} className="mb-4">
-                {g.label && <p className="px-3 mb-1.5 text-xs font-medium text-[hsl(var(--muted-foreground))]">{g.label}</p>}
-                <div className="grid grid-cols-2 gap-1">
-                  {g.items.map((it) => (
-                    <NavLink key={it.href} item={it} active={isActive(pathname, it.href)} />
-                  ))}
+          <div className="animate-drop absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto rounded-t-3xl bg-[hsl(var(--bg))] px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[hsl(var(--border))]" aria-hidden />
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-base font-semibold">Menu</p>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Tutup menu" className="grid h-9 w-9 place-items-center rounded-full hover:bg-[hsl(var(--surface))]">
+                <X className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            {groups.map((g, idx) => {
+              const items = g.items.filter((it) => !primary.some((p) => p.href === it.href));
+              if (!items.length) return null;
+              return (
+                <div key={idx} className="mb-4">
+                  {g.label && <p className="mb-2 text-xs font-medium text-[hsl(var(--muted-foreground))]">{g.label}</p>}
+                  <ul className="grid grid-cols-2 gap-2">
+                    {items.map((it) => {
+                      const Icon = ICONS[it.icon];
+                      const active = isActive(pathname, it.href);
+                      return (
+                        <li key={it.href}>
+                          <Link
+                            href={it.href}
+                            className={cn(
+                              "flex h-full flex-col gap-2 rounded-2xl border p-3",
+                              active
+                                ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--surface))]"
+                                : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]",
+                            )}
+                          >
+                            <Icon className="h-5 w-5 text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]" aria-hidden />
+                            <span>
+                              <span className="block text-sm font-semibold">{it.label}</span>
+                              {it.hint && <span className="block text-xs text-[hsl(var(--muted-foreground))]">{it.hint}</span>}
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+            <Link href="/" target="_blank" className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-medium text-[hsl(var(--muted-foreground))]">
+              Lihat situs <ExternalLink className="h-4 w-4" aria-hidden />
+            </Link>
           </div>
         </div>
       )}

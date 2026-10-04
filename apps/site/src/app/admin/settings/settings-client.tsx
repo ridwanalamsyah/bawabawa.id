@@ -113,7 +113,17 @@ function useSaver(key: string, onSaved: (v: SettingValue) => void) {
   return { saving, status, save };
 }
 
+const TABS = [
+  { id: "contact", label: "Kontak" },
+  { id: "social", label: "Sosial media" },
+  { id: "homepage", label: "Beranda" },
+  { id: "faq", label: "Tanya-jawab" },
+  { id: "motion", label: "Animasi" },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
+
 export function SettingsClient() {
+  const [tab, setTab] = React.useState<TabId>("contact");
   const [settings, setSettings] = React.useState<Record<string, SettingValue>>({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -159,16 +169,37 @@ export function SettingsClient() {
     return <Card className="p-6 text-sm">{error}</Card>;
   }
 
+  const section = (key: string) => SECTIONS.find((sct) => sct.settingKey === key)!;
+  const panels: Record<TabId, React.ReactNode> = {
+    contact: <SectionForm section={section("contact")} initialValue={settings.contact ?? {}} onSaved={saved("contact")} />,
+    social: <SectionForm section={section("social")} initialValue={settings.social ?? {}} onSaved={saved("social")} />,
+    homepage: <HomepageForm initialValue={settings.homepage ?? {}} onSaved={saved("homepage")} />,
+    faq: <FaqForm initialValue={settings.faq ?? {}} onSaved={saved("faq")} />,
+    motion: <MotionForm initialValue={settings.site_motion ?? {}} onSaved={saved("site_motion")} />,
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {SECTIONS.map((section) => (
-        <SectionForm key={section.settingKey} section={section} initialValue={settings[section.settingKey] ?? {}} onSaved={saved(section.settingKey)} />
-      ))}
-      <HomepageForm initialValue={settings.homepage ?? {}} onSaved={saved("homepage")} />
-      <MotionForm initialValue={settings.site_motion ?? {}} onSaved={saved("site_motion")} />
-      <div className="lg:col-span-2">
-        <FaqForm initialValue={settings.faq ?? {}} onSaved={saved("faq")} />
+    <div className="max-w-2xl">
+      <div role="tablist" aria-label="Bagian pengaturan" className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            onClick={() => setTab(t.id)}
+            className={
+              "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors " +
+              (tab === t.id
+                ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-700))] text-white"
+                : "border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--muted-foreground))]")
+            }
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
+      <div role="tabpanel">{panels[tab]}</div>
     </div>
   );
 }

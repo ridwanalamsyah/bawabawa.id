@@ -31,10 +31,21 @@ type AdminUser = {
 type StatusFilter = "pending" | "active" | "suspended" | "all";
 
 const FILTER_LABELS: Record<StatusFilter, string> = {
-  pending: "Menunggu approve",
+  pending: "Menunggu",
   active: "Aktif",
-  suspended: "Suspended",
+  suspended: "Dihentikan",
   all: "Semua",
+};
+
+const DIVISION_LABEL: Record<string, string> = {
+  owner: "Pemilik",
+  admin: "Admin",
+  operations: "Operasional",
+  finance: "Keuangan",
+  support: "Layanan pembeli",
+  shopper: "Pembelanja",
+  sales: "Penjualan",
+  gudang: "Gudang",
 };
 
 const DIVISIONS = ["owner", "admin", "operations", "finance", "support", "shopper", "sales", "gudang"];
@@ -131,11 +142,11 @@ export function UsersAdminClient() {
         <div className="ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => void load()} disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-            Refresh
+            Muat ulang
           </Button>
           <Button size="sm" variant="primary" onClick={() => setShowInvite((v) => !v)}>
             <UserPlus className="h-4 w-4" />
-            Invite admin
+            Tambah orang
           </Button>
         </div>
       </div>
@@ -166,125 +177,67 @@ export function UsersAdminClient() {
         </div>
       )}
 
-      <Card className="p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-[hsl(var(--surface-2))] text-xs text-[hsl(var(--muted-foreground))]">
-              <tr>
-                <Th>Akun</Th>
-                <Th>Email</Th>
-                <Th>Divisi</Th>
-                <Th>Status</Th>
-                <Th>Dibuat</Th>
-                <Th className="text-right">Aksi</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {users === null ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-[hsl(var(--muted-foreground))]">
-                    <Loader2 className="mx-auto mb-2 h-4 w-4 animate-spin" />
-                    Memuat…
-                  </td>
-                </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-[hsl(var(--muted-foreground))]">
-                    {filter === "pending"
-                      ? "Tidak ada user yang menunggu approval."
-                      : "Belum ada user di kategori ini."}
-                  </td>
-                </tr>
-              ) : (
-                users.map((u) => (
-                  <tr key={u.id} className="border-t border-[hsl(var(--border))]">
-                    <Td>
-                      <div className="flex items-center gap-3">
-                        <Avatar name={u.fullName || u.email} size={32} src={u.pictureUrl ?? undefined} />
-                        <div>
-                          <p className="font-medium">{u.fullName || u.email}</p>
-                          <p className="text-xs text-[hsl(var(--muted-foreground))] font-mono">{u.id.slice(0, 8)}</p>
-                        </div>
-                      </div>
-                    </Td>
-                    <Td className="font-mono text-xs">{u.email}</Td>
-                    <Td>{u.division}</Td>
-                    <Td>
-                      <StatusBadge status={u.status} />
-                    </Td>
-                    <Td className="text-xs text-[hsl(var(--muted-foreground))]">
-                      {new Date(u.createdAt).toLocaleDateString("id-ID", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </Td>
-                    <Td className="text-right">
-                      <div className="flex flex-wrap justify-end gap-2">
-                        {u.status === "pending" && (
-                          <Button
-                            size="sm"
-                            variant="primary"
-                            disabled={busyId === u.id}
-                            onClick={() => void act(u.id, "approve")}
-                          >
-                            {busyId === u.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                            )}
-                            Approve
-                          </Button>
-                        )}
-                        {u.status === "active" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busyId === u.id}
-                            onClick={() => void act(u.id, "suspend")}
-                          >
-                            {busyId === u.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <ShieldOff className="h-3.5 w-3.5" />
-                            )}
-                            Suspend
-                          </Button>
-                        )}
-                        {u.status === "suspended" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={busyId === u.id}
-                            onClick={() => void act(u.id, "reactivate")}
-                          >
-                            {busyId === u.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                            )}
-                            Aktifkan ulang
-                          </Button>
-                        )}
-                        <a
-                          href={`mailto:${u.email}`}
-                          className="inline-flex items-center gap-1 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2 py-1 text-xs text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--surface-2))]"
-                          title="Email"
-                        >
-                          <Mail className="h-3 w-3" /> Email
-                        </a>
-                      </div>
-                    </Td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      {users === null ? (
+        <Card className="p-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
+          <Loader2 className="mx-auto mb-2 h-4 w-4 animate-spin" />
+          Memuat…
+        </Card>
+      ) : users.length === 0 ? (
+        <Card className="p-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
+          {filter === "pending" ? "Tidak ada yang menunggu persetujuan." : "Belum ada orang di daftar ini."}
+        </Card>
+      ) : (
+        <ul className="grid gap-3 lg:grid-cols-2">
+          {users.map((u) => {
+            const busy = busyId === u.id;
+            const spinner = busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null;
+            return (
+              <li key={u.id}>
+                <Card className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Avatar name={u.fullName || u.email} size={40} src={u.pictureUrl ?? undefined} />
+                    <div className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-2 font-medium">
+                        {u.fullName || u.email} <StatusBadge status={u.status} />
+                      </p>
+                      <p className="truncate text-sm text-[hsl(var(--muted-foreground))]">{u.email}</p>
+                      <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                        {DIVISION_LABEL[u.division] ?? u.division} · sejak{" "}
+                        {new Date(u.createdAt).toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {u.status === "pending" && (
+                      <Button size="sm" variant="primary" disabled={busy} onClick={() => void act(u.id, "approve")}>
+                        {spinner ?? <CheckCircle2 className="h-3.5 w-3.5" />} Izinkan masuk
+                      </Button>
+                    )}
+                    {u.status === "active" && (
+                      <Button size="sm" variant="outline" disabled={busy} onClick={() => void act(u.id, "suspend")}>
+                        {spinner ?? <ShieldOff className="h-3.5 w-3.5" />} Hentikan akses
+                      </Button>
+                    )}
+                    {u.status === "suspended" && (
+                      <Button size="sm" variant="outline" disabled={busy} onClick={() => void act(u.id, "reactivate")}>
+                        {spinner ?? <CheckCircle2 className="h-3.5 w-3.5" />} Aktifkan lagi
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" asChild>
+                      <a href={`mailto:${u.email}`}>
+                        <Mail className="h-3.5 w-3.5" /> Kirim email
+                      </a>
+                    </Button>
+                  </div>
+                </Card>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <p className="mt-4 text-xs text-[hsl(var(--muted-foreground))]">
-        Sign-in pakai Google. Admin pertama (Owner) di-seed manual di DB. Admin baru: invite via tombol di atas (atau biarkan pendaftar sign-in dulu lewat Google, lalu di-approve di sini).
+        Tim masuk pakai akun Google. Untuk menambah orang, tekan &ldquo;Tambah orang&rdquo; dan isi email Gmail-nya. Orang yang mencoba masuk sendiri akan muncul di &ldquo;Menunggu&rdquo; dan perlu kamu izinkan.
       </p>
     </>
   );
@@ -338,7 +291,7 @@ function InviteForm({
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          <span className="font-medium">Divisi</span>
+          <span className="font-medium">Tugas</span>
           <select
             value={division}
             onChange={(e) => setDivision(e.target.value)}
@@ -346,7 +299,7 @@ function InviteForm({
           >
             {DIVISIONS.map((d) => (
               <option key={d} value={d}>
-                {d}
+                {DIVISION_LABEL[d] ?? d}
               </option>
             ))}
           </select>
@@ -354,7 +307,7 @@ function InviteForm({
         <div className="flex items-end gap-2">
           <Button type="submit" variant="primary" disabled={busy}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            Kirim invite
+            Tambahkan
           </Button>
           <Button type="button" variant="ghost" onClick={onCancel}>
             Batal
@@ -376,17 +329,7 @@ function StatusBadge({ status }: { status: string }) {
     return <Badge className="bg-[hsl(var(--amber-500)/0.15)] text-[hsl(var(--amber-700))]">Menunggu</Badge>;
   }
   if (status === "suspended") {
-    return <Badge className="bg-[hsl(var(--rose-500)/0.15)] text-[hsl(var(--rose-700))]">Suspended</Badge>;
+    return <Badge className="bg-[hsl(var(--rose-500)/0.15)] text-[hsl(var(--rose-700))]">Dihentikan</Badge>;
   }
   return <Badge>{status}</Badge>;
-}
-
-function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <th className={`px-4 py-2 text-left font-medium ${className}`}>{children}</th>
-  );
-}
-
-function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-4 py-3 ${className}`}>{children}</td>;
 }
