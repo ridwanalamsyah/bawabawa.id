@@ -13,6 +13,7 @@
  */
 
 import * as React from "react";
+import { errorMessage } from "@/lib/order-requests";
 import { useRouter } from "next/navigation";
 
 declare global {
@@ -80,7 +81,7 @@ export function GoogleSignInButton({ next, clientId }: { next: string; clientId:
           | { error?: string; user?: { role?: string } }
           | null;
         if (!res.ok || !json?.user) {
-          setError(json?.error ?? "Sign-in gagal. Coba lagi atau hubungi admin.");
+          setError(errorMessage(json, "Gagal masuk. Coba lagi atau hubungi admin."));
           setBusy(false);
           return;
         }

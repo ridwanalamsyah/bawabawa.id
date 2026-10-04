@@ -5,6 +5,7 @@ import path from "node:path";
 import pinoHttp from "pino-http";
 import { requestIdMiddleware } from "./common/middleware/request-id";
 import { rateLimitMiddleware } from "./common/security/rate-limit";
+import { ensureSchema } from "./infrastructure/db/migrations-runner";
 import { errorHandler } from "./common/errors/error-handler";
 import { apiRouter } from "./routes";
 import { metricsMiddleware } from "./common/observability/metrics";
@@ -94,6 +95,12 @@ export function createApp() {
     })
   );
   app.use(rateLimitMiddleware);
+
+  // New code may need new columns: apply pending migrations before the first
+  // API request of each instance (no-op once up to date).
+  app.use("/api/v1", (_req, _res, next) => {
+    ensureSchema().then(() => next(), next);
+  });
 
   // Webhook receivers verify signatures over the exact raw bytes, so they
   // must see the request before the global JSON parser consumes the body.

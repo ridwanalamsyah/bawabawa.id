@@ -7,6 +7,7 @@
  */
 
 import * as React from "react";
+import { errorMessage } from "@/lib/order-requests";
 import { Loader2, CheckCircle2, ShieldOff, Mail, UserPlus, RotateCcw } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -53,7 +54,7 @@ export function UsersAdminClient() {
       const res = await fetch(`/api/admin/users?status=${filter}`);
       const json = (await res.json().catch(() => null)) as { data?: AdminUser[]; error?: string } | null;
       if (!res.ok || !json?.data) {
-        setError(json?.error ?? `Gagal memuat daftar (${res.status})`);
+        setError(errorMessage(json, "Daftar tim belum bisa dimuat. Coba muat ulang."));
         setUsers([]);
         return;
       }
@@ -86,7 +87,7 @@ export function UsersAdminClient() {
       });
       const json = (await res.json().catch(() => null)) as { error?: string } | null;
       if (!res.ok) {
-        setError(json?.error ?? `Gagal ${action} (${res.status})`);
+        setError(errorMessage(json, "Perubahan belum tersimpan. Coba lagi."));
         return;
       }
       await load();
@@ -149,7 +150,7 @@ export function UsersAdminClient() {
             });
             const json = (await res.json().catch(() => null)) as { error?: string } | null;
             if (!res.ok) {
-              return json?.error ?? `Gagal invite (${res.status})`;
+              return errorMessage(json, "Undangan belum terkirim. Coba lagi.");
             }
             setShowInvite(false);
             await load();

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { errorMessage } from "@/lib/order-requests";
 import { useRouter } from "next/navigation";
 import { Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export function LoginForm({ next }: { next: string }) {
         | { error?: string; user?: { role?: string } }
         | null;
       if (!res.ok || !json) {
-        setError(json?.error ?? "Email atau password salah.");
+        setError(errorMessage(json, "Email atau password salah."));
         setLoading(false);
         return;
       }
