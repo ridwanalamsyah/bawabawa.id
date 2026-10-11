@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
 
@@ -10,6 +11,16 @@ import type { NextConfig } from "next";
 // Known Next.js 16 quirk: https://github.com/vercel/next.js/issues/92540.
 const monorepoRoot = path.resolve(process.cwd(), "..", "..");
 
+// Files the in-process ERP API needs at runtime, listed by
+// scripts/trace-erp-api.mjs (run by `prebuild`). Glob characters are escaped
+// because outputFileTracingIncludes takes patterns.
+const tracePath = path.join(process.cwd(), ".erp-api-trace.json");
+const erpApiFiles: string[] = existsSync(tracePath)
+  ? (JSON.parse(readFileSync(tracePath, "utf8")) as string[]).map((file) =>
+      file.replace(/[*?[\]{}()!+@]/g, "\\$&"),
+    )
+  : [];
+
 // HTTP security headers. Helmet equivalent applied at the Next.js layer so
 // Vercel-hosted edges respond with sane defaults out of the box.
 //
@@ -20,7 +31,6 @@ const monorepoRoot = path.resolve(process.cwd(), "..", "..");
 // Tighten further once we stop using inline `<script>` blocks (theme init in
 // layout.tsx).
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id";
-const ERP_API_BASE = process.env.ERP_API_BASE_URL ?? "https://bawabawa-id-api.vercel.app";
 const PLAUSIBLE_HOST = "https://plausible.io";
 // Google Identity Services origins — accounts.google.com serves the GSI
 // client script + ID token verifier UI, and the button is rendered inside
@@ -33,7 +43,7 @@ const csp = [
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com`,
   `img-src 'self' data: blob: https://api.dicebear.com https://images.unsplash.com https://*.r2.dev https://*.amazonaws.com https://*.googleusercontent.com https://*.public.blob.vercel-storage.com`,
   `font-src 'self' https://fonts.gstatic.com data:`,
-  `connect-src 'self' ${SITE_URL} ${ERP_API_BASE} ${PLAUSIBLE_HOST} https://accounts.google.com`,
+  `connect-src 'self' ${SITE_URL} ${PLAUSIBLE_HOST} https://accounts.google.com`,
   `frame-src 'self' https://accounts.google.com`,
   `frame-ancestors 'none'`,
   `base-uri 'self'`,
@@ -66,6 +76,12 @@ const nextConfig: NextConfig = {
     root: monorepoRoot,
   },
   outputFileTracingRoot: monorepoRoot,
+  // The ERP API (apps/api, compiled to apps/api/dist by `prebuild`) runs
+  // inside this deployment — see src/lib/erp-internal.ts. Any server code
+  // may call it, so every server function carries its files.
+  outputFileTracingIncludes: {
+    "/**": [...erpApiFiles, "../api/dist/infrastructure/db/**/*.sql"],
+  },
   images: {
     remotePatterns: [
       // Deterministic SVG avatars used in testimonials / shopper / customer

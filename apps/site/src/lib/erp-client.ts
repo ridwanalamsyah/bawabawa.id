@@ -10,15 +10,16 @@
  *                       `{ ok: false, error }` so the caller can fall back to
  *                       mock data when the ERP API is unreachable.
  *
- * Configure via environment variables:
- *   ERP_API_BASE_URL          — server-only base URL (e.g. http://localhost:4000)
- *   NEXT_PUBLIC_ERP_API_URL   — public base URL exposed to the browser when
- *                               browser-side calls are required
- *   ERP_API_TOKEN             — optional bearer token for server-side requests
+ * Server-side calls go to the ERP API running inside this deployment (see
+ * `erp-internal.ts`); browser-side calls use the same-origin `/api/v1`.
  *
- * Falls back to a relative `/api/v1` path when no env var is set, which lets
- * the site run standalone in mock-mode without any ERP service running.
+ * Optional environment variables:
+ *   ERP_API_BASE_URL  — call a separately running API instead (e.g.
+ *                       http://localhost:4000 in local dev)
+ *   ERP_API_TOKEN     — optional bearer token for server-side requests
  */
+
+import { erpApiBase } from "@/lib/erp-internal";
 
 export type ErpFetchOptions = RequestInit & {
   /** Path beneath the ERP API base URL, e.g. `/orders` (leading slash optional). */
@@ -48,31 +49,17 @@ export class ErpError extends Error {
   }
 }
 
-function resolveBaseUrl(): string {
-  if (typeof window === "undefined") {
-    return (
-      process.env.ERP_API_BASE_URL ??
-      process.env.NEXT_PUBLIC_ERP_API_URL ??
-      "/api/v1"
-    );
-  }
-  return process.env.NEXT_PUBLIC_ERP_API_URL ?? "/api/v1";
-}
-
-function buildUrl(path: string): string {
-  const base = resolveBaseUrl().replace(/\/$/, "");
+async function buildUrl(path: string): Promise<string> {
   const suffix = path.startsWith("/") ? path : `/${path}`;
   // The ERP mounts everything under `/api/v1`. If the caller already includes
-  // it (e.g. for absolute URLs in dev) we don't double-prefix.
-  if (base.endsWith("/api/v1") || suffix.startsWith("/api/")) {
-    return `${base}${suffix}`;
-  }
-  return `${base}/api/v1${suffix}`;
+  // it we don't double-prefix.
+  const base = typeof window === "undefined" ? await erpApiBase() : "/api/v1";
+  return suffix.startsWith("/api/") ? `${base.replace(/\/api\/v1$/, "")}${suffix}` : `${base}${suffix}`;
 }
 
 export async function erpFetch<T>(opts: ErpFetchOptions): Promise<T> {
   const { path, token, timeoutMs = 6000, cache, next, ...init } = opts;
-  const url = buildUrl(path);
+  const url = await buildUrl(path);
   const headers = new Headers(init.headers);
   headers.set("accept", "application/json");
   if (init.body && !headers.has("content-type")) {

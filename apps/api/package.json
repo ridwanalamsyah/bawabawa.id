@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/copy-sql.mjs",
     "start": "node dist/server.js",
     "migrate": "tsx src/infrastructure/db/migrate.ts",
     "lint": "echo \"configure api lint\"",

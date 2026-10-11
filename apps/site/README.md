@@ -46,7 +46,9 @@ dan BFF (`src/lib/erp-authed-fetch.ts`) — tidak pernah dikirim ke JavaScript b
 Konfigurasi via env:
 
 ```
-ERP_API_BASE_URL=https://bawabawa-api.vercel.app
+# API ERP (apps/api) berjalan di dalam situs ini di /api/v1 — lihat
+# docs/runbooks/satu-proyek-vercel.md untuk env yang dibutuhkannya.
+# ERP_API_BASE_URL=http://localhost:3000  # opsional: pakai API terpisah
 SESSION_JWT_SECRET=<openssl rand -hex 32>
 ERP_WEBHOOK_SECRET=<sama dengan di API>   # HMAC ERP → site, header x-bawabawa-signature + x-bawabawa-timestamp
 SITE_PROXY_SECRET=<sama dengan di API>    # rate-limit per pembeli, bukan per server

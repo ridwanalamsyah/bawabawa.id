@@ -1,5 +1,11 @@
 # Deploy Bawabawa.id — All-Vercel Free Tier (no credit card)
 
+> **Update:** the ERP API now runs inside the public site project (one Vercel
+> project serves the site and `/api/v1/*`). A separate API project and
+> `ERP_API_BASE_URL` are no longer needed — see
+> [docs/runbooks/satu-proyek-vercel.md](docs/runbooks/satu-proyek-vercel.md).
+> The API steps below are kept for reference.
+
 This is the **no-CC deployment path**. All three services (public site, ERP web SPA, ERP API) run on **Vercel Hobby**, with the database on **Neon Free**. Total monthly cost: **Rp 0**, no credit card required.
 
 | Layer | Project name | Root Directory | Notes |
