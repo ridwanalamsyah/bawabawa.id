@@ -9,5 +9,11 @@
   },
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/v1/cron/run",
+      "schedule": "30 1 * * *"
+    }
+  ]
 }

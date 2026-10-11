@@ -68,7 +68,7 @@ jobs:
         working-directory: apps/api
 
   # Browser test of the real customer journey (request → promo → tracking →
-  # resend link) against the built site, a local API and Postgres.
+  # resend link) against the built site (which serves the API) and Postgres.
   e2e:
     runs-on: ubuntu-latest
     services:
@@ -88,7 +88,9 @@ jobs:
       JWT_REFRESH_SECRET: ci-e2e-refresh-secret-not-for-production
       SITE_PROXY_SECRET: ci-e2e-proxy-secret-0123456789
       SESSION_JWT_SECRET: ci-e2e-session-secret-0123456789abcdef
-      ERP_API_BASE_URL: http://127.0.0.1:3999
+      # Under `next start` the in-process API runs with NODE_ENV=production,
+      # which requires a Google client id to be configured.
+      GOOGLE_OAUTH_CLIENT_ID: ci-e2e-google-client-id.apps.googleusercontent.com
       PUBLIC_SITE_URL: http://127.0.0.1:3100
       NEXT_PUBLIC_WA_NUMBER: "6281111111111"
       DEMO_MODE: "false"
@@ -103,11 +105,6 @@ jobs:
       - run: npm ci
       - name: Apply migrations
         run: npm run migrate --workspace @erp/api
-      - name: Start API
-        working-directory: apps/api
-        run: |
-          NODE_ENV=development PORT=3999 nohup npx tsx src/server.ts > /tmp/api.log 2>&1 &
-          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3999/api/v1/health && break; sleep 1; done
       - name: Build and start site
         working-directory: apps/site
         run: |
@@ -121,9 +118,10 @@ jobs:
         working-directory: apps/e2e
         env:
           BAWABAWA_E2E_BASE_URL: http://127.0.0.1:3100
-          E2E_API_URL: http://127.0.0.1:3999
+          # The ERP API is served by the site itself under /api/v1.
+          E2E_API_URL: http://127.0.0.1:3100
           E2E_JWT_SECRET: ci-e2e-access-secret-not-for-production
         run: npx playwright test tests/order-flow.local.spec.ts
       - name: Server logs
         if: failure()
-        run: tail -n 200 /tmp/api.log /tmp/site.log
+        run: tail -n 200 /tmp/site.log

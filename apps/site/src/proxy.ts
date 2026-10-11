@@ -23,7 +23,7 @@ async function continueWithFreshErpToken(req: NextRequest): Promise<NextResponse
   const refresh = req.cookies.get(ERP_REFRESH_COOKIE)?.value;
   if (!refresh || !tokenExpiresWithin(access, 60)) return NextResponse.next();
 
-  const pair = await refreshErpTokens(refresh);
+  const pair = await refreshErpTokens(refresh, req.nextUrl.origin);
   if (!pair) return NextResponse.next();
 
   req.cookies.set(ERP_TOKEN_COOKIE, pair.accessToken);

@@ -12,6 +12,7 @@
  */
 
 import { ERP_REFRESH_COOKIE, ERP_TOKEN_COOKIE } from "@/lib/auth-edge";
+import { erpApiBase } from "@/lib/erp-internal";
 
 export const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
@@ -39,18 +40,16 @@ export function tokenExpiresWithin(token: string | undefined | null, seconds: nu
   }
 }
 
-function apiBase(): string {
-  const base = (process.env.ERP_API_BASE_URL ?? process.env.NEXT_PUBLIC_ERP_API_URL ?? "").replace(/\/$/, "");
-  if (!base) return "/api/v1";
-  return base.endsWith("/api/v1") ? base : `${base}/api/v1`;
-}
-
 export type ErpTokenPair = { accessToken: string; refreshToken: string };
 
-export async function refreshErpTokens(refreshToken: string | undefined | null): Promise<ErpTokenPair | null> {
+/** `selfOrigin`: see `erpApiBase` (used by `proxy.ts`). */
+export async function refreshErpTokens(
+  refreshToken: string | undefined | null,
+  selfOrigin?: string,
+): Promise<ErpTokenPair | null> {
   if (!refreshToken) return null;
   try {
-    const res = await fetch(`${apiBase()}/auth/refresh`, {
+    const res = await fetch(`${await erpApiBase(selfOrigin)}/auth/refresh`, {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({ refreshToken }),
@@ -69,7 +68,7 @@ export async function refreshErpTokens(refreshToken: string | undefined | null):
 export async function revokeErpRefreshToken(refreshToken: string | undefined | null): Promise<void> {
   if (!refreshToken) return;
   try {
-    await fetch(`${apiBase()}/auth/logout`, {
+    await fetch(`${await erpApiBase()}/auth/logout`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ refreshToken }),
