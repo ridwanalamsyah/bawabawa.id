@@ -224,10 +224,10 @@
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
 
-  --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-display), "Playfair Display", Georgia, serif;
-  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
+  --font-display: "Playfair Display", "Plus Jakarta Sans", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
   /* Tight radius scale. */

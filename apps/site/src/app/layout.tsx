@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -11,26 +10,8 @@ import { jsonLd, organizationSchema, localBusinessSchema } from "@/lib/seo/schem
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 const PLAUSIBLE_SRC = process.env.NEXT_PUBLIC_PLAUSIBLE_SRC ?? "https://plausible.io/js/script.js";
 
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  display: "swap",
-});
+const GOOGLE_FONTS_HREF =
+  "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
 
 export const metadata: Metadata = {
   title: {
@@ -78,10 +59,13 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${jakarta.variable} ${playfair.variable} ${mono.variable} antialiased`}
+      className="antialiased"
       suppressHydrationWarning
     >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href={GOOGLE_FONTS_HREF} />
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-screen flex flex-col">
