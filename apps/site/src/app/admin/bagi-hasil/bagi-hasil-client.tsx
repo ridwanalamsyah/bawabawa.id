@@ -1,53 +1,57 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Download, Printer, Save, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus } from "lucide-react";
-
-type Rule = {
-  role: string;
-  label?: string;
-  percentage: number;
-  description?: string;
-};
-
-type Settings = {
-  rules: Rule[];
-  reservePercentage: number;
-};
-
-const DEFAULT_RULES: Rule[] = [
-  { role: "shopper", label: "Personal Shopper", percentage: 8 },
-  { role: "admin", label: "Admin operasional", percentage: 2 },
-  { role: "kurir", label: "Kurir / kargo handler", percentage: 5 },
-];
+import { formatIDR } from "@/lib/utils";
+import {
+  DEFAULT_PROFIT_SHARING_3P,
+  type PartnerSplitRule,
+} from "@/lib/viral-bandung-data";
+import {
+  downloadExcelCsv,
+  printProfitSharingSlipPdf,
+} from "@/lib/admin-exports";
+import type { AdminOrder } from "../orders/orders-client";
 
 export function BagiHasilClient() {
-  const [rules, setRules] = React.useState<Rule[]>([]);
-  const [reservePercentage, setReservePercentage] = React.useState<number>(0);
-  const [loading, setLoading] = React.useState(true);
-  const [saving, setSaving] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [message, setMessage] = React.useState<string | null>(null);
+  const [rules, setRules] = useState<PartnerSplitRule[]>(DEFAULT_PROFIT_SHARING_3P.rules);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  // Simulasi Manual Cepat bila belum banyak order
+  const [simModalRp, setSimModalRp] = useState(4500000);
+  const [simProfitBandungJabarRp, setSimProfitBandungJabarRp] = useState(1200000);
+  const [simProfitSamarindaRegRp, setSimProfitSamarindaRegRp] = useState(900000);
+  const [simProfitSamarindaRefRp, setSimProfitSamarindaRefRp] = useState(750000);
+
+  useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const res = await fetch("/api/admin/bagi-hasil", { cache: "no-store" });
-        if (!res.ok) {
-          if (!cancelled) setError("Data belum bisa dimuat. Coba muat ulang.");
-          return;
+        const [ordersRes, settingsRes] = await Promise.all([
+          fetch("/api/admin/order-requests", { cache: "no-store" }),
+          fetch("/api/admin/settings", { cache: "no-store" }),
+        ]);
+
+        if (!cancelled && ordersRes.ok) {
+          const oj = (await ordersRes.json().catch(() => null)) as { items?: AdminOrder[] } | null;
+          if (Array.isArray(oj?.items)) {
+            setOrders(oj.items);
+          }
         }
-        const data = (await res.json()) as Settings;
-        if (cancelled) return;
-        setRules(data.rules?.length ? data.rules : DEFAULT_RULES);
-        setReservePercentage(Number(data.reservePercentage) || 0);
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Gagal terhubung ke server");
+
+        if (!cancelled && settingsRes.ok) {
+          const sj = (await settingsRes.json().catch(() => null)) as Array<{ key: string; value: unknown }> | null;
+          const row = Array.isArray(sj) ? sj.find((r) => r.key === "profit_sharing") : undefined;
+          const val = row?.value as { rules?: PartnerSplitRule[] } | undefined;
+          if (Array.isArray(val?.rules) && val.rules.length === 3) {
+            setRules(val.rules);
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -58,159 +62,400 @@ export function BagiHasilClient() {
     };
   }, []);
 
-  function updateRule(i: number, patch: Partial<Rule>) {
-    setRules((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  }
+  const updateRule = (idx: number, patch: Partial<PartnerSplitRule>) => {
+    setRules((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  };
 
-  function removeRule(i: number) {
-    setRules((prev) => prev.filter((_, idx) => idx !== i));
-  }
-
-  function addRule() {
-    setRules((prev) => [...prev, { role: "", label: "", percentage: 0 }]);
-  }
-
-  async function handleSave() {
+  const handleSave = async () => {
     setSaving(true);
-    setError(null);
     setMessage(null);
     try {
-      const res = await fetch("/api/admin/bagi-hasil", {
+      await fetch("/api/admin/settings/profit_sharing", {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          rules: rules.map((r) => ({
-            ...r,
-            percentage: Number(r.percentage) || 0,
-          })),
-          reservePercentage: Number(reservePercentage) || 0,
+          value: {
+            partnerNames: DEFAULT_PROFIT_SHARING_3P.partnerNames,
+            rules,
+          },
         }),
       });
-      if (!res.ok) {
-        const j = (await res.json().catch(() => null)) as { error?: string } | null;
-        setError(j?.error ?? `Gagal menyimpan (${res.status})`);
-        return;
-      }
-      setMessage("Tersimpan.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal terhubung ke server");
+      setMessage("Skema Bagi Hasil 3 Partner berhasil disimpan!");
     } finally {
       setSaving(false);
     }
-  }
+  };
 
-  const totalPercentage =
-    rules.reduce((s, r) => s + (Number(r.percentage) || 0), 0) +
-    (Number(reservePercentage) || 0);
+  // Hitung dari order nyata jika ada, atau gunakan angka simulasi
+  const computed = useMemo(() => {
+    const activeOrders = orders.filter((o) => o.status !== "cancelled");
+    const rBandung = rules[0] ?? DEFAULT_PROFIT_SHARING_3P.rules[0];
+    const rSmdReg = rules[1] ?? DEFAULT_PROFIT_SHARING_3P.rules[1];
+    const rSmdRef = rules[2] ?? DEFAULT_PROFIT_SHARING_3P.rules[2];
+
+    let modalRp = 0;
+    let profitBandungJabar = 0;
+    let profitSmdReg = 0;
+    let profitSmdRef = 0;
+
+    if (activeOrders.length > 0) {
+      for (const o of activeOrders) {
+        const p = o.quote ?? o.estimate;
+        if (!p) continue;
+        modalRp += (p.itemsTotal || 0) + (p.shippingFee || 0);
+        const netFee = Math.max(0, (p.jastipFee || 0) - (p.discount || 0));
+        const city = (o.address?.city ?? "").toLowerCase();
+        const isSmd =
+          o.tier === "batch" ||
+          city.includes("samarinda") ||
+          city.includes("balikpapan") ||
+          city.includes("tenggarong");
+        const isRef =
+          (o.voucherCode ?? "").toUpperCase() === "BAWASMD" ||
+          (o.customerNotes ?? "").includes("BAWASMD");
+
+        if (!isSmd) {
+          profitBandungJabar += netFee;
+        } else if (isRef) {
+          profitSmdRef += netFee;
+        } else {
+          profitSmdReg += netFee;
+        }
+      }
+    } else {
+      modalRp = simModalRp;
+      profitBandungJabar = simProfitBandungJabarRp;
+      profitSmdReg = simProfitSamarindaRegRp;
+      profitSmdRef = simProfitSamarindaRefRp;
+    }
+
+    const totalNetProfit = profitBandungJabar + profitSmdReg + profitSmdRef;
+
+    const kasBisnisRp = Math.round(
+      (profitBandungJabar * rBandung.kasBisnisPct +
+        profitSmdReg * rSmdReg.kasBisnisPct +
+        profitSmdRef * rSmdRef.kasBisnisPct) /
+        100
+    );
+    const ownerBandungRp = Math.round(
+      (profitBandungJabar * rBandung.ownerBandungPct +
+        profitSmdReg * rSmdReg.ownerBandungPct +
+        profitSmdRef * rSmdRef.ownerBandungPct) /
+        100
+    );
+    const coOwnerBandungRp = Math.round(
+      (profitBandungJabar * rBandung.coOwnerBandungPct +
+        profitSmdReg * rSmdReg.coOwnerBandungPct +
+        profitSmdRef * rSmdRef.coOwnerBandungPct) /
+        100
+    );
+    const hubSamarindaRp = Math.round(
+      (profitBandungJabar * rBandung.hubSamarindaPct +
+        profitSmdReg * rSmdReg.hubSamarindaPct +
+        profitSmdRef * rSmdRef.hubSamarindaPct) /
+        100
+    );
+
+    return {
+      usingRealOrders: activeOrders.length > 0,
+      orderCount: activeOrders.length || 24,
+      modalRp,
+      profitBandungJabar,
+      profitSmdReg,
+      profitSmdRef,
+      totalNetProfit,
+      kasBisnisRp,
+      ownerBandungRp,
+      coOwnerBandungRp,
+      hubSamarindaRp,
+    };
+  }, [
+    orders,
+    rules,
+    simModalRp,
+    simProfitBandungJabarRp,
+    simProfitSamarindaRegRp,
+    simProfitSamarindaRefRp,
+  ]);
+
+  const handleExportCsv = () => {
+    downloadExcelCsv(
+      "Rekap_Bagi_Hasil_3_Partner_Bawabawa.csv",
+      [
+        "Pos Keuangan / Partner",
+        "Peran & Keterangan",
+        "Nominal (Rp)",
+      ],
+      [
+        [
+          "1. PENGEMBALIAN MODAL BELANJA TOKO & ONGKIR",
+          "Wajib dikembalikan utuh 100% ke rekening penombok sebelum bagi hasil",
+          computed.modalRp,
+        ],
+        [
+          "2. TOTAL LABA BERSIH JASTIP FEE",
+          "Akumulasi Jastip Fee dari 3 Jalur Pengiriman",
+          computed.totalNetProfit,
+        ],
+        [
+          "Kas Operasional & Packing Bawabawa",
+          "10% untuk lakban, kardus, ice gel & cadangan risiko",
+          computed.kasBisnisRp,
+        ],
+        [
+          "Partner 1 — Owner Bandung (Anda)",
+          "45% Jalur Bandung/Jabar | 35% SMD Umum | 30% SMD Referral",
+          computed.ownerBandungRp,
+        ],
+        [
+          "Partner 2 — Co-Owner & Belanja Bandung (Pacar)",
+          "45% Jalur Bandung/Jabar | 35% SMD Umum | 30% SMD Referral",
+          computed.coOwnerBandungRp,
+        ],
+        [
+          "Partner 3 — Hub & Promosi Samarinda (Teman)",
+          "0% Jalur Bandung/Jabar | 20% SMD Umum | 30% SMD Referral (BAWASMD)",
+          computed.hubSamarindaRp,
+        ],
+      ]
+    );
+  };
 
   return (
-    <div className="space-y-4">
-      <GlassCard className="p-6">
-        <h2 className="font-semibold">Aturan bagi hasil per peran</h2>
-        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-          Tetapkan persentase dari margin yang dibagikan ke tiap peran. Total
-          tidak harus 100% — selisihnya jadi laba operasional.
-        </p>
-
-        {loading ? (
-          <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">Memuat…</p>
-        ) : (
-          <div className="mt-5 space-y-3">
-            {rules.map((r, i) => (
-              <div
-                key={`rule-${i}`}
-                className="grid gap-3 sm:grid-cols-12 items-end rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-3"
-              >
-                <div className="sm:col-span-3">
-                  <Label htmlFor={`role-${i}`}>Peran (kode)</Label>
-                  <Input
-                    id={`role-${i}`}
-                    placeholder="shopper"
-                    value={r.role}
-                    onChange={(e) => updateRule(i, { role: e.target.value })}
-                  />
-                </div>
-                <div className="sm:col-span-4">
-                  <Label htmlFor={`label-${i}`}>Label</Label>
-                  <Input
-                    id={`label-${i}`}
-                    placeholder="Personal Shopper"
-                    value={r.label ?? ""}
-                    onChange={(e) => updateRule(i, { label: e.target.value })}
-                  />
-                </div>
-                <div className="sm:col-span-3">
-                  <Label htmlFor={`pct-${i}`}>%</Label>
-                  <Input
-                    id={`pct-${i}`}
-                    type="number"
-                    inputMode="decimal"
-                    step="0.5"
-                    min="0"
-                    max="100"
-                    value={String(r.percentage)}
-                    onChange={(e) =>
-                      updateRule(i, { percentage: Number(e.target.value) })
-                    }
-                  />
-                </div>
-                <div className="sm:col-span-2 flex sm:justify-end">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => removeRule(i)}
-                  >
-                    <Trash2 className="h-4 w-4" /> Hapus
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            <div>
-              <Button type="button" size="sm" variant="outline" onClick={addRule}>
-                <Plus className="h-4 w-4" /> Tambah peran
-              </Button>
-            </div>
-          </div>
-        )}
-      </GlassCard>
-
-      <GlassCard className="p-6">
-        <h2 className="font-semibold">Cadangan operasional</h2>
-        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-          Persentase margin yang disisihkan untuk biaya operasional / cadangan
-          klaim kerusakan paket.
-        </p>
-        <div className="mt-5 max-w-xs">
-          <Label htmlFor="reserve">% cadangan</Label>
-          <Input
-            id="reserve"
-            type="number"
-            inputMode="decimal"
-            step="0.5"
-            min="0"
-            max="100"
-            value={String(reservePercentage)}
-            onChange={(e) => setReservePercentage(Number(e.target.value))}
-          />
+    <div className="space-y-6">
+      {/* Header & Tombol Export PDF / Excel */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F5DFAD] px-3 py-1 text-xs font-bold text-[#24201A]">
+            <Wallet className="h-3.5 w-3.5 text-[#C8524B]" /> Sistem Bagi Hasil Adil 3 Partner (Bandung &amp; Hub Samarinda)
+          </span>
+          <h1 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-[#24201A]">
+            Rekap Bagi Hasil &amp; Pemisahan Modal Belanja
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-[hsl(var(--muted-foreground))] max-w-2xl">
+            Memisahkan <strong>Uang Modal Toko Bandung + Ongkir Asli</strong> (agar tidak pernah terpakai) dari <strong>Laba Bersih Jastip Fee</strong> yang dibagi otomatis untuk Anda, Pacar, dan Teman Hub Samarinda sesuai kontribusi jalur.
+          </p>
         </div>
 
-        <p className="mt-4 text-xs text-[hsl(var(--muted-foreground))]">
-          Total alokasi sekarang: <strong>{totalPercentage.toFixed(1)}%</strong>{" "}
-          (sisanya {Math.max(0, 100 - totalPercentage).toFixed(1)}% jadi laba).
-        </p>
-
-        <div className="mt-5 flex items-center gap-3">
-          <Button onClick={handleSave} variant="primary" disabled={saving || loading}>
-            {saving ? "Menyimpan…" : "Simpan perubahan"}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              printProfitSharingSlipPdf({
+                periodLabel: new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" }),
+                totalModalTokoDanOngkirRp: computed.modalRp,
+                totalNetJastipProfitRp: computed.totalNetProfit,
+                kasBisnisRp: computed.kasBisnisRp,
+                ownerBandungRp: computed.ownerBandungRp,
+                coOwnerBandungRp: computed.coOwnerBandungRp,
+                hubSamarindaRp: computed.hubSamarindaRp,
+                orderCount: computed.orderCount,
+              })
+            }
+          >
+            <Printer className="h-4 w-4" /> Cetak PDF Slip Bagi Hasil
           </Button>
-          {message && (
-            <span className="text-sm text-[hsl(var(--emerald-600))]">{message}</span>
-          )}
-          {error && (
-            <span className="text-sm text-[hsl(var(--rose-700))]">{error}</span>
-          )}
+          <Button type="button" variant="primary" size="sm" onClick={handleExportCsv}>
+            <Download className="h-4 w-4" /> Download Excel/CSV Bagi Hasil
+          </Button>
+        </div>
+      </div>
+
+      {/* Kotak Pemisahan Modal vs Laba Bersih */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <GlassCard className="p-5 md:col-span-2 bg-[#FCF3E4] border-2 border-[#24201A]">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-[#9E3B34] flex items-center gap-1">
+            <ShieldCheck className="h-4 w-4" /> 1. Uang Modal Toko &amp; Ongkir (Wajib Kembali Utuh)
+          </span>
+          <p className="mt-2 text-2xl sm:text-3xl font-extrabold tabular-nums text-[#24201A]">
+            {formatIDR(computed.modalRp)}
+          </p>
+          <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))] leading-relaxed">
+            Uang ini <strong>bukan keuntungan</strong>. Wajib dikembalikan 100% terlebih dahulu ke rekening Anda/Pacar yang menomboki belanja di toko Bandung &amp; kurir/travel.
+          </p>
+        </GlassCard>
+
+        <GlassCard className="p-5 md:col-span-3">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-[hsl(var(--sage-700))] flex items-center gap-1">
+            <Sparkles className="h-4 w-4" /> 2. Pembagian Laba Bersih Jastip ({formatIDR(computed.totalNetProfit)})
+          </span>
+
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] p-3">
+              <span className="text-[11px] text-[hsl(var(--muted-foreground))] block">🏦 Kas Bisnis (10%)</span>
+              <span className="mt-1 text-base font-extrabold tabular-nums text-[#24201A] block">
+                {formatIDR(computed.kasBisnisRp)}
+              </span>
+              <span className="text-[10px] text-[hsl(var(--muted-foreground))]">Packing &amp; Ice Gel</span>
+            </div>
+
+            <div className="rounded-2xl border border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-50))] p-3">
+              <span className="text-[11px] font-bold text-[hsl(var(--sage-800))] block">Partner 1 · Anda</span>
+              <span className="mt-1 text-base font-extrabold tabular-nums text-[hsl(var(--sage-700))] block">
+                {formatIDR(computed.ownerBandungRp)}
+              </span>
+              <span className="text-[10px] text-[hsl(var(--muted-foreground))]">Owner Bandung</span>
+            </div>
+
+            <div className="rounded-2xl border border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-50))] p-3">
+              <span className="text-[11px] font-bold text-[hsl(var(--sage-800))] block">Partner 2 · Pacar</span>
+              <span className="mt-1 text-base font-extrabold tabular-nums text-[hsl(var(--sage-700))] block">
+                {formatIDR(computed.coOwnerBandungRp)}
+              </span>
+              <span className="text-[10px] text-[hsl(var(--muted-foreground))]">Co-Owner Bandung</span>
+            </div>
+
+            <div className="rounded-2xl border border-[#E98881] bg-[#FBE8E6]/50 p-3">
+              <span className="text-[11px] font-bold text-[#9E3B34] block">Partner 3 · Teman SMD</span>
+              <span className="mt-1 text-base font-extrabold tabular-nums text-[#9E3B34] block">
+                {formatIDR(computed.hubSamarindaRp)}
+              </span>
+              <span className="text-[10px] text-[hsl(var(--muted-foreground))]">Hub Samarinda</span>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Kalkulator Simulasi Interaktif (Bila Ingin Simulasi Angka Bulanan) */}
+      <GlassCard className="p-5 sm:p-6">
+        <h2 className="text-base font-bold text-[#24201A]">
+          Simulasi Laba Bersih per Jalur Pengiriman (Ubah Angka untuk Simulasi Bulanan)
+        </h2>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div>
+            <Label>Total Modal Belanja &amp; Ongkir (Rp)</Label>
+            <Input
+              type="number"
+              value={simModalRp}
+              onChange={(e) => setSimModalRp(Number(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Laba Jastip Bandung &amp; Travel Jabar</Label>
+            <Input
+              type="number"
+              value={simProfitBandungJabarRp}
+              onChange={(e) => setSimProfitBandungJabarRp(Number(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Laba Jastip Samarinda (Order Web)</Label>
+            <Input
+              type="number"
+              value={simProfitSamarindaRegRp}
+              onChange={(e) => setSimProfitSamarindaRegRp(Number(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Laba Samarinda via Teman (BAWASMD)</Label>
+            <Input
+              type="number"
+              value={simProfitSamarindaRefRp}
+              onChange={(e) => setSimProfitSamarindaRefRp(Number(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Tabel Aturan Persentase 3 Skema (Bisa Diedit & Disimpan) */}
+      <GlassCard className="p-5 sm:p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-bold text-[#24201A]">
+              Pengaturan Persentase Bagi Hasil 3 Partner Berdasarkan Jalur
+            </h2>
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">
+              Skema adil: Teman Samarinda mendapat <strong>0%</strong> untuk order Bandung/Jabar (karena tidak lewat Samarinda), <strong>20%</strong> untuk order Samarinda via Web, dan naik menjadi <strong>30%</strong> (setara 30:30:30) jika order dibawa/diinput oleh Teman Samarinda!
+            </p>
+          </div>
+          <Button type="button" onClick={handleSave} disabled={saving || loading}>
+            <Save className="h-4 w-4" /> {saving ? "Menyimpan..." : "Simpan Skema Bagi Hasil"}
+          </Button>
+        </div>
+
+        {message && (
+          <div className="rounded-xl bg-[hsl(var(--sage-100))] p-3 text-xs font-bold text-[hsl(var(--sage-800))]">
+            {message}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {rules.map((r, idx) => {
+            const sumPct =
+              Number(r.kasBisnisPct) +
+              Number(r.ownerBandungPct) +
+              Number(r.coOwnerBandungPct) +
+              Number(r.hubSamarindaPct);
+            return (
+              <div
+                key={r.zoneId}
+                className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] p-4 space-y-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#24201A]">{r.zoneName}</h3>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">{r.description}</p>
+                  </div>
+                  <span className="rounded-full bg-[#F5DFAD] px-3 py-0.5 text-xs font-bold text-[#24201A]">
+                    Total: {sumPct}%
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <Label>🏦 Kas Bisnis (%)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={r.kasBisnisPct}
+                      onChange={(e) => updateRule(idx, { kasBisnisPct: Number(e.target.value) || 0 })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Partner 1 · Anda (%)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={r.ownerBandungPct}
+                      onChange={(e) => updateRule(idx, { ownerBandungPct: Number(e.target.value) || 0 })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Partner 2 · Pacar (%)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={r.coOwnerBandungPct}
+                      onChange={(e) => updateRule(idx, { coOwnerBandungPct: Number(e.target.value) || 0 })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Partner 3 · Hub Samarinda (%)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={r.hubSamarindaPct}
+                      onChange={(e) => updateRule(idx, { hubSamarindaPct: Number(e.target.value) || 0 })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </GlassCard>
     </div>

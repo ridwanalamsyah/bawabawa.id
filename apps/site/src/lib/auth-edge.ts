@@ -11,6 +11,7 @@ export type AuthRoleEdge =
   | "customer"
   | "owner"
   | "operations"
+  | "hub_samarinda"
   | "finance"
   | "support"
   | "shopper"
@@ -25,6 +26,7 @@ export type AuthSessionEdge = {
 const ADMIN_ROLES: AuthRoleEdge[] = [
   "owner",
   "operations",
+  "hub_samarinda",
   "finance",
   "support",
   "admin",

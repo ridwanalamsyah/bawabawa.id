@@ -39,14 +39,44 @@ type Section = {
 
 const SECTIONS: Section[] = [
   {
+    settingKey: "payment_info",
+    title: "Rekening Transfer Bank & QRIS Resmi",
+    description: "Tampil otomatis di halaman form pesanan (/request), halaman lacak (/lacak), dan PDF Invoice pembeli.",
+    fields: [
+      { key: "bcaNumber", label: "Nomor Rekening BCA", placeholder: "7772 8891 04" },
+      { key: "bcaHolder", label: "Atas Nama BCA", placeholder: "Bawabawa Jastip Bandung" },
+      { key: "mandiriNumber", label: "Nomor Rekening Mandiri", placeholder: "1300 0248 9912 3" },
+      { key: "mandiriHolder", label: "Atas Nama Mandiri", placeholder: "Bawabawa Jastip Bandung" },
+      { key: "seabankNumber", label: "Nomor Rekening SeaBank", placeholder: "9012 8834 7712" },
+      { key: "seabankHolder", label: "Atas Nama SeaBank", placeholder: "Bawabawa Jastip Bandung" },
+      { key: "qrisMerchantName", label: "Nama Merchant QRIS", placeholder: "BAWABAWA.ID JASTIP BANDUNG & HUB SAMARINDA" },
+      { key: "qrisNmid", label: "NMID QRIS", placeholder: "ID1026384920192" },
+      { key: "qrisImageUrl", label: "URL Gambar QRIS (Opsional)", type: "url", placeholder: "https://..." },
+      { key: "whatsappAdmin", label: "Nomor WA Admin Utama Bandung", type: "tel", placeholder: "6281122334455" },
+      { key: "whatsappHubSamarinda", label: "Nomor WA Partner Hub Samarinda", type: "tel", placeholder: "6281255667788" },
+      { key: "paymentNote", label: "Catatan Instruksi Pembayaran", placeholder: "Transfer sesuai nominal setelah admin konfirmasi stok..." },
+    ],
+  },
+  {
+    settingKey: "live_status",
+    title: "Top Bar Status Live Shopper Bandung",
+    description: "Tampil di baris paling atas navigasi situs untuk memberi tahu lokasi belanja hari ini.",
+    fields: [
+      { key: "headline", label: "Headline Status Live", placeholder: "Tim Belanja Bandung sedang keliling Cihapit, Buah Batu & Jl. Riau hari ini!" },
+      { key: "currentLocation", label: "Lokasi Toko Hari Ini", placeholder: "Roti Macan Buah Batu & Tjilaki 9 Cihapit" },
+      { key: "nextZoneCutoff", label: "Info Cut-off Travel & Kloter", placeholder: "Cut-off Travel Jabar pukul 15.00 WIB · Kloter Samarinda berangkat Jumat" },
+      { key: "hubSamarindaStatus", label: "Info Singkat Hub Samarinda", placeholder: "Hub Samarinda: Ready Stock Basreng Sultan & In Parfume" },
+    ],
+  },
+  {
     settingKey: "contact",
     title: "Kontak",
     description: "Tampil di footer dan halaman Kontak.",
     fields: [
       { key: "phone", label: "Nomor WhatsApp", type: "tel", placeholder: "0812 3456 7890" },
       { key: "email", label: "Email", type: "email", placeholder: "halo@bawabawa.id" },
-      { key: "address", label: "Alamat", placeholder: "Bandung, Jawa Barat" },
-      { key: "supportHours", label: "Jam buka", placeholder: "Senin–Sabtu, 09.00–18.00 WIB" },
+      { key: "address", label: "Alamat", placeholder: "Bandung, Jawa Barat & Hub Samarinda" },
+      { key: "supportHours", label: "Jam buka", placeholder: "Senin–Sabtu, 08.00–20.00 WIB" },
     ],
   },
   {
@@ -114,16 +144,18 @@ function useSaver(key: string, onSaved: (v: SettingValue) => void) {
 }
 
 const TABS = [
+  { id: "payment_info", label: "Rekening & QRIS" },
+  { id: "live_status", label: "Status Live Bandung" },
+  { id: "homepage", label: "Teks Beranda" },
+  { id: "faq", label: "Tanya-Jawab (FAQ)" },
   { id: "contact", label: "Kontak" },
-  { id: "social", label: "Sosial media" },
-  { id: "homepage", label: "Beranda" },
-  { id: "faq", label: "Tanya-jawab" },
+  { id: "social", label: "Sosial Media" },
   { id: "motion", label: "Animasi" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
 export function SettingsClient() {
-  const [tab, setTab] = React.useState<TabId>("contact");
+  const [tab, setTab] = React.useState<TabId>("payment_info");
   const [settings, setSettings] = React.useState<Record<string, SettingValue>>({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -171,6 +203,8 @@ export function SettingsClient() {
 
   const section = (key: string) => SECTIONS.find((sct) => sct.settingKey === key)!;
   const panels: Record<TabId, React.ReactNode> = {
+    payment_info: <SectionForm section={section("payment_info")} initialValue={settings.payment_info ?? {}} onSaved={saved("payment_info")} />,
+    live_status: <SectionForm section={section("live_status")} initialValue={settings.live_status ?? {}} onSaved={saved("live_status")} />,
     contact: <SectionForm section={section("contact")} initialValue={settings.contact ?? {}} onSaved={saved("contact")} />,
     social: <SectionForm section={section("social")} initialValue={settings.social ?? {}} onSaved={saved("social")} />,
     homepage: <HomepageForm initialValue={settings.homepage ?? {}} onSaved={saved("homepage")} />,
@@ -179,7 +213,7 @@ export function SettingsClient() {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl">
       <div role="tablist" aria-label="Bagian pengaturan" className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         {TABS.map((t) => (
           <button

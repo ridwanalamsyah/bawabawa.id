@@ -36,7 +36,14 @@ type Form = {
   sort: string;
 };
 
-const CATEGORY_SUGGESTIONS = ["Snack Khas Bandung", "Fashion & Factory Outlet", "Hijab", "Sepatu", "Skincare Lokal", "Lagi Rame"];
+const CATEGORY_SUGGESTIONS = [
+  "Bakery & Pastry Viral",
+  "Kopi & Dessert",
+  "Camilan & Pedas",
+  "Frozen & Vacuum",
+  "Parfum & Fashion",
+  "Klasik & Bundling",
+];
 
 const empty: Form = {
   name: "",
@@ -85,6 +92,7 @@ export function CatalogAdminClient() {
   const [items, setItems] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const [seeding, setSeeding] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/catalog", { cache: "no-store" });
@@ -98,7 +106,6 @@ export function CatalogAdminClient() {
   }, []);
 
   useEffect(() => {
-    // Fetch-on-mount: state is set after the network round-trip.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
@@ -111,12 +118,53 @@ export function CatalogAdminClient() {
     setEditing(null);
   };
 
+  const seedViralBandung = async () => {
+    setSeeding(true);
+    setError(null);
+    try {
+      const { VIRAL_BANDUNG_CATALOG } = await import("@/lib/viral-bandung-data");
+      for (let i = 0; i < VIRAL_BANDUNG_CATALOG.length; i++) {
+        const v = VIRAL_BANDUNG_CATALOG[i];
+        await fetch("/api/admin/catalog", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: v.name,
+            description: v.description,
+            imageUrl: v.imageUrl,
+            originStore: v.originStore,
+            price: v.price,
+            weightKg: v.weightKg,
+            category: v.category,
+            variants: v.variants,
+            isCatalog: true,
+            sort: i + 1,
+          }),
+        });
+      }
+      await load();
+    } catch {
+      setError("Sebagian produk belum tersimpan ke database.");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button variant="primary" onClick={() => setEditing("new")} disabled={editing === "new"}>
-          <Plus className="h-4 w-4" aria-hidden /> Tambah barang
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm text-[hsl(var(--muted-foreground))]">
+          Kelola daftar kuliner &amp; barang viral Bandung (Roti Macan, Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Seroja Bake, Sapporo Soes, Makjay, In Parfume, Basreng Sultan).
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => void seedViralBandung()} disabled={seeding}>
+            {seeding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Muat 20 Produk Viral Bandung
+          </Button>
+          <Button variant="primary" size="sm" onClick={() => setEditing("new")} disabled={editing === "new"}>
+            <Plus className="h-4 w-4" aria-hidden /> Tambah Barang Baru
+          </Button>
+        </div>
       </div>
       {error && (
         <Card className="p-4 text-sm text-[hsl(var(--danger))]" role="alert">
@@ -129,8 +177,13 @@ export function CatalogAdminClient() {
           <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden /> Memuat…
         </Card>
       ) : items.length === 0 ? (
-        <Card className="p-10 text-center text-sm text-[hsl(var(--muted-foreground))]">
-          Belum ada barang. Mulai dari 5–10 barang paling sering dititip (snack khas, outlet favorit).
+        <Card className="p-8 text-center space-y-3">
+          <p className="text-sm font-bold text-[#24201A]">
+            Halaman depan saat ini menampilkan 20 Produk Bawaan Viral Bandung secara otomatis.
+          </p>
+          <p className="text-xs text-[hsl(var(--muted-foreground))] max-w-lg mx-auto">
+            Klik tombol <strong>&ldquo;Muat 20 Produk Viral Bandung&rdquo;</strong> di kanan atas untuk menyalin ke-20 produk tersebut ke tabel database agar kamu bisa mengubah harga, varian, atau fotonya satu per satu.
+          </p>
         </Card>
       ) : (
         <ul className="space-y-3">
@@ -146,12 +199,15 @@ export function CatalogAdminClient() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.imageUrl} alt="" className="h-14 w-14 rounded-xl object-cover" />
                   ) : (
-                    <div className="h-14 w-14 rounded-xl bg-[hsl(var(--surface-2))]" />
+                    <div className="h-14 w-14 rounded-xl bg-[#F5DFAD] grid place-items-center font-bold text-xs text-[#24201A]">
+                      BDG
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{p.name}</p>
+                    <p className="font-bold text-[#24201A] truncate">{p.name}</p>
                     <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                      {p.category ?? "Tanpa kategori"} · {formatIDR(p.price)}
+                      {p.originStore ? `${p.originStore} · ` : ""}
+                      {p.category ?? "Viral Bandung"} · <strong>{formatIDR(p.price)}</strong>
                       {p.weightKg != null ? ` · ${p.weightKg} kg` : ""}
                     </p>
                   </div>

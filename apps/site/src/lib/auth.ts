@@ -7,7 +7,15 @@
 
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 
-export type AuthRole = "customer" | "owner" | "operations" | "finance" | "support" | "shopper" | "admin";
+export type AuthRole =
+  | "customer"
+  | "owner"
+  | "operations"
+  | "hub_samarinda"
+  | "finance"
+  | "support"
+  | "shopper"
+  | "admin";
 
 export type AuthSession = {
   userId: string;

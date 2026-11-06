@@ -38,17 +38,28 @@ const FILTER_LABELS: Record<StatusFilter, string> = {
 };
 
 const DIVISION_LABEL: Record<string, string> = {
-  owner: "Pemilik",
+  owner: "Partner 1 — Owner Bandung (Anda)",
+  operations: "Partner 2 — Co-Owner & Belanja Bandung (Pacar)",
+  hub_samarinda: "Partner 3 — Hub & Promosi Samarinda (Teman)",
   admin: "Admin",
-  operations: "Operasional",
   finance: "Keuangan",
   support: "Layanan pembeli",
-  shopper: "Pembelanja",
+  shopper: "Pembelanja Bandung",
   sales: "Penjualan",
   gudang: "Gudang",
 };
 
-const DIVISIONS = ["owner", "admin", "operations", "finance", "support", "shopper", "sales", "gudang"];
+const DIVISIONS = [
+  "owner",
+  "operations",
+  "hub_samarinda",
+  "admin",
+  "finance",
+  "support",
+  "shopper",
+  "sales",
+  "gudang",
+];
 
 export function UsersAdminClient() {
   const [filter, setFilter] = React.useState<StatusFilter>("pending");

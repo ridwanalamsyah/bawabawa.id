@@ -1,70 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
+import { VIRAL_BANDUNG_BLOGS } from "@/lib/viral-bandung-data";
+import { Button } from "@/components/ui/button";
 
 type Params = { slug: string };
-
-const POSTS: Record<string, {
-  title: string;
-  description: string;
-  category: string;
-  readTime: string;
-  date: string;
-  paragraphs: string[];
-}> = {
-  "review-oleh-oleh-bandung-legendaris": {
-    title: "10 oleh-oleh Bandung legendaris yang wajib dicicipi",
-    description:
-      "Kartika Sari pisang bollen, Amanda brownies kukus, bolu susu Lembang — kenapa orang Bandung sumpah cinta sama mereka.",
-    category: "Kuliner",
-    readTime: "8 min",
-    date: "5 Apr 2025",
-    paragraphs: [
-      "Bandung punya warisan kuliner yang nggak ada matinya. Oleh-oleh khas kota ini banyak yang sudah berusia puluhan tahun dan tetap jadi favorit lintas generasi.",
-      "1. Kartika Sari Pisang Bollen — pisang segar dibalut adonan pastry renyah dan keju. Sudah ada sejak 1979 dan masih jadi #1 oleh-oleh Bandung sampai sekarang.",
-      "2. Amanda Brownies Kukus — brownies tekstur lembut, tidak terlalu manis, varian rasa lengkap dari original sampai matcha. Outlet ada di banyak titik.",
-      "3. Bolu Susu Lembang — fenomenal karena rasa susunya yang medok dan tekstur fluffy. Outlet pusat di Lembang.",
-      "4. Strudel Bandung — strudel khas Eropa adaptasi rasa lokal (durian, pisang, abon, nangka).",
-      "5. Pia Bandung — pia tipis isi kacang hijau yang renyah dan ringan.",
-      "6. Surabi Imut Bandung — surabi tradisional dengan topping modern. Outlet di Jl. Setiabudi.",
-      "7. Tahu Susu Lembang — tahu putih dengan tekstur halus karena pakai susu murni.",
-      "8. Kue Balok Mang Salam — kue balok klasik dengan butter dan keju.",
-      "9. Cireng Banyur — cireng khas Bandung dengan saus pedas khasnya.",
-      "10. Batagor Riri — batagor legendaris di Jl. Burangrang.",
-    ],
-  },
-  "tips-jastip-aman-anti-tipu": {
-    title: "5 tanda jasa titip aman vs penipu — cek dulu sebelum transfer",
-    description: "Checklist anti-tipu sebelum kamu transfer ke jasa titip Instagram.",
-    category: "Edukasi",
-    readTime: "5 min",
-    date: "28 Mar 2025",
-    paragraphs: [
-      "Setiap bulan kami mendengar ribuan kasus penipuan jastip di Instagram. Berikut 5 tanda yang harus kamu cek sebelum percaya:",
-      "1. Profil bisnis terverifikasi atau punya domain web — bukan akun pribadi yang baru dibuat.",
-      "2. Sistem escrow / pembayaran ditahan — dana tidak langsung masuk ke shopper, tapi ke perusahaan yang dirilis setelah barang sampai.",
-      "3. Tracking realtime dengan nomor resi — bukan cuma kabar 'lagi packing' tanpa bukti.",
-      "4. Customer service yang responsif di jam kerja — chat dijawab dalam 1 jam, bukan hilang berhari-hari.",
-      "5. Review publik di Google Maps, Trustpilot, atau marketplace — bukan cuma testimoni screenshot WA yang gampang dipalsukan.",
-      "Kalau jastip yang kamu pakai memenuhi 5 kriteria di atas, kemungkinan besar aman. Kalau tidak, lebih baik cari alternatif lain.",
-    ],
-  },
-  "brand-distro-bandung-2025": {
-    title: "Brand distro Bandung paling hits 2025",
-    description: "Update terbaru brand distro Bandung yang lagi rising di 2025.",
-    category: "Fashion",
-    readTime: "7 min",
-    date: "20 Mar 2025",
-    paragraphs: [
-      "Bandung selalu jadi kiblat fashion distro Indonesia. Tahun 2025, beberapa brand baru muncul dan brand lama makin solid.",
-      "Erigo terus dominan di segmen casualwear dan sport-inspired. Eiger masih raja outdoor & adventure gear. 3Second tetap kuat di teen fashion.",
-      "Brand baru yang naik 2025: Wakai (lifestyle sandals), Compass (sneakers premium), Brodo (formal-casual leather), dan Aksara Bandung (heritage-inspired streetwear).",
-      "Untuk yang mau koleksi limited edition, banyak drop terbatas tiap bulan. Personal shopper Bawabawa siap antri & beli untuk kamu di Samarinda.",
-    ],
-  },
-};
 
 type AdminBlogPost = {
   slug: string;
@@ -80,8 +22,6 @@ async function fetchAdminPost(slug: string): Promise<AdminBlogPost | null> {
   const erp = await erpSafe<AdminBlogPost | null>({
     path: `/blog-posts/${encodeURIComponent(slug)}`,
     timeoutMs: 4000,
-    // Cached so slugs published after the deploy render as ISR pages
-    // instead of failing the static→dynamic check; admin saves revalidate.
     cache: "force-cache",
     next: { revalidate: 60, tags: ["blog"] },
   });
@@ -101,131 +41,76 @@ function formatDate(iso: string | null): string {
   }
 }
 
-// Render very simple Markdown -> plain paragraphs. We intentionally
-// avoid pulling a full Markdown renderer + sanitizer into the marketing
-// bundle for the soft-launch phase. Authors are admins, content is
-// trusted, and the editor in the ERP renders the same way (plain text
-// with paragraphs separated by blank lines).
-function renderMarkdown(md: string): Array<{ type: "h1" | "h2" | "li" | "p"; text: string }> {
-  const blocks: Array<{ type: "h1" | "h2" | "li" | "p"; text: string }> = [];
+function renderMarkdown(md: string): Array<{ type: "h1" | "h2" | "h3" | "li" | "p"; text: string }> {
+  const blocks: Array<{ type: "h1" | "h2" | "h3" | "li" | "p"; text: string }> = [];
   for (const raw of md.split(/\n{2,}/)) {
     const line = raw.trim();
     if (!line) continue;
-    if (line.startsWith("# ")) blocks.push({ type: "h1", text: line.slice(2) });
+    if (line.startsWith("### ")) blocks.push({ type: "h3", text: line.slice(4) });
     else if (line.startsWith("## ")) blocks.push({ type: "h2", text: line.slice(3) });
-    else if (line.startsWith("- ")) blocks.push({ type: "li", text: line.slice(2) });
-    else blocks.push({ type: "p", text: line });
+    else if (line.startsWith("# ")) blocks.push({ type: "h1", text: line.slice(2) });
+    else if (line.startsWith("* ") || line.startsWith("- ")) {
+      for (const item of line.split("\n")) {
+        blocks.push({ type: "li", text: item.replace(/^[*-]\s+/, "") });
+      }
+    } else blocks.push({ type: "p", text: line });
   }
   return blocks;
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = POSTS[slug];
-  if (post) {
+  const admin = await fetchAdminPost(slug);
+  if (admin) {
     return {
-      title: post.title,
-      description: post.description,
+      title: admin.title,
+      description: admin.excerpt ?? admin.title,
       alternates: { canonical: `/blog/${slug}` },
-      openGraph: { title: post.title, description: post.description, type: "article" },
+      openGraph: { title: admin.title, description: admin.excerpt ?? admin.title, type: "article" },
     };
   }
-  const admin = await fetchAdminPost(slug);
-  if (!admin) return {};
-  return {
-    title: admin.title,
-    description: admin.excerpt ?? admin.title,
-    alternates: { canonical: `/blog/${slug}` },
-    openGraph: { title: admin.title, description: admin.excerpt ?? admin.title, type: "article" },
-  };
+  const seeded = VIRAL_BANDUNG_BLOGS.find((b) => b.slug === slug);
+  if (seeded) {
+    return {
+      title: seeded.title,
+      description: seeded.excerpt,
+      alternates: { canonical: `/blog/${slug}` },
+      openGraph: { title: seeded.title, description: seeded.excerpt, type: "article" },
+    };
+  }
+  return {};
 }
 
 export async function generateStaticParams() {
-  return Object.keys(POSTS).map((slug) => ({ slug }));
+  return VIRAL_BANDUNG_BLOGS.map((b) => ({ slug: b.slug }));
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const post = POSTS[slug];
-  if (post) {
-    return (
-      <PostShell
-        category={post.category}
-        date={post.date}
-        readTime={post.readTime}
-        title={post.title}
-      >
-        {post.paragraphs.map((p, i) => (
-          <p key={i}>{p}</p>
-        ))}
-      </PostShell>
-    );
-  }
-
   const admin = await fetchAdminPost(slug);
-  if (!admin) notFound();
+  const seeded = VIRAL_BANDUNG_BLOGS.find((b) => b.slug === slug);
 
-  const blocks = renderMarkdown(admin.contentMd);
-  return (
-    <PostShell
-      category={admin.category ?? "Artikel"}
-      date={formatDate(admin.publishedAt) || "baru"}
-      readTime={admin.readTime ?? "5 min"}
-      title={admin.title}
-    >
-      {blocks.map((b, i) => {
-        switch (b.type) {
-          case "h1":
-            return (
-              <h2 key={i} className="text-2xl font-semibold tracking-tight mt-8">
-                {b.text}
-              </h2>
-            );
-          case "h2":
-            return (
-              <h3 key={i} className="text-xl font-semibold tracking-tight mt-6">
-                {b.text}
-              </h3>
-            );
-          case "li":
-            return (
-              <li key={i} className="ml-6 list-disc">
-                {b.text}
-              </li>
-            );
-          default:
-            return <p key={i}>{b.text}</p>;
-        }
-      })}
-    </PostShell>
-  );
-}
+  if (!admin && !seeded) notFound();
 
-function PostShell({
-  category,
-  date,
-  readTime,
-  title,
-  children,
-}: {
-  category: string;
-  date: string;
-  readTime: string;
-  title: string;
-  children: React.ReactNode;
-}) {
+  const title = admin?.title ?? seeded!.title;
+  const category = admin?.category ?? seeded?.category ?? "Kuliner Viral Bandung";
+  const date = formatDate(admin?.publishedAt ?? seeded?.publishedAt ?? null) || "Terbaru";
+  const readTime = admin?.readTime ?? `${seeded?.readingMinutes ?? 4} min`;
+  const md = admin?.contentMd ?? seeded!.bodyMd;
+  const blocks = renderMarkdown(md);
+
   return (
-    <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+    <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
       <Link
         href="/blog"
-        className="inline-flex items-center gap-1.5 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        Semua artikel
+        Semua Artikel &amp; Panduan
       </Link>
 
-      <div className="mt-6 flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-medium">
-        <span className="rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-900))] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))] px-2 py-0.5">
+      <div className="mt-6 flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-semibold">
+        <span className="rounded-full bg-[#F5DFAD] text-[#24201A] px-2.5 py-0.5 font-bold">
           {category}
         </span>
         <span>·</span>
@@ -236,12 +121,52 @@ function PostShell({
         {readTime}
       </div>
 
-      <h1 className="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">
+      <h1 className="mt-4 font-display text-3xl sm:text-4xl font-bold tracking-tight leading-tight text-[#24201A]">
         {title}
       </h1>
 
       <div className="mt-8 space-y-5 text-[hsl(var(--foreground))] leading-relaxed">
-        {children}
+        {blocks.map((b, i) => {
+          switch (b.type) {
+            case "h1":
+            case "h2":
+              return (
+                <h2 key={i} className="font-display text-2xl font-bold tracking-tight mt-8 text-[#24201A]">
+                  {b.text}
+                </h2>
+              );
+            case "h3":
+              return (
+                <h3 key={i} className="text-lg font-bold tracking-tight mt-6 text-[hsl(var(--sage-700))]">
+                  {b.text}
+                </h3>
+              );
+            case "li":
+              return (
+                <li key={i} className="ml-6 list-disc text-sm sm:text-base">
+                  {b.text}
+                </li>
+              );
+            default:
+              return <p key={i} className="text-sm sm:text-base">{b.text}</p>;
+          }
+        })}
+      </div>
+
+      <div className="mt-12 rounded-3xl border-2 border-[#24201A] bg-[hsl(var(--surface))] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display text-xl font-bold text-[#24201A]">
+            Mau titip barang yang dibahas di artikel ini?
+          </h3>
+          <p className="mt-1 text-xs sm:text-sm text-[hsl(var(--muted-foreground))]">
+            Tersedia pengiriman Bandung Instant, Travel Jawa Barat/Jakarta, dan Kloter Hub Samarinda.
+          </p>
+        </div>
+        <Button asChild size="lg" className="shrink-0">
+          <Link href="/request">
+            Titip Sekarang <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     </article>
   );

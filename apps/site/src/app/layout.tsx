@@ -11,44 +11,41 @@ const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 const PLAUSIBLE_SRC = process.env.NEXT_PUBLIC_PLAUSIBLE_SRC ?? "https://plausible.io/js/script.js";
 
 const GOOGLE_FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
+  "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
 
 export const metadata: Metadata = {
   title: {
-    default: "Bawabawa.id — Jasa Titip Premium Bandung ke Samarinda",
+    default: "Bawabawa.id — Jastip Kuliner & Barang Viral Bandung (Bandung · Jabar/Travel · Hub Samarinda)",
     template: "%s · Bawabawa.id",
   },
   description:
-    "Jasa titip dari Bandung ke Samarinda. Pilih dari katalog atau titip barang apa saja — cek harga dulu, bayar setelah setuju, pantau lewat WhatsApp.",
+    "Jasa titip kuliner & barang viral Bandung (Roti Macan, Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Makjay, In Parfume). Kirim Instant Bandung Raya, Sameday Travel Jawa Barat & Jakarta, atau Kloter ke Hub Samarinda.",
   keywords: [
-    "jasa titip Bandung Samarinda",
     "jastip Bandung",
-    "personal shopper Bandung",
-    "Bawabawa",
+    "jastip Roti Macan Bandung",
+    "jastip Tjilaki 9",
+    "jastip Bandung Jakarta travel",
+    "jastip Bandung Samarinda",
+    "Bawabawa.id",
   ],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id"),
   openGraph: {
-    title: "Bawabawa.id — Jasa Titip Premium Bandung ke Samarinda",
+    title: "Bawabawa.id — Jastip Kuliner & Barang Viral Bandung",
     description:
-      "Cek harga dulu, bayar setelah setuju, pantau pesanan lewat WhatsApp.",
+      "Titip Roti Macan, Bolu Pisang Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Makjay & In Parfume. Kirim Bandung Instant, Travel Jabar/Jakarta, atau Hub Samarinda.",
     type: "website",
     locale: "id_ID",
   },
 };
 
-// Inline theme init mirrors apps/web's bb_themeMode storage so a user toggling
-// dark mode in either surface keeps the same preference across the ERP and the
-// public site.
+// Always initialize in clean warm light mode (#FCF3E4) so the brand palette stays
+// bright and appetizing across devices.
 const themeInit = `
 (function() {
   try {
-    var stored = localStorage.getItem('bb_themeMode') || localStorage.getItem('bawabawa-theme') || 'system';
-    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var dark = stored === 'dark' || (stored === 'system' && prefersDark);
-    var mode = dark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', mode);
-    if (dark) document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = mode;
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
   } catch (e) {}
 })();
 `;
