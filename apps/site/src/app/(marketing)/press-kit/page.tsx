@@ -1,73 +1,145 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Download } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Press Kit & Brand Assets",
   description:
-    "Logo, palet warna, tipografi, dan foto resmi Bawabawa.id untuk media partner, blogger, dan kreator konten.",
+    "Logo, palet warna pastel, tipografi, dan aset resmi Bawabawa.id untuk media partner, blogger, dan kreator konten.",
   alternates: { canonical: "/press-kit" },
 };
 
 const COLORS = [
-  { name: "Cream", hex: "#FAF7F0", note: "Background utama" },
-  { name: "Sage 700", hex: "#4D6755", note: "Primary CTA, link" },
-  { name: "Olive 500", hex: "#8A9D6F", note: "Accent secondary" },
-  { name: "Warm Tan", hex: "#D4A373", note: "Highlight, badge" },
-  { name: "Dark Olive", hex: "#2A2C28", note: "Foreground, dark bg" },
-  { name: "Emerald 600", hex: "#4F7D5E", note: "Success, garansi" },
+  { name: "Pastel Cream", hex: "#FCF3E4", note: "Background utama" },
+  { name: "Warm Almond", hex: "#F2E5CB", note: "Surface kartu & 3D krim" },
+  { name: "Matcha Cloud", hex: "#9B9D44", note: "Brand accent utama" },
+  { name: "Deep Olive", hex: "#6D6F27", note: "Wordmark & tombol utama" },
+  { name: "Pastel Sparkle", hex: "#E98881", note: "Aksen bintang & badge" },
+  { name: "Olive Ink", hex: "#333516", note: "Teks utama & dark surface" },
 ];
 
 const FONTS = [
+  { family: "Playfair Display", role: "Wordmark & Display", weights: "600, 700, 800" },
   { family: "Plus Jakarta Sans", role: "Body & UI", weights: "400, 500, 600, 700, 800" },
-  { family: "Playfair Display", role: "Display & hero", weights: "600, 700, 800" },
   { family: "JetBrains Mono", role: "Numbers, code", weights: "400, 600" },
 ];
 
 export default function PressKitPage() {
   return (
     <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+      <p className="text-sm font-semibold text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
         Press Kit
       </p>
       <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">
-        Brand assets untuk media & kreator
+        Brand assets untuk media &amp; kreator
       </h1>
       <p className="mt-4 max-w-2xl text-[hsl(var(--muted-foreground))] leading-relaxed">
-        Halo media partner, blogger, dan creator! Berikut aset resmi Bawabawa.id
-        yang bisa kamu pakai untuk artikel, video, atau konten. Untuk press
-        release atau wawancara, hubungi <strong>press@bawabawa.id</strong>.
+        Halo media partner, blogger, dan creator! Berikut papan identitas merek
+        pastel resmi Bawabawa.id (<em>Your Jastip Bestie</em>) yang bisa kamu
+        pakai untuk artikel, video, atau konten. Untuk press release atau
+        wawancara, hubungi <strong>press@bawabawa.id</strong>.
       </p>
 
       <section className="mt-12">
-        <h2 className="text-xl font-semibold tracking-tight">Logo</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Papan Identitas Merek</h2>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[#FCF3E4] p-3 sm:p-5">
+          <Image
+            src="/brand/brand-board.png"
+            alt="Papan Identitas Merek Bawabawa.id Pastel — Main Logo, Sub Logo, Simplified Logo, dan Sub Mark"
+            width={1024}
+            height={682}
+            className="w-full h-auto rounded-xl"
+            priority
+          />
+        </div>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-8 flex items-center justify-center">
-            <span className="text-3xl font-bold bg-linear-to-br from-[hsl(var(--sage-700))] to-[hsl(var(--emerald-600))] bg-clip-text text-transparent">
+          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[#FCF3E4] p-8 flex flex-col items-center justify-center gap-3">
+            <Image
+              src="/brand/sub-mark.png"
+              alt="Bawabawa.id Sub Mark"
+              width={96}
+              height={96}
+              className="h-20 w-20 rounded-2xl shadow-md"
+            />
+            <span className="font-display text-3xl font-bold text-[#6D6F27]">
               Bawabawa.id
             </span>
+            <span className="text-xs tracking-[0.14em] uppercase text-[#797B2F]">
+              — Your Jastip Bestie —
+            </span>
           </div>
-          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[#2A2C28] p-8 flex items-center justify-center">
-            <span className="text-3xl font-bold bg-linear-to-br from-[hsl(var(--sage-300))] to-[hsl(var(--emerald-400))] bg-clip-text text-transparent">
+          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[#18190E] p-8 flex flex-col items-center justify-center gap-3">
+            <Image
+              src="/brand/sub-mark.png"
+              alt="Bawabawa.id Sub Mark"
+              width={96}
+              height={96}
+              className="h-20 w-20 rounded-2xl shadow-md"
+            />
+            <span className="font-display text-3xl font-bold text-[#FCF3E4]">
               Bawabawa.id
+            </span>
+            <span className="text-xs tracking-[0.14em] uppercase text-[#C4C676]">
+              — Your Jastip Bestie —
             </span>
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a
+            href="/brand/brand-board.png"
+            download
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Brand Board PNG
+          </a>
+          <a
+            href="/brand/logo-main.png"
+            download
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Main Logo PNG
+          </a>
+          <a
+            href="/brand/logo-sub.png"
+            download
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Sub Logo PNG
+          </a>
+          <a
+            href="/brand/logo-simplified.png"
+            download
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Simplified Logo PNG
+          </a>
+          <a
+            href="/brand/sub-mark.png"
+            download
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Sub Mark Icon PNG
+          </a>
           <a
             href="/brand/logo-light.svg"
             download
-            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
-            Logo light SVG
+            Logo Light SVG
           </a>
           <a
             href="/brand/logo-dark.svg"
             download
-            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 py-1.5 text-xs font-medium hover:bg-[hsl(var(--surface-2))] transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
-            Logo dark SVG
+            Logo Dark SVG
           </a>
         </div>
       </section>
@@ -80,7 +152,7 @@ export default function PressKitPage() {
               key={c.name}
               className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] overflow-hidden"
             >
-              <div className="h-16" style={{ background: c.hex }} />
+              <div className="h-16 border-b border-[hsl(var(--border))]" style={{ background: c.hex }} />
               <div className="p-3">
                 <p className="font-semibold text-sm">{c.name}</p>
                 <p className="text-[11px] font-mono text-[hsl(var(--muted-foreground))]">

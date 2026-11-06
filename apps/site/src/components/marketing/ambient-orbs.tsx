@@ -9,15 +9,15 @@ export function AmbientOrbs() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <span
-        className="animate-orb-drift absolute -top-40 -left-32 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(closest-side,hsl(var(--sage-500)/0.28),transparent)]"
+        className="animate-orb-drift absolute -top-40 -left-32 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(closest-side,hsl(var(--sage-500)/0.24),transparent)]"
         style={{ "--orb-duration": "26s" } as CSSProperties}
       />
       <span
-        className="animate-orb-drift absolute -top-10 right-[-10rem] h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(closest-side,hsl(var(--amber-400)/0.22),transparent)]"
+        className="animate-orb-drift absolute -top-10 right-[-10rem] h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(closest-side,hsl(var(--coral-500)/0.20),transparent)]"
         style={{ "--orb-duration": "32s", animationDirection: "reverse" } as CSSProperties}
       />
       <span
-        className="animate-orb-drift absolute bottom-[-12rem] left-1/3 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(closest-side,hsl(var(--sky-500)/0.16),transparent)]"
+        className="animate-orb-drift absolute bottom-[-12rem] left-1/3 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(closest-side,hsl(var(--amber-400)/0.22),transparent)]"
         style={{ "--orb-duration": "38s" } as CSSProperties}
       />
     </div>

@@ -1,23 +1,96 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-export function Logo({ className, withWordmark = true }: { className?: string; withWordmark?: boolean }) {
+export interface LogoProps {
+  className?: string;
+  withWordmark?: boolean;
+  withTagline?: boolean;
+  variant?: "default" | "simplified" | "main";
+}
+
+export function Logo({
+  className,
+  withWordmark = true,
+  withTagline = true,
+  variant = "default",
+}: LogoProps) {
+  if (variant === "simplified") {
+    return (
+      <div className={cn("inline-flex items-center", className)}>
+        <Image
+          src="/brand/logo-simplified.png"
+          alt="Bawabawa.id — Your Jastip Bestie"
+          width={210}
+          height={54}
+          className="h-9 w-auto object-contain"
+          priority
+        />
+      </div>
+    );
+  }
+
+  if (variant === "main") {
+    return (
+      <div className={cn("inline-flex flex-col items-center gap-1.5", className)}>
+        <Image
+          src="/brand/logo-mark.png"
+          alt="Bawabawa.id"
+          width={153}
+          height={109}
+          className="h-20 w-auto object-contain drop-shadow-[0_6px_14px_rgba(109,111,39,0.18)]"
+          priority
+        />
+        {withWordmark && (
+          <span className="font-display text-2xl font-bold tracking-tight text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
+            Bawabawa.id
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className={cn("inline-flex items-center gap-2", className)}>
+    <div className={cn("inline-flex items-center gap-2.5", className)}>
       <span
         aria-hidden
-        className="relative inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-linear-to-br from-[hsl(var(--sage-500))] via-[hsl(var(--sage-700))] to-[hsl(var(--emerald-600))] shadow-[0_8px_24px_-8px_hsl(var(--sage-700)/0.6)]"
+        className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#FCF3E4] shadow-[0_6px_18px_-6px_hsl(var(--sage-700)/0.45)] ring-1 ring-[hsl(var(--sage-700)/0.18)] transition-transform duration-200 group-hover:scale-[1.03]"
       >
-        <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 8.5C5 6.6 6.6 5 8.5 5h7C17.4 5 19 6.6 19 8.5v0c0 1.7-1.3 3-3 3H8c-1.7 0-3 1.3-3 3v0C5 16.4 6.6 18 8.5 18h7c1.9 0 3.5-1.6 3.5-3.5" />
-          <circle cx="8.2" cy="8.5" r="0.9" fill="currentColor" />
-          <circle cx="15.8" cy="14.5" r="0.9" fill="currentColor" />
-        </svg>
-        <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[hsl(var(--emerald-400))] ring-2 ring-[hsl(var(--bg))]" />
+        <Image
+          src="/brand/sub-mark.png"
+          alt=""
+          width={80}
+          height={80}
+          className="h-full w-full object-cover"
+          priority
+        />
       </span>
       {withWordmark && (
-        <span className="font-semibold tracking-tight text-[hsl(var(--foreground))]">
-          Bawabawa<span className="text-[hsl(var(--sage-600))]">.id</span>
-        </span>
+        <>
+          <span
+            aria-hidden
+            className="h-7 w-px bg-[hsl(var(--sage-700)/0.24)] dark:bg-[hsl(var(--sage-300)/0.24)]"
+          />
+          <span className="flex flex-col justify-center leading-none">
+            <span className="inline-flex items-center gap-1 font-display text-[1.18rem] font-bold tracking-[-0.02em] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))]">
+              Bawabawa<span>.id</span>
+              <svg
+                viewBox="0 0 16 16"
+                aria-hidden
+                className="-mt-1.5 h-3 w-3 text-[#E97E75] shrink-0"
+                fill="currentColor"
+              >
+                <path d="M8 0.5C8.55 4.6 11.4 7.45 15.5 8C11.4 8.55 8.55 11.4 8 15.5C7.45 11.4 4.6 8.55 0.5 8C4.6 7.45 7.45 4.6 8 0.5Z" />
+              </svg>
+            </span>
+            {withTagline && (
+              <span className="mt-1 inline-flex items-center gap-1.5 text-[9.5px] font-medium tracking-[0.08em] text-[hsl(var(--sage-600))] dark:text-[hsl(var(--sage-300))]">
+                <span aria-hidden className="h-px w-2.5 bg-current opacity-60" />
+                <span>Your Jastip Bestie</span>
+                <span aria-hidden className="h-px w-2.5 bg-current opacity-60" />
+              </span>
+            )}
+          </span>
+        </>
       )}
     </div>
   );

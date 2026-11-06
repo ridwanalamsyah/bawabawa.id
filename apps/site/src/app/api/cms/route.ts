@@ -25,9 +25,9 @@ export async function GET() {
         key: "brand",
         value: {
           name: "Bawabawa.id",
-          tagline: "Titip barang Bandung → Samarinda",
-          accent: "#7c9885",
-          accent2: "#d4a373",
+          tagline: "Your Jastip Bestie — Bandung → Samarinda",
+          accent: "#9b9d44",
+          accent2: "#e98881",
         },
       },
       {

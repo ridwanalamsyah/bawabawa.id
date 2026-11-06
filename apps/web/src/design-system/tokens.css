@@ -8,41 +8,41 @@
 :root {
   color-scheme: light;
 
-  /* ── Surfaces (light theme is default — sage + cream, warm minimalist) ── */
-  --color-bg: #faf7f0;            /* warm cream */
-  --color-bg-elevated: #ffffff;
-  --color-surface-solid: #fdfbf6;
-  --color-text: #2a2c28;          /* dark olive */
-  --color-text-strong: #161916;
-  --color-muted: #6b6e66;
-  --color-subtle: #9ea298;
+  /* ── Surfaces (Pastel Cream #FCF3E4, Warm Almond #F2E5CB, Deep Olive #6D6F27) ── */
+  --color-bg: #fcf3e4;            /* pastel cream */
+  --color-bg-elevated: #fffbf3;
+  --color-surface-solid: #fdf7eb;
+  --color-text: #333516;          /* deep olive ink */
+  --color-text-strong: #1f210c;
+  --color-muted: #656739;
+  --color-subtle: #939568;
 
-  /* Glass primitives — frosted cream, warm shadow */
-  --glass-bg: rgba(255, 252, 244, 0.68);
-  --glass-bg-strong: rgba(255, 252, 244, 0.86);
-  --glass-bg-deep: rgba(255, 252, 244, 0.94);
-  --glass-border: rgba(42, 44, 40, 0.10);
-  --glass-border-strong: rgba(42, 44, 40, 0.18);
+  /* Glass primitives — frosted pastel cream, warm olive shadow */
+  --glass-bg: rgba(255, 250, 240, 0.72);
+  --glass-bg-strong: rgba(255, 251, 243, 0.88);
+  --glass-bg-deep: rgba(255, 251, 243, 0.95);
+  --glass-border: rgba(109, 111, 39, 0.14);
+  --glass-border-strong: rgba(109, 111, 39, 0.22);
   --glass-blur: 20px;
   --glass-blur-strong: 28px;
-  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
-  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
-  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
+  --glass-shadow: 0 8px 32px rgba(109, 111, 39, 0.12);
+  --glass-shadow-lg: 0 20px 60px rgba(109, 111, 39, 0.16);
+  --glass-shadow-hover: 0 12px 44px rgba(109, 111, 39, 0.22);
 
-  /* Brand — sage + warm tan, earthy minimalist */
+  /* Brand — Pastel Matcha Olive + Pastel Pink Sparkle */
   --brand-name: "bawabawa.id";
-  --brand-accent: #7c9885;             /* sage */
-  --brand-accent-2: #d4a373;           /* warm tan */
-  --brand-accent-strong: #5e7a68;      /* deep sage */
-  --brand-accent-soft: rgba(124, 152, 133, 0.14);
-  --brand-accent-ring: rgba(124, 152, 133, 0.36);
-  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
+  --brand-accent: #9b9d44;             /* matcha olive */
+  --brand-accent-2: #e98881;           /* pastel pink sparkle */
+  --brand-accent-strong: #6d6f27;      /* deep olive wordmark */
+  --brand-accent-soft: rgba(155, 157, 68, 0.16);
+  --brand-accent-ring: rgba(155, 157, 68, 0.40);
+  --brand-gradient: linear-gradient(135deg, #9b9d44 0%, #6d6f27 65%, #e98881 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(155, 157, 68, 0.22) 0%, rgba(233, 136, 129, 0.20) 100%);
 
-  /* Status — tuned to read against the warm palette */
-  --color-success: #5e7a68;
+  /* Status — tuned to read against the warm pastel palette */
+  --color-success: #6d6f27;
   --color-warning: #c08552;
-  --color-danger: #b3463f;
+  --color-danger: #c85a53;
   --color-info: #6b8a99;
 
   /* Spacing scale */
@@ -83,30 +83,30 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --color-bg: #15140f;            /* warm charcoal */
-  --color-bg-elevated: #1d1c17;
-  --color-surface-solid: #23211b;
-  --color-text: #f4efe4;
+  --color-bg: #18190e;            /* warm olive charcoal */
+  --color-bg-elevated: #212214;
+  --color-surface-solid: #262817;
+  --color-text: #fcf3e4;
   --color-text-strong: #ffffff;
-  --color-muted: #b8b3a6;
-  --color-subtle: #76726a;
+  --color-muted: #c2be9d;
+  --color-subtle: #838162;
 
-  --glass-bg: rgba(35, 33, 27, 0.58);
-  --glass-bg-strong: rgba(35, 33, 27, 0.76);
-  --glass-bg-deep: rgba(35, 33, 27, 0.90);
-  --glass-border: rgba(244, 239, 228, 0.10);
-  --glass-border-strong: rgba(244, 239, 228, 0.18);
+  --glass-bg: rgba(38, 40, 23, 0.62);
+  --glass-bg-strong: rgba(38, 40, 23, 0.80);
+  --glass-bg-deep: rgba(38, 40, 23, 0.92);
+  --glass-border: rgba(252, 243, 228, 0.12);
+  --glass-border-strong: rgba(252, 243, 228, 0.20);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
   --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
   --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
 
-  --brand-accent: #a3bfa8;             /* lifted sage for dark surface */
-  --brand-accent-2: #e3b88a;           /* warm tan, brighter on dark */
-  --brand-accent-strong: #7c9885;
-  --brand-accent-soft: rgba(163, 191, 168, 0.20);
-  --brand-accent-ring: rgba(163, 191, 168, 0.48);
-  --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
+  --brand-accent: #b8ba5e;             /* lifted matcha for dark surface */
+  --brand-accent-2: #f09a94;           /* pastel pink sparkle on dark */
+  --brand-accent-strong: #9b9d44;
+  --brand-accent-soft: rgba(184, 186, 94, 0.20);
+  --brand-accent-ring: rgba(184, 186, 94, 0.48);
+  --brand-gradient: linear-gradient(135deg, #b8ba5e 0%, #9b9d44 60%, #f09a94 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(184, 186, 94, 0.24) 0%, rgba(240, 154, 148, 0.22) 100%);
 }
 
 * {
@@ -136,22 +136,22 @@ body {
   line-height: 1.55;
   color: var(--color-text);
   background-color: var(--color-bg);
-  /* Sage + cream gradient mesh — warm, earthy, premium */
+  /* Pastel matcha + pink sparkle + warm cream gradient mesh */
   background-image:
-    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.22) 0%, transparent 50%),
-    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.18) 0%, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(196, 213, 175, 0.18) 0%, transparent 55%),
-    radial-gradient(at 100% 80%, rgba(232, 215, 188, 0.18) 0%, transparent 50%);
+    radial-gradient(at 18% 0%, rgba(155, 157, 68, 0.20) 0%, transparent 50%),
+    radial-gradient(at 82% 0%, rgba(233, 136, 129, 0.16) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(196, 198, 118, 0.18) 0%, transparent 55%),
+    radial-gradient(at 100% 80%, rgba(242, 229, 203, 0.28) 0%, transparent 50%);
   background-attachment: fixed;
   transition: background-color var(--motion-base), color var(--motion-base);
 }
 
 [data-theme="dark"] body {
   background-image:
-    radial-gradient(at 18% 0%, rgba(124, 152, 133, 0.28) 0%, transparent 55%),
-    radial-gradient(at 82% 0%, rgba(212, 163, 115, 0.20) 0%, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(94, 122, 104, 0.18) 0%, transparent 55%),
-    radial-gradient(at 100% 80%, rgba(192, 133, 82, 0.16) 0%, transparent 50%);
+    radial-gradient(at 18% 0%, rgba(155, 157, 68, 0.26) 0%, transparent 55%),
+    radial-gradient(at 82% 0%, rgba(233, 136, 129, 0.18) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(109, 111, 39, 0.20) 0%, transparent 55%),
+    radial-gradient(at 100% 80%, rgba(184, 186, 94, 0.14) 0%, transparent 50%);
 }
 
 h1,

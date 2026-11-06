@@ -11,42 +11,42 @@
 :root {
   color-scheme: light;
 
-  /* ── Surfaces (warm cream, sage, dark olive ink) ── */
-  --color-bg: #faf7f0;
-  --color-bg-elevated: #ffffff;
-  --color-surface-solid: #fdfbf6;
-  --color-surface-2: #f4efe4;
-  --color-text: #2a2c28;
-  --color-text-strong: #161916;
-  --color-muted: #6b6e66;
-  --color-subtle: #9ea298;
+  /* ── Surfaces (Pastel Cream #FCF3E4, Warm Almond #F2E5CB, Deep Olive #6D6F27) ── */
+  --color-bg: #fcf3e4;
+  --color-bg-elevated: #fffbf3;
+  --color-surface-solid: #fdf7eb;
+  --color-surface-2: #f2e5cb;
+  --color-text: #333516;
+  --color-text-strong: #1f210c;
+  --color-muted: #656739;
+  --color-subtle: #939568;
 
-  /* Glass primitives — frosted cream */
-  --glass-bg: rgba(255, 252, 244, 0.68);
-  --glass-bg-strong: rgba(255, 252, 244, 0.86);
-  --glass-bg-deep: rgba(255, 252, 244, 0.94);
-  --glass-border: rgba(42, 44, 40, 0.10);
-  --glass-border-strong: rgba(42, 44, 40, 0.18);
+  /* Glass primitives — frosted pastel cream */
+  --glass-bg: rgba(255, 250, 240, 0.72);
+  --glass-bg-strong: rgba(255, 251, 243, 0.88);
+  --glass-bg-deep: rgba(255, 251, 243, 0.95);
+  --glass-border: rgba(109, 111, 39, 0.14);
+  --glass-border-strong: rgba(109, 111, 39, 0.22);
   --glass-blur: 20px;
   --glass-blur-strong: 28px;
-  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
-  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
-  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
+  --glass-shadow: 0 8px 32px rgba(109, 111, 39, 0.12);
+  --glass-shadow-lg: 0 20px 60px rgba(109, 111, 39, 0.16);
+  --glass-shadow-hover: 0 12px 44px rgba(109, 111, 39, 0.22);
 
-  /* Brand — sage + warm tan, earthy minimalist */
+  /* Brand — Pastel Matcha Olive + Pastel Pink Sparkle + Warm Cream */
   --brand-name: "bawabawa.id";
-  --brand-accent: #7c9885;
-  --brand-accent-2: #d4a373;
-  --brand-accent-strong: #5e7a68;
-  --brand-accent-soft: rgba(124, 152, 133, 0.14);
-  --brand-accent-ring: rgba(124, 152, 133, 0.36);
-  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
+  --brand-accent: #9b9d44;
+  --brand-accent-2: #e98881;
+  --brand-accent-strong: #6d6f27;
+  --brand-accent-soft: rgba(155, 157, 68, 0.16);
+  --brand-accent-ring: rgba(155, 157, 68, 0.40);
+  --brand-gradient: linear-gradient(135deg, #9b9d44 0%, #6d6f27 65%, #e98881 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(155, 157, 68, 0.22) 0%, rgba(233, 136, 129, 0.20) 100%);
 
   /* Status */
-  --color-success: #5e7a68;
+  --color-success: #6d6f27;
   --color-warning: #c08552;
-  --color-danger: #b3463f;
+  --color-danger: #c85a53;
   --color-info: #6b8a99;
 
   /* Spacing scale */
@@ -81,56 +81,55 @@
 
   /* HSL channels — components consume these via `hsl(var(--token))` so the
      value is space-separated H S% L% (no `hsl()` wrapper). Mirrors the hex
-     palette above so admin and public surfaces look identical. */
-  --bg: 42 50% 96%;
-  --bg-soft: 41 42% 93%;
-  --surface: 0 0% 100%;
-  --surface-2: 41 42% 93%;
-  --foreground: 90 5% 16%;
-  --muted-foreground: 83 4% 42%;
-  --border: 90 8% 84%;
-  --input: 90 8% 84%;
-  --ring: 139 12% 54%;
-  --primary-foreground: 0 0% 100%;
+     Pastel Brand Identity palette above. */
+  --bg: 36 80% 94%;
+  --bg-soft: 38 62% 90%;
+  --surface: 39 100% 98%;
+  --surface-2: 39 58% 87%;
+  --foreground: 62 42% 15%;
+  --muted-foreground: 62 28% 32%;
+  --border: 42 38% 81%;
+  --input: 42 38% 81%;
+  --ring: 61 39% 44%;
+  --primary-foreground: 38 80% 97%;
   --warning: 28 47% 54%;
-  --danger: 4 48% 47%;
+  --danger: 4 52% 55%;
 
-  --sage-50:  90 21% 95%;
-  --sage-100: 104 21% 90%;
-  --sage-200: 105 20% 80%;
-  --sage-300: 105 18% 69%;
-  --sage-400: 109 15% 59%;
-  --sage-500: 139 12% 54%;
-  --sage-600: 141 13% 42%;
-  --sage-700: 138 14% 35%;
-  --sage-800: 141 17% 20%;
-  --sage-900: 150 19% 13%;
+  --sage-50:  54 56% 94%;
+  --sage-100: 58 52% 87%;
+  --sage-200: 60 48% 76%;
+  --sage-300: 61 42% 62%;
+  --sage-400: 61 38% 51%;
+  --sage-500: 61 39% 44%;
+  --sage-600: 62 44% 36%;
+  --sage-700: 62 48% 29%;
+  --sage-800: 62 50% 22%;
+  --sage-900: 63 48% 13%;
 
-  --olive-300: 78 34% 73%;
-  --olive-500: 74 18% 56%;
-  --olive-700: 76 17% 34%;
+  --olive-300: 61 44% 68%;
+  --olive-500: 61 39% 44%;
+  --olive-700: 62 48% 29%;
 
-  --emerald-400: 134 21% 63%;
-  --emerald-500: 141 13% 42%;
-  --emerald-600: 142 14% 34%;
+  --emerald-400: 61 42% 58%;
+  --emerald-500: 61 39% 44%;
+  --emerald-600: 62 46% 32%;
 
-  --cream-100: 42 50% 96%;
+  --cream-100: 36 80% 94%;
 
-  --rose-500: 4 48% 47%;
-  --rose-700: 3 49% 32%;
+  --rose-500: 4 71% 71%;
+  --rose-700: 4 58% 50%;
 
-  /* Accent palette next to the sage brand: amber (Bandung warmth), sky
-     (Mahakam / Samarinda), coral (promos, stickers). Use -100 for tile
-     backgrounds and -500/-600 for icons and text. */
-  --amber-100: 40 90% 90%;
-  --amber-400: 38 92% 60%;
-  --amber-600: 30 80% 38%;
+  /* Accent palette next to the matcha-olive brand: warm almond/amber,
+     pastel rose-coral (the logo's 4-point sparkle star), and sky. */
+  --amber-100: 39 68% 89%;
+  --amber-400: 38 56% 71%;
+  --amber-600: 37 54% 38%;
   --sky-100: 200 75% 92%;
   --sky-500: 201 70% 45%;
   --sky-600: 203 70% 35%;
-  --coral-100: 10 85% 92%;
-  --coral-500: 9 75% 58%;
-  --coral-600: 8 65% 44%;
+  --coral-100: 5 80% 93%;
+  --coral-500: 4 71% 71%;
+  --coral-600: 4 58% 52%;
   --plum-100: 280 45% 93%;
   --plum-600: 282 35% 42%;
 }
@@ -139,50 +138,48 @@
 .dark {
   color-scheme: dark;
 
-  --color-bg: #15140f;
-  --color-bg-elevated: #1d1c17;
-  --color-surface-solid: #23211b;
-  --color-surface-2: #2c2922;
-  --color-text: #f4efe4;
+  --color-bg: #18190e;
+  --color-bg-elevated: #212214;
+  --color-surface-solid: #262817;
+  --color-surface-2: #30321d;
+  --color-text: #fcf3e4;
   --color-text-strong: #ffffff;
-  --color-muted: #b8b3a6;
-  --color-subtle: #76726a;
+  --color-muted: #c2be9d;
+  --color-subtle: #838162;
 
-  --glass-bg: rgba(35, 33, 27, 0.58);
-  --glass-bg-strong: rgba(35, 33, 27, 0.76);
-  --glass-bg-deep: rgba(35, 33, 27, 0.90);
-  --glass-border: rgba(244, 239, 228, 0.10);
-  --glass-border-strong: rgba(244, 239, 228, 0.18);
+  --glass-bg: rgba(38, 40, 23, 0.62);
+  --glass-bg-strong: rgba(38, 40, 23, 0.80);
+  --glass-bg-deep: rgba(38, 40, 23, 0.92);
+  --glass-border: rgba(252, 243, 228, 0.12);
+  --glass-border-strong: rgba(252, 243, 228, 0.20);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
   --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
   --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
 
-  --brand-accent: #a3bfa8;
-  --brand-accent-2: #e3b88a;
-  --brand-accent-strong: #7c9885;
-  --brand-accent-soft: rgba(163, 191, 168, 0.20);
-  --brand-accent-ring: rgba(163, 191, 168, 0.48);
-  --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
+  --brand-accent: #b8ba5e;
+  --brand-accent-2: #f09a94;
+  --brand-accent-strong: #9b9d44;
+  --brand-accent-soft: rgba(184, 186, 94, 0.20);
+  --brand-accent-ring: rgba(184, 186, 94, 0.48);
+  --brand-gradient: linear-gradient(135deg, #b8ba5e 0%, #9b9d44 60%, #f09a94 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(184, 186, 94, 0.24) 0%, rgba(240, 154, 148, 0.22) 100%);
 
-  /* HSL channel overrides for dark mode. Surfaces and borders flip to dark
-     tones; brand sage / olive / emerald scales keep their hex values so
-     gradient buttons stay legible against the warm-charcoal canvas. */
-  --bg: 47 14% 7%;
-  --bg-soft: 40 11% 11%;
-  --surface: 41 12% 12%;
-  --surface-2: 41 12% 15%;
-  --foreground: 40 39% 93%;
-  --muted-foreground: 41 13% 75%;
-  --border: 40 10% 25%;
-  --input: 40 10% 25%;
+  /* HSL channel overrides for dark mode. */
+  --bg: 65 28% 8%;
+  --bg-soft: 64 26% 11%;
+  --surface: 64 26% 13%;
+  --surface-2: 64 24% 16%;
+  --foreground: 36 80% 94%;
+  --muted-foreground: 54 24% 72%;
+  --border: 60 18% 24%;
+  --input: 60 18% 24%;
 
-  --amber-100: 36 40% 18%;
-  --amber-600: 40 85% 65%;
+  --amber-100: 38 35% 18%;
+  --amber-600: 38 75% 70%;
   --sky-100: 205 35% 18%;
   --sky-600: 199 70% 68%;
-  --coral-100: 8 35% 18%;
-  --coral-600: 10 85% 70%;
+  --coral-100: 5 35% 19%;
+  --coral-600: 5 80% 76%;
   --plum-100: 282 25% 19%;
   --plum-600: 282 50% 75%;
 }
@@ -199,32 +196,29 @@
   --color-ring: var(--brand-accent-ring);
 
   --color-primary: var(--brand-accent);
-  --color-primary-foreground: #ffffff;
+  --color-primary-foreground: #fcf3e4;
   --color-accent: var(--brand-accent-2);
   --color-accent-foreground: #ffffff;
 
-  /* Compatibility shims so existing Tailwind utilities like `bg-sage-700`,
-     `text-emerald-500`, `border-olive-300` keep rendering. The site was
-     authored against an earlier sage/olive scale; we map them to the ERP
-     brand tokens so visual identity now matches `apps/web` exactly. */
-  --color-sage-50:  #f1f4ee;
-  --color-sage-100: #e2eadf;
-  --color-sage-200: #c7d6c2;
-  --color-sage-300: #aabfa3;
-  --color-sage-400: #8da787;
-  --color-sage-500: #7c9885;
-  --color-sage-600: #5e7a68;
-  --color-sage-700: #4d6755;
-  --color-sage-800: #2a3b30;
-  --color-sage-900: #1a2620;
+  /* Compatibility shims mapped to the Pastel Matcha Olive scale. */
+  --color-sage-50:  #f7f5e6;
+  --color-sage-100: #eeefc9;
+  --color-sage-200: #dee0a4;
+  --color-sage-300: #c4c676;
+  --color-sage-400: #b0b253;
+  --color-sage-500: #9b9d44;
+  --color-sage-600: #838533;
+  --color-sage-700: #6d6f27;
+  --color-sage-800: #52541c;
+  --color-sage-900: #2f3111;
 
-  --color-olive-300: #c4d2a3;
-  --color-olive-500: #9aa37b;
-  --color-olive-700: #5e6648;
+  --color-olive-300: #ccce8e;
+  --color-olive-500: #9b9d44;
+  --color-olive-700: #6d6f27;
 
-  --color-emerald-400: #8eb597;
-  --color-emerald-500: #5e7a68;
-  --color-emerald-600: #4a6253;
+  --color-emerald-400: #babc6b;
+  --color-emerald-500: #9b9d44;
+  --color-emerald-600: #75772c;
 
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
@@ -232,13 +226,11 @@
 
   --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-sans);
+  --font-display: var(--font-display), "Playfair Display", Georgia, serif;
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
-  /* Tight radius scale. The previous one (xl = 24px, 2xl = 32px) turned
-     every input and card into a soft pill — a big part of the generic,
-     "AI template" feel. */
+  /* Tight radius scale. */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
@@ -287,7 +279,7 @@ h1, h2, h3 {
   letter-spacing: -0.025em;
 }
 .font-display {
-  font-family: var(--font-sans);
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
   letter-spacing: -0.01em;
 }
 

@@ -12,18 +12,18 @@
 
 const BRAND = {
   name: "Bawabawa.id",
-  tagline: "Jasa titip premium Bandung → Samarinda",
+  tagline: "Your Jastip Bestie · Bandung → Samarinda",
   site: process.env.PUBLIC_SITE_URL ?? "https://bawabawa.id",
-  cream: "#faf7f0",
-  surface: "#fdfbf6",
-  border: "#e6e0cf",
-  text: "#2a2c28",
-  muted: "#6b6e66",
-  sage700: "#4d6755",
-  sage500: "#7c9885",
-  olive500: "#8a9d6f",
-  emerald600: "#4f7d5e",
-  tan: "#d4a373",
+  cream: "#fcf3e4",
+  surface: "#fffbf3",
+  border: "#e3d6ba",
+  text: "#333516",
+  muted: "#656739",
+  sage700: "#6d6f27",
+  sage500: "#9b9d44",
+  olive500: "#9b9d44",
+  emerald600: "#75772c",
+  tan: "#e98881",
 };
 
 function shell(opts: {
