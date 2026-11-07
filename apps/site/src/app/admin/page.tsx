@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Inbox, MessageCircle, Package, Plane, Star, Truck, Wallet, Heart, MapPin, HandCoins } from "lucide-react";
+import { ArrowRight, Inbox, MessageCircle, Package, Plane, Star, Truck, Wallet, Heart } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { GlassCard } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,9 +24,9 @@ type Trip = { id: string; code: string; departAt: string; capacityKg: number; bo
 
 const TODO: Array<{ status: OrderRequestStatus; label: string; hint: string; icon: typeof Inbox; tone: string }> = [
   { status: "submitted", label: "Perlu dicek", hint: "Cek harga lalu kirim penawaran", icon: Inbox, tone: "bg-[hsl(var(--coral-100))] text-[hsl(var(--coral-600))]" },
-  { status: "approved", label: "Menunggu bayar", hint: "Cocokkan transfer BCA/Mandiri/QRIS", icon: Wallet, tone: "bg-[hsl(var(--amber-100))] text-[hsl(var(--amber-600))]" },
-  { status: "paid", label: "Siap dibelikan", hint: "Sudah bayar, siap belanja toko Bandung", icon: Package, tone: "bg-[hsl(var(--sky-100))] text-[hsl(var(--sky-600))]" },
-  { status: "packed", label: "Siap kirim", hint: "Kirim Kurir Bandung / Travel / Kloter SMD", icon: Truck, tone: "bg-[hsl(var(--sage-100))] text-[hsl(var(--sage-700))]" },
+  { status: "approved", label: "Menunggu bayar", hint: "Cocokkan transfer yang masuk", icon: Wallet, tone: "bg-[hsl(var(--amber-100))] text-[hsl(var(--amber-600))]" },
+  { status: "paid", label: "Siap dibelikan", hint: "Sudah bayar, tinggal belanja", icon: Package, tone: "bg-[hsl(var(--sky-100))] text-[hsl(var(--sky-600))]" },
+  { status: "packed", label: "Siap kirim", hint: "Serahkan ke kurir & isi resi", icon: Truck, tone: "bg-[hsl(var(--sage-100))] text-[hsl(var(--sage-700))] dark:bg-[hsl(var(--sage-700)/0.3)] dark:text-[hsl(var(--sage-200))]" },
 ];
 
 export default async function AdminHomePage() {
@@ -46,10 +46,7 @@ export default async function AdminHomePage() {
 
   return (
     <>
-      <PageHeader
-        title="Ringkasan Operasional Bawabawa.id"
-        description="Pusat kendali 3 Jalur (Bandung Raya · Travel Jabar/Jakarta · Kloter Hub Samarinda) & 3 Partner."
-      />
+      <PageHeader title="Halo! Ini yang perlu dikerjakan hari ini" description="Klik kotak untuk langsung membuka antreannya." />
 
       {!orders.ok && (
         <GlassCard className="mb-4 p-4 text-sm text-[hsl(var(--rose-700))]">
@@ -76,40 +73,6 @@ export default async function AdminHomePage() {
           );
         })}
       </ul>
-
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Link
-          href="/admin/hub-samarinda"
-          className="lift flex items-center justify-between gap-3 rounded-2xl border border-[#E6DAC3] bg-[#FFFDF9] p-4"
-        >
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#EEF3DC] text-[#5B6020]">
-              <MapPin className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold text-[#24201A]">Hub Samarinda (Workspace Partner 3)</p>
-              <p className="text-xs text-[#61594C]">Manifest Kloter, QC Penerimaan, Kasir POS Samarinda (`BAWASMD`) & Stok Ready</p>
-            </div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-[#73772B]" />
-        </Link>
-
-        <Link
-          href="/admin/bagi-hasil"
-          className="lift flex items-center justify-between gap-3 rounded-2xl border border-[#E6DAC3] bg-[#FFFDF9] p-4"
-        >
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#FDF2D0] text-[#9A6800]">
-              <HandCoins className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold text-[#24201A]">Bagi Hasil 3 Partner & Cetak Slip PDF/Excel</p>
-              <p className="text-xs text-[#61594C]">Proporsi adil Bandung/Jabar vs Samarinda Reguler (20%) vs Referral BAWASMD (30%)</p>
-            </div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-[#9A6800]" />
-        </Link>
-      </div>
 
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
         <GlassCard className="lg:col-span-7 p-0 overflow-hidden">

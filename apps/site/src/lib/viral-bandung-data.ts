@@ -370,7 +370,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Roti Macan Bandung — Cranberry Cheese",
     description:
       "Roti sourdough lembut dengan isian cream cheese dan cranberry yang antreannya paling ramai di Buah Batu.",
-    imageUrl: "/images/catalog/roti-macan.jpg",
+    imageUrl: null,
     originStore: "Roti Macan Buah Batu",
     storeDistrict: "Buah Batu",
     price: 42000,
@@ -388,7 +388,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Bolu Pisang Tjilaki 9 Cihapit",
     description:
       "Bolu pisang artisan dari kawasan Cihapit dengan tekstur moist, pisang asli, dan taburan keju/cokelat.",
-    imageUrl: "/images/catalog/bolu-pisang-tjilaki.jpg",
+    imageUrl: null,
     originStore: "Tjilaki 9 Cihapit",
     storeDistrict: "Cihapit",
     price: 85000,
@@ -406,7 +406,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Roti Merak — Roti Sobek & Sisir Butter",
     description:
       "Roti klasik Bandung dengan serat lembut dan olesan butter tebal dari outlet Sadang Serang.",
-    imageUrl: "/images/catalog/roti-merak.jpg",
+    imageUrl: null,
     originStore: "Roti Merak Sadang Serang",
     storeDistrict: "Sadang Serang",
     price: 48000,
@@ -423,7 +423,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Rochi (Roti Mochi) Jl. Riau 61 — Box Isi 6",
     description:
       "Roti panggang lembut dengan isian mochi kenyal dan krim cokelat/matcha lumer di tengahnya.",
-    imageUrl: "/images/catalog/rochi-mochi.jpg",
+    imageUrl: null,
     originStore: "Rochi Jl. Riau 61",
     storeDistrict: "Jl. Riau",
     price: 68000,
@@ -440,7 +440,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Studio Bolen Bandung — Artisan Pastry Bolen",
     description:
       "Pisang bolen dengan kulit pastry berlapis renyah, pisang raja matang, cokelat lumer, dan keju.",
-    imageUrl: "/images/catalog/studio-bolen.jpg",
+    imageUrl: null,
     originStore: "Studio Bolen Trunojoyo",
     storeDistrict: "Trunojoyo / Dago",
     price: 78000,
@@ -457,7 +457,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Kopi Susu Makmur Jaya (Makjay) — 1 Liter",
     description:
       "Es kopi susu creamy dari Kedai Makmur Jaya Bandung. Dikirim dengan ice gel pack.",
-    imageUrl: "/images/catalog/kopi-makjay.jpg",
+    imageUrl: null,
     originStore: "Kedai Kopi Makmur Jaya",
     storeDistrict: "Lengkong Besar / Dago",
     price: 92000,
@@ -474,7 +474,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Basreng Sultan Daun Jeruk (500gr)",
     description:
       "Basreng ikan tenggiri iris tipis renyah dengan bumbu cabai asli dan daun jeruk wangi.",
-    imageUrl: "/images/catalog/basreng-bandung.jpg",
+    imageUrl: null,
     originStore: "Basreng Sultan Bandung",
     storeDistrict: "Kopo / Buah Batu",
     price: 55000,
@@ -492,7 +492,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "In Parfume Fragrance Bandung (35ml / 60ml)",
     description:
       "Extrait de parfum legendaris Jl. Banceuy Bandung. Tahan 12–24 jam, bebas pilih aroma di catatan.",
-    imageUrl: "/images/catalog/in-parfume-fashion.jpg",
+    imageUrl: null,
     originStore: "In Parfume Banceuy",
     storeDistrict: "Banceuy / Braga",
     price: 85000,
@@ -514,7 +514,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Paket Bundling 4 Box Roti Macan Bandung",
     description:
       "Paket 4 box Roti Macan Bandung bebas pilih rasa tanpa perlu ikut antre kuota pagi.",
-    imageUrl: "/images/catalog/roti-macan.jpg",
+    imageUrl: null,
     originStore: "Roti Macan Buah Batu",
     storeDistrict: "Buah Batu",
     price: 162000,
@@ -531,7 +531,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Seroja Bake Pasar Cihapit — Tart & Pastry Lokal",
     description:
       "Bakehouse lokal di Pasar Cihapit Bandung dengan kreasi tart singkong keju dan pastry bahan nusantara.",
-    imageUrl: "/images/catalog/bolu-pisang-tjilaki.jpg",
+    imageUrl: null,
     originStore: "Seroja Bake Cihapit",
     storeDistrict: "Pasar Cihapit",
     price: 62000,
@@ -548,7 +548,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Sapporo Soes Bandung — Box Isi 8 Cream Puff",
     description:
       "Kue soes Jepang dengan kulit renyah dan vla diplomat cream dingin. Dikirim dengan thermal bag + ice gel.",
-    imageUrl: "/images/catalog/rochi-mochi.jpg",
+    imageUrl: null,
     originStore: "Sapporo Soes Bandung",
     storeDistrict: "Bandung Kota",
     price: 64000,
@@ -565,7 +565,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Puln Bakehouse — Shio Pan & Butter Brioche",
     description:
       "Japanese salt bread (Shio Pan) garing di luar, lembut berongga butter di dalam dari Puln Bandung.",
-    imageUrl: "/images/catalog/roti-merak.jpg",
+    imageUrl: null,
     originStore: "Puln Bakehouse Bandung",
     storeDistrict: "Dago / Riau",
     price: 58000,
@@ -582,7 +582,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Kue Marmer Warisan — Full Wijsman Butter",
     description:
       "Bolu marmer klasik khas Bandung dengan butter Wijsman asli yang padat, lembut, dan tahan kirim luar pulau.",
-    imageUrl: "/images/catalog/bolu-pisang-tjilaki.jpg",
+    imageUrl: null,
     originStore: "Kue Warisan Bandung",
     storeDistrict: "Bandung Kota",
     price: 115000,
@@ -599,7 +599,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Tiramisusu by Chocomory — Dessert Box",
     description:
       "Enam lapisan tiramisu cake dan milk crumble lumer khas Bandung. Packing aman dengan ice gel.",
-    imageUrl: "/images/catalog/kopi-makjay.jpg",
+    imageUrl: null,
     originStore: "Tiramisusu Jl. Anggrek",
     storeDistrict: "Jl. Riau / Anggrek",
     price: 88000,
@@ -616,7 +616,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Keripik Pedas Mang Odod & Seblak Rafael",
     description:
       "Camilan pedas gurih khas Bandung yang renyah dan tahan lama untuk dikirim ke semua jalur.",
-    imageUrl: "/images/catalog/basreng-bandung.jpg",
+    imageUrl: null,
     originStore: "Camilan Pedas Bandung",
     storeDistrict: "Bandung Kota",
     price: 42000,
@@ -634,7 +634,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Batagor Kingsley Vacuum Pack (Isi 10 Pcs)",
     description:
       "Batagor ikan tenggiri legendaris Bandung kemasan vakum lengkap dengan bumbu kacang, kecap, dan jeruk limau.",
-    imageUrl: "/images/catalog/basreng-bandung.jpg",
+    imageUrl: null,
     originStore: "Batagor Kingsley Jl. Veteran",
     storeDistrict: "Veteran / Burangrang",
     price: 125000,
@@ -651,7 +651,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Tas Exsport Space / Torch Bandung",
     description:
       "Koleksi tas kasual, sling bag, dan backpack warna pastel dari flagship store Exsport & Torch Bandung.",
-    imageUrl: "/images/catalog/in-parfume-fashion.jpg",
+    imageUrl: null,
     originStore: "Exsport Space / Torch Bandung",
     storeDistrict: "Dago / Bahureksa",
     price: 279000,
@@ -668,7 +668,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Apparel Distro & Merchandise Tahilalats Braga",
     description:
       "Kaos dan merchandise resmi dari Toko Tahilalats Braga, Maternal Disaster, atau Screamous Bandung.",
-    imageUrl: "/images/catalog/in-parfume-fashion.jpg",
+    imageUrl: null,
     originStore: "Jl. Braga & Trunojoyo",
     storeDistrict: "Braga / Trunojoyo",
     price: 189000,
@@ -685,7 +685,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Prima Rasa & Kartika Sari — Brownies & Bolen",
     description:
       "Oleh-oleh klasik Bandung yang diambil fresh pagi hari dari outlet pusat Kemuning / Kebon Kawung.",
-    imageUrl: "/images/catalog/studio-bolen.jpg",
+    imageUrl: null,
     originStore: "Prima Rasa Kemuning",
     storeDistrict: "Kemuning / Kebon Kawung",
     price: 82000,
@@ -703,7 +703,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
     name: "Paket Hampers Kangen Bandung (3 Toko Hits)",
     description:
       "Berisi 1 Box Roti Macan Cranberry Cheese + 1 Box Bolu Pisang Tjilaki 9 + 1 Pouch Basreng Sultan Daun Jeruk.",
-    imageUrl: "/images/catalog/roti-macan.jpg",
+    imageUrl: null,
     originStore: "Kurasi Bawabawa Bandung",
     storeDistrict: "Multi-Toko Bandung",
     price: 175000,

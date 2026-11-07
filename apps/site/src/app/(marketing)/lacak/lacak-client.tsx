@@ -3,15 +3,15 @@
 import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, MessageCircle, QrCode } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { formatDate, formatIDR } from "@/lib/utils";
 import { getLocalOrderLinks, getServerLocalOrderLinks, subscribeLocalOrderLinks } from "@/lib/local-orders";
 import { waLink } from "@/lib/contact";
-import { PaymentQrisCard } from "@/components/marketing/payment-qris-card";
 
+/** Accepts either the full tracking URL or just the token part. */
 function extractToken(input: string): string | null {
   const trimmed = input.trim();
   const match = trimmed.match(/track\/([A-Za-z0-9_-]{20,64})/) ?? trimmed.match(/^([A-Za-z0-9_-]{20,64})$/);
@@ -23,10 +23,9 @@ export function LacakClient() {
   const links = useSyncExternalStore(subscribeLocalOrderLinks, getLocalOrderLinks, getServerLocalOrderLinks);
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [showPaymentBox, setShowPaymentBox] = useState(false);
 
   return (
-    <div className="mt-8 space-y-5">
+    <div className="mt-8 space-y-4">
       <GlassCard className="p-5 sm:p-6">
         <form
           onSubmit={(e) => {
@@ -40,7 +39,7 @@ export function LacakClient() {
           }}
           className="grid gap-2"
         >
-          <Label htmlFor="track-link">Link Tracking atau Token Pesanan</Label>
+          <Label htmlFor="track-link">Link tracking</Label>
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               id="track-link"
@@ -54,7 +53,7 @@ export function LacakClient() {
               aria-describedby={error ? "track-link-err" : undefined}
             />
             <Button type="submit" variant="primary">
-              Buka Status &amp; Invoice <ArrowRight className="h-4 w-4" aria-hidden />
+              Buka <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           </div>
           {error && (
@@ -67,16 +66,14 @@ export function LacakClient() {
 
       {links.length > 0 && (
         <GlassCard className="p-5 sm:p-6">
-          <h2 className="font-semibold">Riwayat Pesanan dari Perangkat Ini</h2>
+          <h2 className="font-semibold">Pesanan dari perangkat ini</h2>
           <ul className="mt-3 divide-y divide-[hsl(var(--border))]">
             {links.map((l) => (
               <li key={l.token}>
                 <Link href={`/track/${l.token}`} className="flex items-center gap-3 py-3 hover:underline">
-                  <span className="font-mono font-semibold">{l.code}</span>
+                  <span className="font-mono">{l.code}</span>
                   <span className="text-xs text-[hsl(var(--muted-foreground))]">{formatDate(l.createdAt)}</span>
-                  <span className="ml-auto tabular-nums text-sm font-semibold text-[hsl(var(--sage-700))]">
-                    {formatIDR(l.estimateTotal)}
-                  </span>
+                  <span className="ml-auto tabular-nums text-sm">{formatIDR(l.estimateTotal)}</span>
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </li>
@@ -85,47 +82,12 @@ export function LacakClient() {
         </GlassCard>
       )}
 
-      <GlassCard className="p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[hsl(var(--sage-700))]">
-              <QrCode className="h-4 w-4" /> Info Rekening BCA / Mandiri &amp; QRIS Resmi
-            </span>
-            <h2 className="mt-1 text-base font-semibold">
-              Nomor Rekening &amp; QRIS Bawabawa.id
-            </h2>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowPaymentBox((s) => !s)}
-          >
-            {showPaymentBox ? "Tutup Rekening & QRIS" : "Lihat Rekening & QRIS"}
-          </Button>
-        </div>
-
-        {showPaymentBox && (
-          <div className="mt-4">
-            <PaymentQrisCard
-              order={{
-                code: links[0]?.code ?? "KONFIRMASI-WA",
-                items: [{ name: "Pesanan Jastip Bawabawa.id", qty: 1, unitPrice: links[0]?.estimateTotal ?? 100000 }],
-                itemsTotal: links[0]?.estimateTotal ?? 100000,
-                jastipFee: 0,
-                shippingFee: 0,
-                total: links[0]?.estimateTotal ?? 100000,
-              }}
-            />
-          </div>
-        )}
-      </GlassCard>
-
       <ResendLink />
     </div>
   );
 }
 
+/** Lost the link? Phone + order code → we send it again by WhatsApp. */
 function ResendLink() {
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -154,7 +116,7 @@ function ResendLink() {
 
   return (
     <GlassCard className="p-5 sm:p-6">
-      <h2 className="font-semibold">Link tracking hilang?</h2>
+      <h2 className="font-semibold">Link hilang?</h2>
       {state === "sent" ? (
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
           Kalau nomor dan kode pesanannya cocok, link tracking sudah kami kirim ke WhatsApp {phone}. Belum masuk dalam

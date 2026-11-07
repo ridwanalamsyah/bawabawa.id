@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, PackageSearch } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
 import { GlassCard } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import type { CatalogProduct } from "@/app/api/catalog/route";
 import { CatalogGrid, CartBar } from "./catalog-client";
 import { delay } from "@/lib/motion";
-import { VIRAL_BANDUNG_CATALOG } from "@/lib/viral-bandung-data";
 
 export const metadata: Metadata = {
-  title: "Katalog Kuliner & Barang Bandung",
+  title: "Katalog titipan Bandung",
   description:
-    "Katalog jastip Roti Macan, Bolu Pisang Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Seroja Bake, Sapporo Soes, Puln, Kue Warisan, Kopi Makjay, Basreng & In Parfume Bandung.",
+    "Snack khas, fashion & factory outlet, hijab, sepatu, dan skincare lokal Bandung dengan harga all-in. Pesan, bayar, kami belikan & kirim ke Samarinda.",
   alternates: { canonical: "/katalog" },
 };
 
@@ -34,94 +34,78 @@ function nextOpenTrip(trips: Trip[], now: number): Trip | undefined {
       (t) =>
         t.status === "open" &&
         new Date(t.departAt).getTime() > now &&
-        (!t.poClosesAt || new Date(t.poClosesAt).getTime() > now)
+        (!t.poClosesAt || new Date(t.poClosesAt).getTime() > now),
     )
     .sort((a, b) => a.departAt.localeCompare(b.departAt))[0];
 }
 
+import { VIRAL_BANDUNG_CATALOG } from "@/lib/viral-bandung-data";
+
 export default async function CatalogPage() {
   const [catalog, trips] = await Promise.all([
-    erpSafe<CatalogProduct[]>({
-      path: "/catalog",
-      timeoutMs: 5000,
-      cache: "force-cache",
-      next: { revalidate: 60, tags: ["catalog", "inventory"] },
-    }),
-    erpSafe<Trip[]>({
-      path: "/trips",
-      timeoutMs: 4000,
-      cache: "force-cache",
-      next: { revalidate: 60, tags: ["trips"] },
-    }),
+    erpSafe<CatalogProduct[]>({ path: "/catalog", timeoutMs: 5000, cache: "force-cache", next: { revalidate: 60, tags: ["catalog", "inventory"] } }),
+    erpSafe<Trip[]>({ path: "/trips", timeoutMs: 4000, cache: "force-cache", next: { revalidate: 60, tags: ["trips"] } }),
   ]);
-
-  const products: CatalogProduct[] =
+  const products =
     catalog.ok && Array.isArray(catalog.data) && catalog.data.length > 0
       ? catalog.data
       : VIRAL_BANDUNG_CATALOG;
-
-  const nextTrip = nextOpenTrip(
-    trips.ok && Array.isArray(trips.data) ? trips.data : [],
-    new Date().getTime()
-  );
+  const nextTrip = nextOpenTrip(trips.ok && Array.isArray(trips.data) ? trips.data : [], new Date().getTime());
 
   return (
-    <section className="py-12 sm:py-16">
+    <section className="py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <p className="animate-rise text-xs uppercase tracking-[0.2em] text-[hsl(var(--sage-700))] font-semibold">
-            Katalog Pilihan
+        <div className="max-w-3xl">
+          <p className="animate-rise text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))]">
+            Katalog
           </p>
-          <h1
-            style={delay(60)}
-            className="animate-rise mt-2 text-3xl sm:text-5xl font-bold tracking-tight leading-[1.08]"
-          >
-            Barang yang paling sering dititip dari Bandung.
+          <h1 style={delay(60)} className="animate-rise mt-3 text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+            Titipan populer, harga sudah all-in.
           </h1>
-          <p
-            style={delay(120)}
-            className="animate-rise mt-3 text-sm sm:text-base text-[hsl(var(--muted-foreground))] leading-relaxed"
-          >
-            Harga di bawah adalah harga toko Bandung (belum termasuk jastip &amp; ongkir sesuai jalur kirim). Barang yang kamu mau belum ada?{" "}
-            <Link href="/request" className="underline text-[hsl(var(--sage-700))] font-medium">
-              Tulis di form titip sekarang
-            </Link>
-            .
+          <p style={delay(140)} className="animate-rise mt-4 text-base text-[hsl(var(--muted-foreground))]">
+            Harga sudah termasuk jasa titip. Ongkir dihitung dari berat di keranjang.
+            Barang yang kamu cari tidak ada?{" "}
+            <Link href="/request" className="underline">Titip barang apa saja</Link>.
           </p>
         </div>
 
         {nextTrip && (
-          <GlassCard className="mt-6 p-4 flex flex-wrap items-center gap-3">
+          <GlassCard className="mt-8 p-4 sm:p-5 flex flex-wrap items-center gap-3">
             <CalendarClock className="h-5 w-5 text-[hsl(var(--sage-700))]" aria-hidden />
-            <p className="text-xs sm:text-sm">
-              <strong>Kloter {nextTrip.code}</strong> berangkat{" "}
+            <p className="text-sm">
+              <strong>Open Trip {nextTrip.code}</strong> berangkat{" "}
               {formatDate(nextTrip.departAt, { weekday: "long", day: "numeric", month: "long", year: undefined })} ·{" "}
-              {Math.max(0, nextTrip.capacityKg - nextTrip.bookedKg)} kg tersisa
+              {Math.max(0, nextTrip.capacityKg - nextTrip.bookedKg)} kg slot tersisa
               {nextTrip.poClosesAt && (
                 <>
                   {" · "}
                   <strong>
-                    Tutup PO{" "}
-                    {formatDate(nextTrip.poClosesAt, {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: undefined,
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    PO tutup{" "}
+                    {formatDate(nextTrip.poClosesAt, { weekday: "long", day: "numeric", month: "long", year: undefined, hour: "2-digit", minute: "2-digit" })}
                   </strong>
                 </>
               )}
             </p>
-            <Link href="/open-trip" className="text-xs font-semibold text-[hsl(var(--sage-700))] underline sm:ml-auto">
-              Jadwal lengkap →
-            </Link>
+            <Link href="/open-trip" className="text-sm underline sm:ml-auto">Lihat jadwal</Link>
           </GlassCard>
         )}
 
         <div className="mt-8">
-          <CatalogGrid products={products} />
+          {products.length === 0 ? (
+            <GlassCard className="p-10 text-center">
+              <PackageSearch className="mx-auto h-8 w-8 text-[hsl(var(--muted-foreground))]" aria-hidden />
+              <h2 className="mt-4 text-xl font-semibold">Katalog sedang disiapkan</h2>
+              <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] max-w-md mx-auto">
+                Belum ada barang di katalog. Kamu tetap bisa titip barang apa saja — tim kami
+                cek stok & harga dulu sebelum kamu bayar.
+              </p>
+              <Button asChild variant="primary" className="mt-6">
+                <Link href="/request">Titip barang apa saja</Link>
+              </Button>
+            </GlassCard>
+          ) : (
+            <CatalogGrid products={products} />
+          )}
         </div>
       </div>
       <CartBar />

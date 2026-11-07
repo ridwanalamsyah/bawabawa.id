@@ -5,9 +5,9 @@ import { erpSafe } from "@/lib/erp-client";
 import { VIRAL_BANDUNG_BLOGS } from "@/lib/viral-bandung-data";
 
 export const metadata: Metadata = {
-  title: "Cerita & Panduan Bandung",
+  title: "Blog & Tips Belanja",
   description:
-    "Daftar kuliner & roti populer Bandung (Roti Macan, Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Seroja Bake, Sapporo Soes, Makjay, In Parfume) serta panduan pengiriman Bawabawa.id.",
+    "Cerita customer, tips belanja dari Bandung, panduan jastip, dan rekomendasi kuliner Bandung.",
   alternates: { canonical: "/blog" },
 };
 
@@ -46,15 +46,14 @@ function formatDate(iso: string | null): string {
 export default async function BlogPage() {
   const adminPosts = await fetchAdminPosts();
   const seenSlugs = new Set(adminPosts.map((p) => p.slug));
-
   const merged = [
     ...adminPosts.map((p) => ({
       slug: p.slug,
       title: p.title,
       excerpt: p.excerpt ?? "",
-      category: p.category ?? "Artikel Bandung",
-      readTime: p.readTime ?? "4 min",
-      date: formatDate(p.publishedAt) || "Terbaru",
+      category: p.category ?? "Artikel",
+      readTime: p.readTime ?? "5 min",
+      date: formatDate(p.publishedAt) || "baru",
     })),
     ...VIRAL_BANDUNG_BLOGS.filter((b) => !seenSlugs.has(b.slug)).map((b) => ({
       slug: b.slug,
@@ -67,43 +66,42 @@ export default async function BlogPage() {
   ];
 
   return (
-    <article className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] font-semibold">
-        Cerita &amp; Panduan
+    <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
+      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
+        Blog
       </p>
-      <h1 className="mt-2 text-3xl sm:text-5xl font-bold tracking-tight">
-        Rekomendasi Bandung &amp; tips titip barang.
+      <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">
+        Cerita, tips &amp; panduan belanja
       </h1>
-      <p className="mt-3 max-w-2xl text-sm sm:text-base text-[hsl(var(--muted-foreground))] leading-relaxed">
-        Ditulis dari pengalaman tim belanja kami setiap minggu di Bandung — mulai dari jadwal war Roti Macan &amp; Bolu Pisang Tjilaki 9 hingga tips kirim makanan ke luar kota.
+      <p className="mt-4 max-w-2xl text-[hsl(var(--muted-foreground))] leading-relaxed">
+        Dari rekomendasi kuliner &amp; barang Bandung, panduan jastip aman,
+        sampai tips kirim ke luar kota.
       </p>
 
-      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
         {merged.map((p) => (
           <Link
             key={p.slug}
             href={`/blog/${p.slug}`}
-            className="group rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:border-[hsl(var(--sage-700))] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+            className="group rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:border-[hsl(var(--sage-400))] hover:-translate-y-0.5 transition-all"
           >
-            <div>
-              <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
-                <span className="font-semibold text-[hsl(var(--sage-700))]">
-                  {p.category}
-                </span>
-                <span>·</span>
-                <Clock className="h-3 w-3" />
-                {p.readTime}
-                <span>·</span>
-                {p.date}
-              </div>
-              <h2 className="mt-2 text-lg font-bold tracking-tight leading-snug group-hover:text-[hsl(var(--sage-700))] transition-colors">
-                {p.title}
-              </h2>
-              <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
-                {p.excerpt}
-              </p>
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-medium">
+              <span className="rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-900))] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))] px-2 py-0.5">
+                {p.category}
+              </span>
+              <span>·</span>
+              <Clock className="h-3 w-3" />
+              {p.readTime}
+              <span>·</span>
+              {p.date}
             </div>
-            <p className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[hsl(var(--sage-700))] group-hover:gap-2 transition-all">
+            <h2 className="mt-3 text-xl font-semibold tracking-tight leading-snug group-hover:text-[hsl(var(--sage-700))] transition-colors">
+              {p.title}
+            </h2>
+            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
+              {p.excerpt}
+            </p>
+            <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] group-hover:gap-2.5 transition-all">
               Baca selengkapnya
               <ArrowRight className="h-3.5 w-3.5" />
             </p>

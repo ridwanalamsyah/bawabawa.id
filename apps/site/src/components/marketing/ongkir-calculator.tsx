@@ -5,46 +5,33 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatIDR } from "@/lib/utils";
-import {
-  DEFAULT_ZONE_RATES,
-  computeZoneEstimate,
-  type DeliveryZoneKey,
-  type ZoneRateConfig,
-} from "@/lib/viral-bandung-data";
+import { TIERS, availableTiers, computePricing, recommendTier } from "@/lib/pricing";
 
-const WEIGHTS = [0.5, 1, 2, 3, 5];
+const WEIGHTS = [0.5, 1, 2, 5, 10];
 
-export function OngkirCalculator({
-  zones = DEFAULT_ZONE_RATES,
-}: {
-  zones?: ZoneRateConfig[];
-}) {
+/**
+ * The hero's right column: a working price estimate instead of a fake
+ * dashboard mock-up. Uses the same formula as the order form.
+ */
+export function OngkirCalculator() {
   const priceId = useId();
-  const [price, setPrice] = useState(125000);
+  const [price, setPrice] = useState(300000);
   const [kg, setKg] = useState(1);
-  const [selectedZone, setSelectedZone] = useState<DeliveryZoneKey>("jabar_travel");
-
-  const rows = zones.map((z) => ({
-    zone: z,
-    est: computeZoneEstimate({
-      zoneId: z.id,
-      itemSubtotalRp: price,
-      weightKg: kg,
-      zones,
-    }),
+  const best = recommendTier(kg);
+  const rows = availableTiers().map((tier) => ({
+    tier,
+    pricing: computePricing({ itemsTotal: price, totalKg: kg, tier }),
   }));
 
   return (
     <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 sm:p-6">
-      <h2 className="text-lg font-semibold">Hitung perkiraan biaya</h2>
+      <h2 className="text-lg">Hitung perkiraan biaya</h2>
 
-      <label htmlFor={priceId} className="mt-4 block text-sm font-medium">
-        Harga barang di toko
+      <label htmlFor={priceId} className="mt-5 block text-sm font-medium">
+        Harga barang
       </label>
       <div className="mt-1.5 relative">
-        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[hsl(var(--muted-foreground))]">
-          Rp
-        </span>
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[hsl(var(--muted-foreground))]">Rp</span>
         <input
           id={priceId}
           inputMode="numeric"
@@ -64,10 +51,10 @@ export function OngkirCalculator({
               aria-pressed={kg === w}
               onClick={() => setKg(w)}
               className={cn(
-                "h-10 rounded-lg border text-sm tabular-nums transition-colors",
+                "h-10 rounded-lg border text-sm tabular-nums",
                 kg === w
                   ? "border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] text-[hsl(var(--bg))]"
-                  : "border-[hsl(var(--border))] hover:border-[hsl(var(--foreground)/0.4)]"
+                  : "border-[hsl(var(--border))] hover:border-[hsl(var(--foreground)/0.4)]",
               )}
             >
               {w.toLocaleString("id-ID")} kg
@@ -77,38 +64,27 @@ export function OngkirCalculator({
       </fieldset>
 
       <dl className="mt-5 divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
-        {rows.map(({ zone, est }) => {
-          const active = selectedZone === zone.id;
-          return (
-            <div
-              key={zone.id}
-              onClick={() => setSelectedZone(zone.id)}
-              className={cn(
-                "flex items-baseline justify-between gap-3 py-3 cursor-pointer transition-colors rounded-lg px-2 -mx-2",
-                active ? "bg-[hsl(var(--surface-2)/0.65)]" : "hover:bg-[hsl(var(--surface-2)/0.35)]"
+        {rows.map(({ tier, pricing }) => (
+          <div key={tier} className="flex items-baseline justify-between gap-3 py-3">
+            <dt className="text-sm">
+              <span className="font-semibold">{TIERS[tier].label}</span>
+              <span className="text-[hsl(var(--muted-foreground))]"> · {TIERS[tier].eta}</span>
+              {tier === best && (
+                <span className="animate-tick ml-2 text-xs font-medium text-[hsl(var(--emerald-600))]">lebih hemat</span>
               )}
-            >
-              <dt className="text-sm">
-                <span className="font-semibold text-[hsl(var(--foreground))]">{zone.shortLabel}</span>
-                <span className="text-[hsl(var(--muted-foreground))]"> · {zone.eta}</span>
-              </dt>
-              <dd className="text-base font-semibold tabular-nums">
-                <span key={est.totalRp} className="animate-tick">
-                  {formatIDR(est.totalRp)}
-                </span>
-              </dd>
-            </div>
-          );
-        })}
+            </dt>
+            <dd className="text-base font-semibold tabular-nums">
+              <span key={pricing.total} className="animate-tick">{formatIDR(pricing.total)}</span>
+            </dd>
+          </div>
+        ))}
       </dl>
-
       <p className="mt-3 text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">
-        Sudah termasuk harga barang, jasa titip, dan ongkir. Pembayaran mudah via Transfer BCA/Mandiri
-        atau QRIS setelah stok toko dikonfirmasi di WhatsApp.
+        Sudah termasuk harga barang, jasa titip 8% (min. Rp20.000) dan ongkir. Harga final dikirim
+        tim setelah cek stok — kamu bayar setelah setuju.
       </p>
-
-      <Button asChild className="mt-4 w-full" size="lg">
-        <Link href={`/request?zone=${selectedZone}`} className="nudge">
+      <Button asChild className="mt-5 w-full" size="lg">
+        <Link href="/request" className="nudge">
           Titip barang ini <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </Button>
