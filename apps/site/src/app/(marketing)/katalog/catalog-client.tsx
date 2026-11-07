@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Check, ShoppingBag, ShoppingCart, Store } from "lucide-react";
+import { Check, ShoppingCart, Store } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,7 @@ export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
           ))}
         </div>
       )}
-      <ul className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {visible.map((p, i) => (
           <li key={p.id} data-reveal style={delay(Math.min(i, 7) * 60)}>
             <ProductCard product={p} />
@@ -73,36 +73,36 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   };
   return (
     <GlassCard className="lift h-full overflow-hidden flex flex-col">
-      <div className="aspect-square bg-[hsl(var(--surface-2))] grid place-items-center">
-        {product.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
+      {product.imageUrl && (
+        <div className="aspect-square bg-[hsl(var(--surface-2))] overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
-        ) : (
-          <ShoppingBag className="h-8 w-8 text-[hsl(var(--muted-foreground))]" aria-hidden />
-        )}
-      </div>
-      <div className="p-3 sm:p-4 flex flex-col gap-2 flex-1">
+        </div>
+      )}
+      <div className="p-4 flex flex-col gap-2 flex-1">
         {product.category && <Badge variant="neutral" className="self-start">{product.category}</Badge>}
-        <h2 className="text-sm sm:text-base font-semibold leading-snug">{product.name}</h2>
+        <h2 className="text-base font-semibold leading-snug">{product.name}</h2>
         {product.originStore && (
           <p className="text-xs text-[hsl(var(--muted-foreground))] flex items-center gap-1">
-            <Store className="h-3.5 w-3.5" aria-hidden /> {product.originStore}
+            <Store className="h-3.5 w-3.5 shrink-0" aria-hidden /> {product.originStore}
           </p>
         )}
         {product.description && (
           <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2">{product.description}</p>
         )}
-        <p className="mt-auto text-base font-semibold tabular-nums">{formatIDR(product.price)}</p>
-        {product.weightKg != null && (
-          <p className="text-[11px] text-[hsl(var(--muted-foreground))]">± {product.weightKg} kg</p>
-        )}
+        <div className="mt-auto pt-2 flex items-baseline justify-between">
+          <p className="text-base font-semibold tabular-nums">{formatIDR(product.price)}</p>
+          {product.weightKg != null && (
+            <p className="text-[11px] text-[hsl(var(--muted-foreground))]">± {product.weightKg} kg</p>
+          )}
+        </div>
         {product.variants.length > 0 && (
           <label className="text-xs">
             <span className="sr-only">Varian {product.name}</span>
             <select
               value={variant}
               onChange={(e) => setVariant(e.target.value)}
-              className="mt-1 h-9 w-full rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--surface))] px-2 text-sm"
+              className="mt-1 h-9 w-full rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--surface))] px-2 text-xs"
             >
               {product.variants.map((v) => (
                 <option key={v} value={v}>

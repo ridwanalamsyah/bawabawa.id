@@ -230,10 +230,11 @@
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
 
-  --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-sans);
-  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
   /* Tight radius scale. The previous one (xl = 24px, 2xl = 32px) turned
