@@ -967,3 +967,41 @@ export function computeZoneEstimate(params: {
     isSamarindaReferral: code === "BAWASMD",
   };
 }
+
+export function resolveBandungProductImage(product: {
+  name?: string | null;
+  category?: string | null;
+  imageUrl?: string | null;
+}): string {
+  if (product.imageUrl && product.imageUrl.trim().length > 0) {
+    return product.imageUrl;
+  }
+  const n = (product.name ?? "").toLowerCase();
+  const c = (product.category ?? "").toLowerCase();
+  if (n.includes("roti macan") || n.includes("seroja") || n.includes("puln") || n.includes("shio pan")) {
+    return "/images/catalog/roti-macan.jpg";
+  }
+  if (n.includes("tjilaki") || n.includes("bolu pisang") || n.includes("warisan") || n.includes("tiramisusu")) {
+    return "/images/catalog/bolu-pisang-tjilaki.jpg";
+  }
+  if (n.includes("roti merak") || n.includes("sapporo") || n.includes("prima rasa")) {
+    return "/images/catalog/roti-merak.jpg";
+  }
+  if (n.includes("rochi") || n.includes("mochi")) {
+    return "/images/catalog/rochi-mochi.jpg";
+  }
+  if (n.includes("bolen") || n.includes("kartika sari") || n.includes("batagor") || n.includes("cuanki")) {
+    return "/images/catalog/studio-bolen.jpg";
+  }
+  if (n.includes("makjay") || n.includes("kopi") || c.includes("kopi")) {
+    return "/images/catalog/kopi-makjay.jpg";
+  }
+  if (n.includes("parfume") || n.includes("exsport") || n.includes("tahilalats") || c.includes("parfum") || c.includes("fashion")) {
+    return "/images/catalog/in-parfume.jpg";
+  }
+  if (n.includes("basreng") || n.includes("seblak") || c.includes("camilan") || c.includes("pedas")) {
+    return "/images/catalog/basreng-bandung.jpg";
+  }
+  return "/images/catalog/roti-macan.jpg";
+}
+

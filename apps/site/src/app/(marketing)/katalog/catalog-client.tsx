@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn, formatIDR } from "@/lib/utils";
 import { cart, cartCount } from "@/lib/cart";
 import { track } from "@/lib/analytics";
+import { resolveBandungProductImage } from "@/lib/viral-bandung-data";
 import type { CatalogProduct } from "@/app/api/catalog/route";
 
 export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
@@ -116,12 +117,15 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   return (
     <div className="lift h-full rounded-2xl border border-[hsl(var(--border))] bg-white p-4 flex flex-col justify-between transition-all hover:border-[hsl(var(--sage-600))]">
       <div className="flex flex-col gap-1.5">
-        {product.imageUrl && (
-          <div className="aspect-[4/3] rounded-xl overflow-hidden bg-[hsl(var(--surface-2))] mb-1">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
-          </div>
-        )}
+        <div className="aspect-[4/3] rounded-xl overflow-hidden bg-[hsl(var(--surface-2))] mb-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={resolveBandungProductImage(product)}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        </div>
 
         <div className="flex items-center justify-between gap-2">
           {product.originStore ? (

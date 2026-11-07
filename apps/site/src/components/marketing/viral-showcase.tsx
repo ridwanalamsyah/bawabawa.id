@@ -17,6 +17,7 @@ import { cn, formatIDR } from "@/lib/utils";
 import type { CatalogProduct } from "@/app/api/catalog/route";
 import {
   VIRAL_BANDUNG_STORES,
+  resolveBandungProductImage,
   type HubSamarindaStockItem,
 } from "@/lib/viral-bandung-data";
 
@@ -139,19 +140,13 @@ export function ViralShowcase({
                 >
                   <div>
                     <div className="relative h-48 w-full overflow-hidden bg-zinc-100">
-                      {p.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.imageUrl}
-                          alt={p.name}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-zinc-400">
-                          Foto Produk
-                        </div>
-                      )}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={resolveBandungProductImage(p)}
+                        alt={p.name}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
                       <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
                         {p.category && (
                           <span className="rounded-md bg-zinc-900/85 backdrop-blur-xs px-2.5 py-1 text-[11px] font-semibold text-white">
