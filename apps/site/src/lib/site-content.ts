@@ -10,15 +10,20 @@ import {
   type ZoneRateConfig,
 } from "@/lib/viral-bandung-data";
 
+/**
+ * Homepage copy, FAQ, Live Shopper Status, Payment Info (BCA/Mandiri/QRIS),
+ * 3-Zone Delivery Rates, and Hub Samarinda Ready Stock edited in Admin.
+ * Defaults keep the site complete when nothing is set or the ERP is unreachable.
+ */
 export const DEFAULT_HERO_WORDS = [
-  "Roti Macan",
-  "Tjilaki 9",
-  "Kopi Makjay",
-  "Studio Bolen",
-  "In Parfume",
+  "Roti Macan & Merak",
+  "Bolu Pisang Tjilaki 9",
+  "Rochi & Studio Bolen",
+  "Kopi Makjay & Soes",
+  "In Parfume & Basreng",
 ];
 export const DEFAULT_HERO_SUBTITLE =
-  "Kami belikan langsung di Bandung — kirim instan dalam kota, travel sameday Jawa Barat & Jakarta, atau kloter ke Samarinda.";
+  "Tim kami antrekan langsung di toko viral Bandung — kirim Instant se-Bandung Raya, Sameday Travel ke Jawa Barat & Jakarta, atau Kloter ke Hub Samarinda.";
 
 export type FaqItem = { q: string; a: string };
 
@@ -39,8 +44,8 @@ export async function getHomepageContent(): Promise<{ words: string[]; subtitle:
     | undefined;
   const words = Array.isArray(row?.heroWords)
     ? (row!.heroWords as unknown[])
-        .map((w) => str(w, 16))
-        .filter((w): w is string => !!w && !w.includes("&"))
+        .map((w) => str(w, 32))
+        .filter((w): w is string => !!w)
         .slice(0, 5)
     : [];
   return {

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, Sparkles } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
 import { VIRAL_BANDUNG_BLOGS } from "@/lib/viral-bandung-data";
 
 export const metadata: Metadata = {
-  title: "Blog & Tips Belanja",
+  title: "Artikel, Panduan Jastip & Rekomendasi Kuliner Viral Bandung",
   description:
-    "Cerita customer, tips belanja dari Bandung, panduan jastip, dan rekomendasi kuliner Bandung.",
+    "Daftar kuliner & roti viral Bandung 2026 (Roti Macan, Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Seroja Bake, Sapporo Soes, Makjay, In Parfume) serta panduan 3 jalur pengiriman Bawabawa.id.",
   alternates: { canonical: "/blog" },
 };
 
@@ -46,14 +46,15 @@ function formatDate(iso: string | null): string {
 export default async function BlogPage() {
   const adminPosts = await fetchAdminPosts();
   const seenSlugs = new Set(adminPosts.map((p) => p.slug));
+
   const merged = [
     ...adminPosts.map((p) => ({
       slug: p.slug,
       title: p.title,
       excerpt: p.excerpt ?? "",
-      category: p.category ?? "Artikel",
-      readTime: p.readTime ?? "5 min",
-      date: formatDate(p.publishedAt) || "baru",
+      category: p.category ?? "Artikel Bandung",
+      readTime: p.readTime ?? "4 min",
+      date: formatDate(p.publishedAt) || "Terbaru",
     })),
     ...VIRAL_BANDUNG_BLOGS.filter((b) => !seenSlugs.has(b.slug)).map((b) => ({
       slug: b.slug,
@@ -66,43 +67,44 @@ export default async function BlogPage() {
   ];
 
   return (
-    <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-sm font-medium text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] font-semibold">
-        Blog
-      </p>
-      <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-tight">
-        Cerita, tips &amp; panduan belanja
+    <article className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--sage-50))] border border-[hsl(var(--sage-200))] px-3 py-1 text-xs font-bold text-[hsl(var(--foreground))]">
+         Jurnal &amp; Panduan Kuliner Bandung
+      </span>
+      <h1 className="mt-3 font-display text-3xl sm:text-5xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+        Rekomendasi Kuliner Viral Bandung &amp; Panduan Jastip
       </h1>
-      <p className="mt-4 max-w-2xl text-[hsl(var(--muted-foreground))] leading-relaxed">
-        Dari rekomendasi kuliner &amp; barang Bandung, panduan jastip aman,
-        sampai tips kirim ke luar kota.
+      <p className="mt-3 max-w-2xl text-sm sm:text-base text-[hsl(var(--muted-foreground))] leading-relaxed">
+        Kurasi langsung oleh tim shopper Bandung &amp; Partner Hub Samarinda kami — mulai dari jadwal war antrean Roti Macan &amp; Bolu Pisang Tjilaki 9 hingga tips kirim makanan ke luar kota. Semua artikel dapat dikelola langsung dari menu <strong>Admin → Blog &amp; Artikel</strong>.
       </p>
 
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5">
         {merged.map((p) => (
           <Link
             key={p.slug}
             href={`/blog/${p.slug}`}
-            className="group rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:border-[hsl(var(--sage-400))] hover:-translate-y-0.5 transition-all"
+            className="group rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-6 hover:border-[hsl(var(--sage-700))] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
           >
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-medium">
-              <span className="rounded-full bg-[hsl(var(--sage-100))] dark:bg-[hsl(var(--sage-900))] text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-200))] px-2 py-0.5">
-                {p.category}
-              </span>
-              <span>·</span>
-              <Clock className="h-3 w-3" />
-              {p.readTime}
-              <span>·</span>
-              {p.date}
+            <div>
+              <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] font-semibold">
+                <span className="rounded-full bg-[hsl(var(--sage-50))] border border-[hsl(var(--sage-200))] text-[hsl(var(--foreground))] px-2.5 py-0.5 font-bold">
+                  {p.category}
+                </span>
+                <span>·</span>
+                <Clock className="h-3 w-3" />
+                {p.readTime}
+                <span>·</span>
+                {p.date}
+              </div>
+              <h2 className="mt-3 font-display text-xl font-bold tracking-tight leading-snug text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--sage-700))] transition-colors">
+                {p.title}
+              </h2>
+              <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
+                {p.excerpt}
+              </p>
             </div>
-            <h2 className="mt-3 text-xl font-semibold tracking-tight leading-snug group-hover:text-[hsl(var(--sage-700))] transition-colors">
-              {p.title}
-            </h2>
-            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
-              {p.excerpt}
-            </p>
-            <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--sage-700))] dark:text-[hsl(var(--sage-300))] group-hover:gap-2.5 transition-all">
-              Baca selengkapnya
+            <p className="mt-4 pt-3 border-t border-[hsl(var(--border)/0.6)] inline-flex items-center gap-1.5 text-xs font-bold text-[hsl(var(--sage-700))] group-hover:gap-2.5 transition-all">
+              Baca Artikel Lengkap
               <ArrowRight className="h-3.5 w-3.5" />
             </p>
           </Link>

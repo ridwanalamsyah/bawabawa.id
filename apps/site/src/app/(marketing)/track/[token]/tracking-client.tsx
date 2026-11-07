@@ -2,7 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CircleCheck, Loader2, MapPin, MessageCircle, RefreshCw, Star, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  CircleCheck,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Printer,
+  RefreshCw,
+  RotateCcw,
+  Star,
+  XCircle,
+} from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +30,7 @@ import {
   errorMessage,
   type PublicOrderView,
 } from "@/lib/order-requests";
+import { PaymentQrisCard, printCustomerInvoicePdf, type InvoiceOrderSummary } from "@/components/marketing/payment-qris-card";
 
 type LoadState =
   | { kind: "loading" }
@@ -49,11 +61,7 @@ export function TrackingClient({ token }: { token: string }) {
   }, [token]);
 
   useEffect(() => {
-    // Fetch-on-mount + poll; state is set after each request resolves.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
-    // Status changes are driven by the team; a light poll keeps an open tab
-    // current without hammering the API.
     const timer = setInterval(() => void load(), 60_000);
     return () => clearInterval(timer);
   }, [load]);
@@ -126,28 +134,60 @@ export function TrackingClient({ token }: { token: string }) {
   const reachedAt = new Map(order.history.map((h) => [h.status, h.at]));
   const waHelp = waLink(`Halo Bawabawa, saya mau tanya pesanan ${order.code}.`);
 
+  const invoiceSummary: InvoiceOrderSummary = {
+    code: order.code,
+    city: order.city ?? "Bandung / Jabar / Samarinda",
+    zoneLabel: TIERS[order.tier]?.label ?? order.tier,
+    items: order.items.map((it) => ({
+      name: it.name,
+      variant: it.variant,
+      qty: it.qty,
+      unitPrice: it.unitPrice,
+      maxPrice: it.maxPrice,
+    })),
+    itemsTotal: pricing?.itemsTotal ?? 0,
+    jastipFee: pricing?.jastipFee ?? 0,
+    shippingFee: pricing?.shippingFee ?? 0,
+    discount: pricing?.discount ?? 0,
+    total: pricing?.total ?? 0,
+  };
+
+  const firstItemQuery = order.items[0]?.name
+    ? `/request?item=${encodeURIComponent(order.items[0].name)}`
+    : "/request";
+
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-8 space-y-5">
       <GlassCard className="p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-sm text-[hsl(var(--muted-foreground))]">{order.code}</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight">{order.statusLabel}</h2>
+            <p className="font-mono text-sm font-bold text-[hsl(var(--sage-700))]">{order.code}</p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">{order.statusLabel}</h2>
             <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
               Diperbarui {formatDateTime(order.updatedAt)}
             </p>
           </div>
-          <Badge variant={STATUS_BADGE[order.status]}>{ORDER_STEP_LABEL[order.status]}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={STATUS_BADGE[order.status]}>{ORDER_STEP_LABEL[order.status]}</Badge>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => printCustomerInvoicePdf(invoiceSummary)}
+            >
+              <Printer className="h-3.5 w-3.5" /> Cetak PDF Nota
+            </Button>
+          </div>
         </div>
 
         {order.status === "quoted" && pricing && (
           <div className="mt-5 rounded-2xl border border-[hsl(var(--warning)/0.4)] bg-[hsl(var(--warning)/0.08)] p-4">
-            <p className="font-medium">Penawaran harga final: {formatIDR(pricing.total)}</p>
+            <p className="font-bold">Penawaran harga final: {formatIDR(pricing.total)}</p>
             {order.quoteNote && <p className="mt-1 text-sm">Catatan tim: {order.quoteNote}</p>}
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
               <Button variant="accent" onClick={() => void act("approve")} disabled={!!busy}>
                 {busy === "approve" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <CircleCheck className="h-4 w-4" aria-hidden />}
-                Setujui & lanjut bayar
+                Setujui &amp; Lanjut Bayar Transfer/QRIS
               </Button>
               <Button asChild variant="outline">
                 <a href={waHelp} target="_blank" rel="noopener noreferrer">
@@ -158,32 +198,17 @@ export function TrackingClient({ token }: { token: string }) {
           </div>
         )}
 
-        {order.status === "approved" && (
-          <div className="mt-5 rounded-2xl border border-[hsl(var(--sage-500)/0.4)] bg-[hsl(var(--sage-100)/0.6)] dark:bg-[hsl(var(--sage-700)/0.2)] p-4 text-sm">
-            <p className="font-medium">Silakan bayar {pricing ? formatIDR(pricing.total) : ""}</p>
-            <p className="mt-2 whitespace-pre-line text-[hsl(var(--muted-foreground))]">
-              {order.paymentInstructions ??
-                "Instruksi pembayaran dikirim tim kami lewat WhatsApp. Belum terima? Klik tombol di bawah."}
-            </p>
-            <Button asChild variant="primary" className="mt-3">
-              <a href={waLink(`Halo Bawabawa, saya sudah bayar pesanan ${order.code}. Berikut bukti transfernya:`)} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="h-4 w-4" aria-hidden /> Kirim bukti bayar
-              </a>
-            </Button>
-          </div>
-        )}
-
         {order.deliveryMethod === "pickup" && (
           <p className="mt-4 flex items-start gap-2 text-sm">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sage-700))]" aria-hidden />
             <span>
-              Ambil sendiri{order.pickupPoint ? ` di ${order.pickupPoint}` : ""}. Kami kabari lewat WhatsApp saat barang siap diambil.
+              Ambil sendiri{order.pickupPoint ? ` di ${order.pickupPoint}` : " di Hub Bawabawa Samarinda"}. Kami kabari lewat WhatsApp saat barang siap diambil.
             </span>
           </p>
         )}
         {order.trackingNumber && (
           <p className="mt-4 text-sm">
-            No. resi: <span className="font-mono font-medium">{order.trackingNumber}</span>
+            No. resi / No. Pool Travel: <span className="font-mono font-bold">{order.trackingNumber}</span>
           </p>
         )}
         {actionError && (
@@ -193,8 +218,13 @@ export function TrackingClient({ token }: { token: string }) {
         )}
       </GlassCard>
 
+      {/* Tampilkan Kartu Transfer Bank (BCA/Mandiri) & QRIS + Direct WA */}
+      {!cancelled && pricing && (
+        <PaymentQrisCard order={invoiceSummary} />
+      )}
+
       <GlassCard className="p-5 sm:p-6">
-        <h3 className="font-semibold">Perjalanan pesanan</h3>
+        <h3 className="font-bold text-[hsl(var(--foreground))]">Perjalanan Pesanan</h3>
         {cancelled ? (
           <p className="mt-3 flex items-center gap-2 text-sm text-[hsl(var(--danger))]">
             <XCircle className="h-4 w-4" aria-hidden /> Pesanan dibatalkan
@@ -224,7 +254,7 @@ export function TrackingClient({ token }: { token: string }) {
                       "relative mt-0.5 h-5 w-5 shrink-0 rounded-full border-2",
                       done && "bg-[hsl(var(--emerald-500))] border-[hsl(var(--emerald-500))]",
                       active && "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-200))]",
-                      !done && !active && "border-[hsl(var(--border))]",
+                      !done && !active && "border-[hsl(var(--border))]"
                     )}
                     aria-hidden
                   >
@@ -246,7 +276,7 @@ export function TrackingClient({ token }: { token: string }) {
       </GlassCard>
 
       <GlassCard className="p-5 sm:p-6 text-sm">
-        <h3 className="font-semibold">Rincian</h3>
+        <h3 className="font-bold text-[hsl(var(--foreground))]">Rincian Barang &amp; Biaya</h3>
         <ul className="mt-3 space-y-2">
           {order.items.map((it, i) => (
             <li key={i} className="flex items-start justify-between gap-3">
@@ -255,7 +285,7 @@ export function TrackingClient({ token }: { token: string }) {
                 {it.variant ? <span className="text-[hsl(var(--muted-foreground))]"> · {it.variant}</span> : null}
                 <span className="text-xs text-[hsl(var(--muted-foreground))]"> × {it.qty}</span>
               </span>
-              <span className="tabular-nums text-[hsl(var(--muted-foreground))]">
+              <span className="tabular-nums font-medium text-[hsl(var(--foreground))]">
                 {it.unitPrice != null ? formatIDR(it.unitPrice * it.qty) : it.maxPrice ? `maks ${formatIDR(it.maxPrice * it.qty)}` : "—"}
               </span>
             </li>
@@ -263,21 +293,21 @@ export function TrackingClient({ token }: { token: string }) {
         </ul>
         {pricing && (
           <div className="mt-4 space-y-1.5 border-t border-[hsl(var(--border))] pt-3">
-            <Row label="Barang" value={formatIDR(pricing.itemsTotal)} />
-            <Row label="Jasa titip" value={formatIDR(pricing.jastipFee)} />
+            <Row label="Barang Toko Bandung" value={formatIDR(pricing.itemsTotal)} />
+            <Row label="Jasa Titip & Antre" value={formatIDR(pricing.jastipFee)} />
             <Row label={`Ongkir ${TIERS[order.tier]?.label ?? ""}`} value={formatIDR(pricing.shippingFee)} />
-            {pricing.ppn > 0 && <Row label="PPN (atas jasa & ongkir)" value={formatIDR(pricing.ppn)} />}
+            {pricing.ppn > 0 && <Row label="PPN" value={formatIDR(pricing.ppn)} />}
             {pricing.discount ? <Row label={`Promo ${pricing.voucherCode ?? ""}`} value={`−${formatIDR(pricing.discount)}`} /> : null}
-            <div className="flex items-center justify-between pt-1 font-semibold">
-              <span>{isFinalPrice ? "Total" : "Estimasi maks."}</span>
-              <span className="tabular-nums">{formatIDR(pricing.total)}</span>
+            <div className="flex items-center justify-between pt-1 font-bold text-base text-[hsl(var(--foreground))]">
+              <span>{isFinalPrice ? "Total Tagihan" : "Total Estimasi"}</span>
+              <span className="tabular-nums text-[hsl(var(--sage-700))]">{formatIDR(pricing.total)}</span>
             </div>
           </div>
         )}
         <p className="mt-4 text-xs text-[hsl(var(--muted-foreground))]">
           Kalau barang habis: {OUT_OF_STOCK_LABEL[order.outOfStockPreference] ?? order.outOfStockPreference}
-          {order.trip ? ` · Open Trip ${order.trip.code}` : ""}
-          {order.deliveryMethod === "pickup" ? " · Ambil sendiri" : order.city ? ` · Dikirim ke ${order.city}` : ""}
+          {order.trip ? ` · Kloter ${order.trip.code}` : ""}
+          {order.deliveryMethod === "pickup" ? " · Ambil di Hub Samarinda" : order.city ? ` · Dikirim ke ${order.city}` : ""}
         </p>
       </GlassCard>
 
@@ -285,11 +315,23 @@ export function TrackingClient({ token }: { token: string }) {
         <ReviewForm token={token} submitted={!!order.reviewSubmitted} onSubmitted={() => void load()} />
       )}
 
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline">
           <a href={waHelp} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="h-4 w-4" aria-hidden /> Tanya admin
+            <MessageCircle className="h-4 w-4" aria-hidden /> Tanya Admin di WA
           </a>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => printCustomerInvoicePdf(invoiceSummary)}
+        >
+          <Printer className="h-4 w-4" aria-hidden /> Download PDF Invoice
+        </Button>
+        <Button asChild variant="outline">
+          <Link href={firstItemQuery}>
+            <RotateCcw className="h-4 w-4" aria-hidden /> Pesan Lagi (Repeat Order)
+          </Link>
         </Button>
         {order.canCancel && (
           <Button variant="ghost" onClick={() => void act("cancel")} disabled={!!busy}>
@@ -297,9 +339,6 @@ export function TrackingClient({ token }: { token: string }) {
             Batalkan pesanan
           </Button>
         )}
-        <Button asChild variant="ghost" className="sm:ml-auto">
-          <Link href="/request">Titip barang lain</Link>
-        </Button>
       </div>
     </div>
   );
@@ -379,7 +418,7 @@ function ReviewForm({ token, submitted, onSubmitted }: { token: string; submitte
           minLength={10}
           maxLength={800}
           required
-          placeholder="Contoh: barang sesuai pesanan, packing rapi, sampai 2 hari."
+          placeholder="Contoh: Roti Macan & Tjilaki 9 sampai masih fresh, packing aman!"
           className="mt-1.5 min-h-[88px] w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--surface))] px-4 py-3 text-sm outline-none focus:border-[hsl(var(--ring))]"
         />
         {error && (
