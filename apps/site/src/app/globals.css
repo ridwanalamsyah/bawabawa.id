@@ -11,48 +11,42 @@
 :root {
   color-scheme: light;
 
-  /* ── Clean Warm Bakery & Lifestyle Palette (No Mossy Green Cast) ──
-     Background: Pastel Cream (#FCF3E4)
-     Card Surface: Pure Milk White (#FFFDF9)
-     Secondary Surface: Butter Cream (#F7EBD4)
-     Text: Warm Espresso (#24201A) & Warm Cocoa (#665E52)
-     Primary Button/Badge: Crisp Matcha (#73772B / #9B9D44)
-     Sparkle Accent: Coral Pink (#E98881) & Soft Blush (#FBE8E6) */
-  --color-bg: #fcf3e4;
-  --color-bg-elevated: #fffdf9;
-  --color-surface-solid: #fffdf9;
-  --color-surface-2: #f7ebd4;
-  --color-text: #24201a;
-  --color-text-strong: #181510;
-  --color-muted: #665e52;
-  --color-subtle: #968c7e;
+  /* ── Clean Off-White Paper, Pure White Cards, Botanical Sage (No Yellow-Moss Cast) ── */
+  --color-bg: #faf7f0;
+  --color-bg-elevated: #ffffff;
+  --color-surface-solid: #ffffff;
+  --color-surface-2: #f4efe4;
+  --color-text: #1c1e1b;
+  --color-text-strong: #111311;
+  --color-muted: #646860;
+  --color-subtle: #969a92;
 
-  /* Crisp Milk-White Card & Glass Primitives with Warm Neutral Shadows */
-  --glass-bg: rgba(255, 253, 249, 0.88);
-  --glass-bg-strong: rgba(255, 253, 249, 0.96);
-  --glass-bg-deep: #fffdf9;
-  --glass-border: rgba(36, 32, 26, 0.09);
-  --glass-border-strong: #e6dac3;
+  /* Glass primitives — frosted white */
+  --glass-bg: rgba(255, 255, 255, 0.84);
+  --glass-bg-strong: rgba(255, 255, 255, 0.94);
+  --glass-bg-deep: #ffffff;
+  --glass-border: rgba(28, 30, 27, 0.08);
+  --glass-border-strong: #e2dfd7;
   --glass-blur: 16px;
   --glass-blur-strong: 24px;
-  --glass-shadow: 0 6px 24px rgba(36, 32, 26, 0.05);
-  --glass-shadow-lg: 0 16px 44px rgba(36, 32, 26, 0.08);
-  --glass-shadow-hover: 0 12px 32px rgba(36, 32, 26, 0.10);
+  --glass-shadow: 0 4px 20px rgba(28, 30, 27, 0.04);
+  --glass-shadow-lg: 0 14px 40px rgba(28, 30, 27, 0.07);
+  --glass-shadow-hover: 0 10px 28px rgba(28, 30, 27, 0.09);
 
-  /* Brand — Crisp Matcha + Coral Pink Sparkle + Butter Cream */
+  /* Brand — clean botanical sage + warm sand */
   --brand-name: "bawabawa.id";
-  --brand-accent: #73772b;
-  --brand-accent-2: #e98881;
-  --brand-accent-strong: #5c6020;
-  --brand-accent-soft: rgba(155, 157, 68, 0.14);
-  --brand-accent-ring: rgba(115, 119, 43, 0.35);
-  --brand-gradient: linear-gradient(135deg, #8b8e38 0%, #6d7026 60%, #e98881 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(245, 223, 173, 0.45) 0%, rgba(233, 136, 129, 0.18) 100%);
+  --brand-accent: #395a45;
+  --brand-accent-2: #d4a373;
+  --brand-accent-strong: #2b4635;
+  --brand-accent-soft: rgba(57, 90, 69, 0.10);
+  --brand-accent-ring: rgba(57, 90, 69, 0.32);
+  --brand-gradient: linear-gradient(135deg, #4b7358 0%, #395a45 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(75, 115, 88, 0.12) 0%, rgba(212, 163, 115, 0.12) 100%);
 
   /* Status */
-  --color-success: #5f6322;
-  --color-warning: #c87d32;
-  --color-danger: #c8524b;
+  --color-success: #395a45;
+  --color-warning: #c07a38;
+  --color-danger: #b8443d;
   --color-info: #4b778d;
 
   /* Spacing scale */
@@ -68,11 +62,11 @@
   --space-16: 64px;
 
   /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 14px;
   --radius-full: 9999px;
   --radius: var(--radius-lg);
 
@@ -84,61 +78,58 @@
   --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
   --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* HSL channels — warm cream background, pure milk white cards, espresso foreground */
-  --bg: 38 79% 94%;
-  --bg-soft: 38 64% 90%;
-  --surface: 40 100% 99%;
-  --surface-2: 39 67% 90%;
-  --foreground: 36 16% 12%;
-  --muted-foreground: 36 11% 36%;
-  --border: 39 40% 83%;
-  --input: 39 40% 83%;
-  --ring: 63 47% 32%;
-  --primary-foreground: 40 100% 99%;
-  --warning: 30 60% 49%;
-  --danger: 4 53% 54%;
+  /* HSL channels — crisp warm off-white background, pure white cards, charcoal ink */
+  --bg: 42 45% 96%;
+  --bg-soft: 40 33% 93%;
+  --surface: 0 0% 100%;
+  --surface-2: 40 30% 93%;
+  --foreground: 100 5% 11%;
+  --muted-foreground: 90 4% 40%;
+  --border: 42 16% 86%;
+  --input: 42 16% 86%;
+  --ring: 142 22% 29%;
+  --primary-foreground: 0 0% 100%;
+  --warning: 28 54% 48%;
+  --danger: 4 50% 48%;
 
-  /* Matcha scale reserved for buttons, badges & active accents */
-  --sage-50:  42 65% 96%;
-  --sage-100: 54 52% 90%;
-  --sage-200: 58 46% 78%;
-  --sage-300: 60 42% 62%;
-  --sage-400: 61 39% 49%;
-  --sage-500: 61 39% 44%;
-  --sage-600: 63 45% 35%;
-  --sage-700: 63 47% 30%;
-  --sage-800: 63 48% 23%;
-  --sage-900: 36 20% 14%;
+  --sage-50:  138 24% 96%;
+  --sage-100: 138 22% 91%;
+  --sage-200: 138 20% 81%;
+  --sage-300: 138 18% 68%;
+  --sage-400: 139 15% 56%;
+  --sage-500: 140 16% 45%;
+  --sage-600: 141 20% 36%;
+  --sage-700: 142 22% 29%;
+  --sage-800: 144 25% 20%;
+  --sage-900: 150 24% 13%;
 
-  --olive-300: 61 44% 66%;
-  --olive-500: 61 39% 44%;
-  --olive-700: 63 47% 30%;
+  --olive-300: 138 18% 68%;
+  --olive-500: 140 16% 45%;
+  --olive-700: 142 22% 29%;
 
-  --emerald-400: 61 42% 56%;
-  --emerald-500: 61 39% 44%;
-  --emerald-600: 63 47% 31%;
+  --emerald-400: 140 24% 58%;
+  --emerald-500: 141 20% 36%;
+  --emerald-600: 142 22% 29%;
 
-  --cream-100: 38 79% 94%;
+  --cream-100: 42 45% 96%;
 
-  --rose-500: 4 71% 71%;
-  --rose-700: 4 58% 48%;
+  --rose-500: 4 50% 48%;
+  --rose-700: 3 52% 34%;
 
-  /* Warm Butter, Coral Pink Sparkle & Sky accents */
-  --amber-100: 41 78% 90%;
-  --amber-400: 40 68% 72%;
-  --amber-600: 34 62% 36%;
-  --sky-100: 200 75% 93%;
-  --sky-500: 201 70% 44%;
+  /* Soft accent palette for category tiles & status badges */
+  --amber-100: 40 85% 91%;
+  --amber-400: 38 88% 60%;
+  --amber-600: 30 76% 36%;
+  --sky-100: 200 72% 92%;
+  --sky-500: 201 68% 44%;
   --sky-600: 203 70% 34%;
-  --coral-100: 5 78% 94%;
-  --coral-500: 4 71% 71%;
-  --coral-600: 4 58% 48%;
-  --plum-100: 280 45% 94%;
-  --plum-600: 282 35% 42%;
+  --coral-100: 10 80% 93%;
+  --coral-500: 9 70% 56%;
+  --coral-600: 8 62% 42%;
+  --plum-100: 280 42% 93%;
+  --plum-600: 282 34% 40%;
 }
 
-/* Lock light theme even if .dark or [data-theme="dark"] is present so the
-   site never turns into a dark mossy green background. */
 [data-theme="dark"],
 .dark {
   color-scheme: light;
@@ -156,29 +147,29 @@
   --color-ring: var(--brand-accent-ring);
 
   --color-primary: var(--brand-accent);
-  --color-primary-foreground: #fffdf9;
+  --color-primary-foreground: #ffffff;
   --color-accent: var(--brand-accent-2);
-  --color-accent-foreground: #24201a;
+  --color-accent-foreground: #1c1e1b;
 
   /* Compatibility shims */
-  --color-sage-50:  #faf6ec;
-  --color-sage-100: #eff0d1;
-  --color-sage-200: #dfe1a9;
-  --color-sage-300: #c4c676;
-  --color-sage-400: #adaf4e;
-  --color-sage-500: #9b9d44;
-  --color-sage-600: #7f8231;
-  --color-sage-700: #6d7026;
-  --color-sage-800: #55571d;
-  --color-sage-900: #24201a;
+  --color-sage-50:  #f2f7f4;
+  --color-sage-100: #e1ede5;
+  --color-sage-200: #c2dacb;
+  --color-sage-300: #9dc2ab;
+  --color-sage-400: #7ca78c;
+  --color-sage-500: #60856e;
+  --color-sage-600: #496e57;
+  --color-sage-700: #395a45;
+  --color-sage-800: #264030;
+  --color-sage-900: #19291f;
 
-  --color-olive-300: #ccce8e;
-  --color-olive-500: #9b9d44;
-  --color-olive-700: #6d7026;
+  --color-olive-300: #9dc2ab;
+  --color-olive-500: #60856e;
+  --color-olive-700: #395a45;
 
-  --color-emerald-400: #babc6b;
-  --color-emerald-500: #9b9d44;
-  --color-emerald-600: #73772b;
+  --color-emerald-400: #77af8b;
+  --color-emerald-500: #496e57;
+  --color-emerald-600: #395a45;
 
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
@@ -186,7 +177,7 @@
 
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Fraunces", "Plus Jakarta Sans", Georgia, serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
@@ -220,8 +211,6 @@ html, body {
 body {
   font-size: 16px;
   line-height: 1.55;
-  /* Flat paper background. The old four-blob gradient mesh made every
-     page look like the same template. */
   background-color: hsl(var(--bg));
   transition: background-color var(--motion-base), color var(--motion-base);
 }
@@ -231,15 +220,15 @@ body {
   background-image: none;
 }
 
-/* Headings use the UI sans in a heavy weight — direct and legible. */
+/* Headings use Plus Jakarta Sans — clean, modern, and legible. */
 h1, h2, h3 {
   font-family: var(--font-sans);
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 .font-display {
-  font-family: var(--font-display), "Fraunces", Georgia, serif;
-  letter-spacing: -0.015em;
+  font-family: var(--font-sans);
+  letter-spacing: -0.025em;
 }
 
 /* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */

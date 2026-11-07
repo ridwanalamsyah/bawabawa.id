@@ -2,15 +2,35 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Check, Plus, Search, ShoppingBag, ShoppingCart, Store } from "lucide-react";
+import { Check, Plus, Search, ShoppingCart } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn, formatIDR } from "@/lib/utils";
 import { cart, cartCount } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import type { CatalogProduct } from "@/app/api/catalog/route";
+import { VIRAL_BANDUNG_CATALOG } from "@/lib/viral-bandung-data";
 import { delay } from "@/lib/motion";
+
+const IMAGE_BY_ID = new Map(
+  VIRAL_BANDUNG_CATALOG.filter((p) => p.imageUrl).map((p) => [p.id, p.imageUrl!])
+);
+const IMAGE_BY_NAME = new Map(
+  VIRAL_BANDUNG_CATALOG.filter((p) => p.imageUrl).map((p) => [p.name.toLowerCase(), p.imageUrl!])
+);
+
+function resolveProductImage(product: CatalogProduct): string {
+  if (product.imageUrl) return product.imageUrl;
+  const byId = IMAGE_BY_ID.get(product.id);
+  if (byId) return byId;
+  const byName = IMAGE_BY_NAME.get(product.name.toLowerCase());
+  if (byName) return byName;
+  const cat = (product.category ?? "").toLowerCase();
+  if (cat.includes("minuman") || cat.includes("kopi")) return "/images/catalog/kopi-makjay.jpg";
+  if (cat.includes("snack") || cat.includes("keripik")) return "/images/catalog/basreng-bandung.jpg";
+  if (cat.includes("parfum") || cat.includes("fashion")) return "/images/catalog/in-parfume-fashion.jpg";
+  return "/images/catalog/roti-macan.jpg";
+}
 
 export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
   const categories = useMemo(
@@ -54,13 +74,13 @@ export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
           type="button"
           onClick={() => setOnlySamarindaReady((s) => !s)}
           className={cn(
-            "rounded-full border px-4 h-10 text-xs font-bold transition-colors shrink-0",
+            "rounded-full border px-4 h-10 text-xs font-semibold transition-colors shrink-0",
             onlySamarindaReady
-              ? "border-[#24201A] bg-[#24201A] text-[#FCF3E4]"
-              : "border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[#24201A] hover:bg-[#F5DFAD]"
+              ? "border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] text-[hsl(var(--bg))]"
+              : "border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--surface-2))]"
           )}
         >
-          ⚡ Filter Ready Stock di Hub Samarinda
+          Ready di Hub Samarinda
         </button>
       </div>
 
@@ -74,7 +94,7 @@ export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
               aria-selected={active === c}
               onClick={() => setActive(c)}
               className={cn(
-                "shrink-0 rounded-full border px-4 h-9 text-xs sm:text-sm font-semibold transition",
+                "shrink-0 rounded-full border px-4 h-9 text-xs sm:text-sm font-medium transition",
                 active === c
                   ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-700))] text-white"
                   : "border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:bg-[hsl(var(--surface-2))]"
@@ -86,7 +106,7 @@ export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
         </div>
       )}
 
-      <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {visible.map((p, i) => (
           <li key={p.id} data-reveal style={delay(Math.min(i, 7) * 50)}>
             <ProductCard product={p} />
@@ -100,6 +120,7 @@ export function CatalogGrid({ products }: { products: CatalogProduct[] }) {
 function ProductCard({ product }: { product: CatalogProduct }) {
   const [variant, setVariant] = useState(product.variants[0] ?? "");
   const [added, setAdded] = useState(false);
+  const photoUrl = resolveProductImage(product);
 
   const add = () => {
     cart.add({
@@ -107,7 +128,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       name: product.name,
       price: product.price,
       weightKg: product.weightKg ?? 0.5,
-      imageUrl: product.imageUrl,
+      imageUrl: photoUrl,
       variant: variant || undefined,
       tripId: product.tripId,
     });
@@ -117,65 +138,45 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   };
 
   return (
-    <GlassCard className="lift h-full overflow-hidden flex flex-col justify-between p-4">
-      <div className="flex flex-col gap-2">
-        {product.imageUrl && (
-          <div className="aspect-4/3 rounded-xl overflow-hidden bg-[hsl(var(--surface-2))] mb-1">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
-          </div>
-        )}
-
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          {product.category && (
-            <Badge variant="neutral" className="text-[10px]">
-              {product.category}
-            </Badge>
+    <GlassCard className="lift h-full overflow-hidden flex flex-col justify-between p-0">
+      <div>
+        <div className="relative aspect-[4/3] overflow-hidden bg-[hsl(var(--surface-2))]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={photoUrl}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+          {product.readyAtSamarinda && (
+            <span className="absolute top-3 left-3 rounded-full bg-[hsl(var(--surface)/0.92)] backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-medium text-[hsl(var(--sage-800))]">
+              Ready Hub Samarinda
+            </span>
           )}
-          {product.isViralBadge ? (
-            <span className="rounded-full bg-[#F5DFAD] px-2.5 py-0.5 text-[10px] font-bold text-[#24201A]">
-              {product.isViralBadge}
-            </span>
-          ) : product.readyAtSamarinda ? (
-            <span className="rounded-full bg-[hsl(var(--sage-100))] px-2.5 py-0.5 text-[10px] font-bold text-[hsl(var(--sage-800))]">
-              Ready Hub SMD
-            </span>
-          ) : null}
         </div>
 
-        <h2 className="text-base font-bold leading-snug text-[#24201A] mt-1">{product.name}</h2>
-
-        {product.originStore && (
-          <p className="text-xs font-semibold text-[hsl(var(--sage-700))] flex items-center gap-1">
-            <Store className="h-3.5 w-3.5 shrink-0" aria-hidden /> {product.originStore}
-          </p>
-        )}
-
-        {product.description && (
-          <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-3 leading-relaxed">
-            {product.description}
-          </p>
-        )}
-
-        {product.shelfLife && (
-          <p className="text-[11px] font-medium text-[#9E3B34] bg-[#FBE8E6]/60 rounded-lg px-2 py-1 self-start">
-            Ketahanan: {product.shelfLife}
-          </p>
-        )}
+        <div className="p-4 pb-2">
+          {product.originStore && (
+            <p className="text-xs text-[hsl(var(--muted-foreground))] truncate">{product.originStore}</p>
+          )}
+          <h2 className="mt-0.5 text-sm sm:text-base font-semibold leading-snug text-[hsl(var(--foreground))]">
+            {product.name}
+          </h2>
+          {product.description && (
+            <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[hsl(var(--border))] flex flex-col gap-2.5">
+      <div className="p-4 pt-3 mt-1 border-t border-[hsl(var(--border)/0.7)] flex flex-col gap-2.5">
         <div className="flex items-baseline justify-between">
-          <div>
-            <span className="text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] block">
-              Harga Toko Bandung
-            </span>
-            <p className="text-lg font-extrabold tabular-nums text-[#24201A]">
-              {formatIDR(product.price)}
-            </p>
-          </div>
+          <p className="text-base font-bold tabular-nums text-[hsl(var(--foreground))]">
+            {formatIDR(product.price)}
+          </p>
           {product.weightKg != null && (
-            <span className="text-xs text-[hsl(var(--muted-foreground))]">± {product.weightKg} kg</span>
+            <span className="text-xs text-[hsl(var(--muted-foreground))]">~{product.weightKg} kg</span>
           )}
         </div>
 
@@ -185,7 +186,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
             <select
               value={variant}
               onChange={(e) => setVariant(e.target.value)}
-              className="h-9 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--bg))] px-2.5 text-xs font-medium"
+              className="h-9 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--bg))] px-2.5 text-xs"
             >
               {product.variants.map((v) => (
                 <option key={v} value={v}>
@@ -219,17 +220,17 @@ export function CartBar() {
   const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-      <div className="mx-auto max-w-3xl rounded-2xl border border-[#24201A] bg-[#24201A] text-[#FCF3E4] shadow-xl px-4 py-3 flex items-center gap-3">
-        <ShoppingCart key={count} className="animate-bump h-5 w-5 text-[#F5DFAD] shrink-0" aria-hidden />
+      <div className="mx-auto max-w-3xl glass rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3">
+        <ShoppingCart key={count} className="animate-bump h-5 w-5 text-[hsl(var(--sage-700))] shrink-0" aria-hidden />
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-bold truncate">
-            {count} barang dipilih · Harga toko {formatIDR(subtotal)}
+          <p className="text-xs sm:text-sm font-semibold truncate">
+            {count} barang · {formatIDR(subtotal)}
           </p>
-          <p className="text-[11px] text-[#FCF3E4]/75 truncate">
-            Lanjut pilih Jalur Kirim (Bandung / Travel Jabar / Samarinda) &amp; bayar via Transfer/QRIS
+          <p className="text-[11px] text-[hsl(var(--muted-foreground))] truncate">
+            Harga toko Bandung, belum termasuk jasa titip &amp; ongkir
           </p>
         </div>
-        <Button asChild variant="accent" size="sm" className="shrink-0 font-bold text-[#24201A]">
+        <Button asChild variant="primary" size="sm" className="shrink-0">
           <Link href="/request?from=cart">Lanjut Pesan →</Link>
         </Button>
       </div>

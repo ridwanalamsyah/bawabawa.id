@@ -6,16 +6,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Loader2,
-  MapPin,
-  MessageCircle,
   Minus,
-  Plane,
   Plus,
-  ShoppingBag,
-  Sparkles,
-  Store,
   Trash2,
-  Truck,
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/card";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -97,7 +90,6 @@ export function RequestFlow({
     summary: InvoiceOrderSummary;
   } | null>(null);
 
-  // Hydrate initial items from URL query params or Cart
   useEffect(() => {
     if (typeof window === "undefined") return;
     const sp = new URLSearchParams(window.location.search);
@@ -169,7 +161,6 @@ export function RequestFlow({
     const prod = VIRAL_BANDUNG_CATALOG.find((p) => p.id === prodId);
     if (!prod) return;
     setLines((prev) => {
-      // Replace first empty line if blank
       if (prev.length === 1 && !prev[0].name.trim()) {
         return [
           {
@@ -252,7 +243,6 @@ export function RequestFlow({
 
     setSubmitting(true);
 
-    // Map 3-zone to ERP tier ('regular' | 'air' | 'batch') while preserving full zone metadata in notes
     const mappedTier =
       zoneId === "bandung_instant" ? "air" : zoneId === "jabar_travel" ? "regular" : "batch";
 
@@ -346,17 +336,17 @@ export function RequestFlow({
   if (submittedOrder) {
     return (
       <div className="space-y-6 animate-rise">
-        <GlassCard className="p-6 sm:p-8 border-2 border-[hsl(var(--sage-700))] bg-[#FFFDF9]">
+        <GlassCard className="p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[hsl(var(--sage-700))] text-white">
-                <CheckCircle2 className="h-6 w-6" />
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-[hsl(var(--sage-700))] text-white">
+                <CheckCircle2 className="h-5 w-5" />
               </span>
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[hsl(var(--sage-700))]">
-                  Pesanan Berhasil Dicatat
+                <span className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--sage-700))]">
+                  Pesanan Tercatat
                 </span>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#24201A]">
+                <h2 className="text-xl sm:text-2xl font-bold">
                   Kode Pesanan: <span className="font-mono">{submittedOrder.summary.code}</span>
                 </h2>
               </div>
@@ -364,14 +354,14 @@ export function RequestFlow({
             {submittedOrder.token && (
               <Button asChild variant="outline" size="sm">
                 <Link href={`/track/${submittedOrder.token}`}>
-                  Buka Halaman Lacak Pesanan →
+                  Buka Halaman Lacak →
                 </Link>
               </Button>
             )}
           </div>
 
           <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
-            Pesananmu sudah masuk ke sistem antrean belanja Bandung kami. Silakan lanjutkan pembayaran via <strong>Transfer Bank (BCA/Mandiri/SeaBank)</strong> atau <strong>Scan QRIS</strong> di bawah, lalu klik tombol <strong>Konfirmasi &amp; Kirim Bukti ke WA Admin</strong>.
+            Pesananmu sudah masuk ke daftar belanja Bandung. Lanjutkan pembayaran via <strong>Transfer Bank (BCA / Mandiri / SeaBank)</strong> atau <strong>QRIS</strong> di bawah, lalu kirim bukti ke WhatsApp Admin.
           </p>
         </GlassCard>
 
@@ -382,20 +372,15 @@ export function RequestFlow({
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      {/* Kolom Kiri: 3 Bagian Form 1 Halaman */}
       <div className="lg:col-span-8 space-y-6">
         {/* BAGIAN 1: PILIH JALUR PENGIRIMAN */}
         <GlassCard className="p-5 sm:p-6">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-[#24201A] text-xs font-bold text-[#FCF3E4]">
-              1
-            </span>
-            <h2 className="text-lg font-bold text-[#24201A]">
-              Pilih Jalur Pengiriman (Dari Bandung)
-            </h2>
-          </div>
+          <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] font-semibold">
+            Langkah 1
+          </p>
+          <h2 className="mt-1 text-lg font-semibold">Jalur Pengiriman dari Bandung</h2>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {zones.map((z) => {
               const active = zoneId === z.id;
               return (
@@ -404,29 +389,19 @@ export function RequestFlow({
                   type="button"
                   onClick={() => handleZoneChange(z.id)}
                   className={cn(
-                    "rounded-2xl border p-4 text-left transition-all flex flex-col justify-between gap-2",
+                    "rounded-xl border p-3.5 text-left transition-colors",
                     active
-                      ? "border-2 border-[hsl(var(--sage-700))] bg-[#FCF3E4] shadow-xs"
-                      : "border-[hsl(var(--border))] bg-[hsl(var(--bg))] hover:bg-[hsl(var(--surface-2))]"
+                      ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-50))]"
+                      : "border-[hsl(var(--border))] bg-[hsl(var(--surface))] hover:bg-[hsl(var(--surface-2))]"
                   )}
                 >
-                  <div>
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-xs font-extrabold text-[#24201A]">{z.shortLabel}</span>
-                      {active && (
-                        <span className="rounded-full bg-[hsl(var(--sage-700))] px-2 py-0.5 text-[10px] font-bold text-white">
-                          Dipilih
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 text-xs font-semibold text-[hsl(var(--sage-700))]">{z.eta}</p>
-                    <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))] leading-snug">
-                      {z.description}
-                    </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-[hsl(var(--foreground))]">{z.shortLabel}</span>
+                    <span className="text-[11px] font-medium text-[hsl(var(--sage-700))]">{z.eta}</span>
                   </div>
-                  <div className="pt-2 border-t border-[hsl(var(--border)/0.7)] text-[11px] font-bold text-[#24201A]">
-                    Ongkir mulai {formatIDR(z.baseShippingRp)} · Jastip min {formatIDR(z.jastipFeeMinRp)}
-                  </div>
+                  <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))]">
+                    Ongkir mulai {formatIDR(z.baseShippingRp)} · Jastip {Math.round(z.jastipFeeRate * 100)}%
+                  </p>
                 </button>
               );
             })}
@@ -439,7 +414,7 @@ export function RequestFlow({
                 id="select-city"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="mt-1.5 h-11 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--bg))] px-3 text-sm font-medium"
+                className="mt-1.5 h-11 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--bg))] px-3 text-sm"
               >
                 {estimate.zone.cities.map((c) => (
                   <option key={c} value={c}>
@@ -451,12 +426,12 @@ export function RequestFlow({
 
             {estimate.zone.shuttles && estimate.zone.shuttles.length > 0 && (
               <div>
-                <Label htmlFor="select-shuttle">Pilihan Kurir / Shuttle Travel / Pickup Hub</Label>
+                <Label htmlFor="select-shuttle">Kurir / Shuttle Travel / Pickup Hub</Label>
                 <select
                   id="select-shuttle"
                   value={selectedShuttle}
                   onChange={(e) => setSelectedShuttle(e.target.value)}
-                  className="mt-1.5 h-11 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--bg))] px-3 text-sm font-medium"
+                  className="mt-1.5 h-11 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--bg))] px-3 text-sm"
                 >
                   {estimate.zone.shuttles.map((s) => (
                     <option key={s} value={s}>
@@ -471,56 +446,43 @@ export function RequestFlow({
 
         {/* BAGIAN 2: DAFTAR BARANG & TOKO BANDUNG */}
         <GlassCard className="p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5">
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#24201A] text-xs font-bold text-[#FCF3E4]">
-                2
-              </span>
-              <h2 className="text-lg font-bold text-[#24201A]">
-                Daftar Barang &amp; Toko Bandung yang Dititip
-              </h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] font-semibold">
+                Langkah 2
+              </p>
+              <h2 className="mt-1 text-lg font-semibold">Daftar Barang Titipan</h2>
             </div>
-            <span className="text-xs text-[hsl(var(--muted-foreground))]">
-              Bisa klik tambah cepat atau ketik barang apa saja
-            </span>
-          </div>
-
-          {/* Quick-Add Pill dari Katalog Viral Bandung */}
-          <div className="mt-3 rounded-2xl bg-[#FCF3E4] border border-[#E6DAC3] p-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#24201A] flex items-center gap-1">
-              <Sparkles className="h-3.5 w-3.5 text-[#C8524B]" /> Tambah Cepat Kuliner &amp; Barang Viral Bandung:
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {VIRAL_BANDUNG_CATALOG.slice(0, 10).map((prod) => (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[hsl(var(--muted-foreground))]">
+              <span>Tambah cepat:</span>
+              {VIRAL_BANDUNG_CATALOG.slice(0, 5).map((prod) => (
                 <button
                   key={prod.id}
                   type="button"
                   onClick={() => addQuickProduct(prod.id)}
-                  className="inline-flex items-center gap-1 rounded-full border border-[#E6DAC3] bg-[hsl(var(--surface))] px-2.5 py-1 text-xs font-semibold text-[#24201A] hover:border-[hsl(var(--sage-700))] hover:bg-[#F5DFAD] transition-colors"
+                  className="underline underline-offset-4 hover:text-[hsl(var(--foreground))]"
                 >
-                  <Plus className="h-3 w-3 text-[hsl(var(--sage-700))]" />
-                  {prod.name.split("—")[0].trim()} ({formatIDR(prod.price)})
+                  + {prod.name.split("—")[0].trim()}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Baris Item */}
           <div className="mt-4 space-y-4">
             {lines.map((line, index) => (
               <div
                 key={line.id}
-                className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] p-4 space-y-3"
+                className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg)/0.6)] p-4 space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[hsl(var(--sage-700))]">
+                  <span className="text-xs font-semibold text-[hsl(var(--muted-foreground))]">
                     Barang #{index + 1}
                   </span>
                   {lines.length > 1 && (
                     <button
                       type="button"
                       onClick={() => setLines((prev) => prev.filter((item) => item.id !== line.id))}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#C8524B] hover:underline"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-[hsl(var(--danger))] hover:underline"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Hapus
                     </button>
@@ -543,7 +505,7 @@ export function RequestFlow({
                     />
                   </div>
                   <div>
-                    <Label>Nama Toko / Lokasi di Bandung</Label>
+                    <Label>Nama Toko di Bandung</Label>
                     <Input
                       value={line.store}
                       onChange={(e) =>
@@ -551,7 +513,7 @@ export function RequestFlow({
                           prev.map((it) => (it.id === line.id ? { ...it, store: e.target.value } : it))
                         )
                       }
-                      placeholder="Contoh: Roti Macan Buah Batu / Pasar Cihapit / Banceuy"
+                      placeholder="Contoh: Roti Macan Buah Batu / Pasar Cihapit"
                       className="mt-1"
                     />
                   </div>
@@ -559,7 +521,7 @@ export function RequestFlow({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="col-span-2 sm:col-span-2">
-                    <Label>Varian Rasa / Ukuran / Catatan</Label>
+                    <Label>Varian / Catatan</Label>
                     <Input
                       value={line.variant}
                       onChange={(e) =>
@@ -572,7 +534,7 @@ export function RequestFlow({
                     />
                   </div>
                   <div>
-                    <Label>Jumlah (Qty)</Label>
+                    <Label>Jumlah</Label>
                     <div className="mt-1 flex items-center gap-1">
                       <button
                         type="button"
@@ -583,7 +545,7 @@ export function RequestFlow({
                             )
                           )
                         }
-                        className="h-10 w-9 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] grid place-items-center"
+                        className="h-11 w-9 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] grid place-items-center"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </button>
@@ -599,7 +561,7 @@ export function RequestFlow({
                             )
                           )
                         }
-                        className="h-10 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--surface))] text-center text-sm font-bold"
+                        className="h-11 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--surface))] text-center text-sm font-semibold"
                       />
                       <button
                         type="button"
@@ -610,14 +572,14 @@ export function RequestFlow({
                             )
                           )
                         }
-                        className="h-10 w-9 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] grid place-items-center"
+                        className="h-11 w-9 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] grid place-items-center"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
                   <div>
-                    <Label>Perkiraan Harga/Pcs (Rp)</Label>
+                    <Label>Harga Satuan (Rp)</Label>
                     <Input
                       inputMode="numeric"
                       value={line.unitPriceRp ? line.unitPriceRp.toLocaleString("id-ID") : ""}
@@ -647,20 +609,19 @@ export function RequestFlow({
             </Button>
           </div>
 
-          {/* Opsi Jika Stok Habis di Toko Bandung */}
           <div className="mt-5 pt-4 border-t border-[hsl(var(--border))]">
-            <Label>Jika varian/barang viral sedang habis di toko Bandung:</Label>
+            <Label>Jika varian sedang habis di toko Bandung:</Label>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {[
                 {
                   id: "substitute" as const,
-                  title: "Ganti Varian Best Seller Lain",
-                  desc: "Agar tetap kebagian kloter/travel hari ini",
+                  title: "Ganti Varian Terfavorit",
+                  desc: "Agar tetap ikut pengiriman hari ini",
                 },
                 {
                   id: "ask" as const,
-                  title: "Kabari via WhatsApp Dulu",
-                  desc: "Tim shopper chat kamu dari toko",
+                  title: "Konfirmasi via WhatsApp",
+                  desc: "Shopper chat kamu dari toko",
                 },
                 {
                   id: "cancel" as const,
@@ -673,13 +634,13 @@ export function RequestFlow({
                   type="button"
                   onClick={() => setOutOfStock(opt.id)}
                   className={cn(
-                    "rounded-xl border p-3 text-left transition-all",
+                    "rounded-xl border p-3 text-left transition-colors",
                     outOfStock === opt.id
-                      ? "border-2 border-[hsl(var(--sage-700))] bg-[#FCF3E4]"
-                      : "border-[hsl(var(--border))] bg-[hsl(var(--bg))]"
+                      ? "border-[hsl(var(--sage-700))] bg-[hsl(var(--sage-50))]"
+                      : "border-[hsl(var(--border))] bg-[hsl(var(--surface))]"
                   )}
                 >
-                  <p className="text-xs font-bold text-[#24201A]">{opt.title}</p>
+                  <p className="text-xs font-semibold">{opt.title}</p>
                   <p className="mt-0.5 text-[11px] text-[hsl(var(--muted-foreground))]">{opt.desc}</p>
                 </button>
               ))}
@@ -687,16 +648,12 @@ export function RequestFlow({
           </div>
         </GlassCard>
 
-        {/* BAGIAN 3: DATA PEMESAN & ALAMAT / PICKUP POINT */}
+        {/* BAGIAN 3: DATA PEMESAN & ALAMAT */}
         <GlassCard className="p-5 sm:p-6">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-[#24201A] text-xs font-bold text-[#FCF3E4]">
-              3
-            </span>
-            <h2 className="text-lg font-bold text-[#24201A]">
-              Data WhatsApp &amp; Alamat Pengiriman
-            </h2>
-          </div>
+          <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] font-semibold">
+            Langkah 3
+          </p>
+          <h2 className="mt-1 text-lg font-semibold">Kontak &amp; Alamat Penerima</h2>
 
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -711,14 +668,14 @@ export function RequestFlow({
               />
             </div>
             <div>
-              <Label htmlFor="cust-phone">Nomor WhatsApp Aktif *</Label>
+              <Label htmlFor="cust-phone">Nomor WhatsApp *</Label>
               <Input
                 id="cust-phone"
                 required
                 inputMode="tel"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="Contoh: 081234567890"
+                placeholder="081234567890"
                 className="mt-1"
               />
             </div>
@@ -727,10 +684,10 @@ export function RequestFlow({
           <div className="mt-4">
             <Label htmlFor="cust-address">
               {zoneId === "samarinda_hub"
-                ? "Alamat Lengkap di Samarinda/Kaltim (Atau tulis: Ambil di Pickup Point Hub Samarinda) *"
+                ? "Alamat di Samarinda/Kaltim (Atau tulis: Ambil di Hub Samarinda) *"
                 : zoneId === "jabar_travel"
-                ? "Alamat Rumah atau Nama Pool Shuttle Travel Tujuan *"
-                : "Alamat Lengkap di Bandung Raya (Rumah / Kos / Nama Hotel + No Kamar / Stasiun) *"}
+                ? "Alamat Rumah atau Pool Shuttle Travel Tujuan *"
+                : "Alamat Lengkap di Bandung Raya (Rumah / Hotel / Stasiun) *"}
             </Label>
             <Textarea
               id="cust-address"
@@ -739,10 +696,10 @@ export function RequestFlow({
               onChange={(e) => setStreetAddress(e.target.value)}
               placeholder={
                 zoneId === "samarinda_hub"
-                  ? "Contoh: Ambil di Hub Bawabawa Samarinda / Jl. Ir. H. Juanda No. 12 Samarinda Ulu"
+                  ? "Contoh: Ambil di Hub Bawabawa Samarinda / Jl. Ir. H. Juanda No. 12 Samarinda"
                   : zoneId === "jabar_travel"
                   ? "Contoh: Ambil di Pool Cititrans Tebet / Antar ke Jl. Kemang Raya No. 8 Jakarta Selatan"
-                  : "Contoh: Hotel Savoy Homann Kamar 302 Jl. Asia Afrika / Jl. Dago Asri No. 14 Bandung"
+                  : "Contoh: Hotel Savoy Homann Kamar 302 Jl. Asia Afrika Bandung"
               }
               className="mt-1 min-h-[84px]"
             />
@@ -750,55 +707,50 @@ export function RequestFlow({
 
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="cust-voucher">Kode Voucher / Referral (Opsional)</Label>
+              <Label htmlFor="cust-voucher">Kode Voucher (Opsional)</Label>
               <Input
                 id="cust-voucher"
                 value={voucherCode}
                 onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                placeholder="Ketik BAWASMD atau KANGENBDG"
+                placeholder="BAWASMD / KANGENBDG"
                 className="mt-1 uppercase font-mono"
               />
-              <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">
-                Khusus pelanggan Partner Hub Samarinda: gunakan kode <strong>BAWASMD</strong> (Potongan Rp15.000).
-              </p>
             </div>
             <div>
-              <Label htmlFor="cust-notes">Catatan Tambahan untuk Shopper</Label>
+              <Label htmlFor="cust-notes">Catatan Tambahan</Label>
               <Input
                 id="cust-notes"
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
-                placeholder="Contoh: Minta plastik tambahan / kartu ucapan"
+                placeholder="Opsional"
                 className="mt-1"
               />
             </div>
           </div>
 
           {submitError && (
-            <div role="alert" className="mt-4 rounded-xl bg-[#FBE8E6] border border-[#C8524B] p-3 text-xs font-semibold text-[#9E3B34]">
+            <div role="alert" className="mt-4 rounded-xl border border-[hsl(var(--danger)/0.4)] bg-[hsl(var(--danger)/0.08)] p-3 text-xs font-medium text-[hsl(var(--danger))]">
               {submitError}
             </div>
           )}
         </GlassCard>
       </div>
 
-      {/* Kolom Kanan: Ringkasan Estimasi Real-time & Tombol Submit */}
+      {/* Kolom Kanan: Ringkasan Estimasi */}
       <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
-        <GlassCard className="p-5 sm:p-6 border-2 border-[#24201A]">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F5DFAD] px-2.5 py-0.5 text-[11px] font-bold text-[#24201A]">
+        <GlassCard className="p-5 sm:p-6">
+          <p className="text-xs uppercase tracking-[0.18em] text-[hsl(var(--sage-700))] font-semibold">
             {estimate.zone.shortLabel}
-          </span>
-          <h3 className="mt-2 font-display text-xl font-bold text-[#24201A]">
-            Ringkasan Estimasi Pesanan
-          </h3>
+          </p>
+          <h3 className="mt-1 text-lg font-semibold">Ringkasan Estimasi</h3>
           <p className="mt-0.5 text-xs text-[hsl(var(--muted-foreground))]">
-            Tujuan: <strong>{selectedCity}</strong>
+            Tujuan: {selectedCity}
           </p>
 
           <ul className="mt-4 space-y-2 border-t border-[hsl(var(--border))] pt-3 text-xs">
             {lines.map((l, i) => (
               <li key={l.id} className="flex items-start justify-between gap-2">
-                <span className="text-[#24201A] font-medium">
+                <span className="font-medium">
                   {i + 1}. {l.name || "Barang belum diisi"}{" "}
                   <span className="text-[hsl(var(--muted-foreground))]">× {l.qty}</span>
                 </span>
@@ -811,30 +763,30 @@ export function RequestFlow({
 
           <dl className="mt-4 space-y-2 border-t border-[hsl(var(--border))] pt-3 text-xs">
             <div className="flex justify-between">
-              <dt className="text-[hsl(var(--muted-foreground))]">Subtotal Harga Toko Bandung</dt>
+              <dt className="text-[hsl(var(--muted-foreground))]">Subtotal harga toko</dt>
               <dd className="font-semibold tabular-nums">{formatIDR(estimate.itemSubtotalRp)}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-[hsl(var(--muted-foreground))]">
-                Jasa Titip &amp; Antre ({Math.round(estimate.zone.jastipFeeRate * 100)}%)
+                Jasa titip ({Math.round(estimate.zone.jastipFeeRate * 100)}%)
               </dt>
               <dd className="font-semibold tabular-nums">{formatIDR(estimate.jastipFeeRp)}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-[hsl(var(--muted-foreground))]">
-                Ongkir {estimate.zone.shortLabel} ({estimate.billableKg} kg)
+                Ongkir ({estimate.billableKg} kg)
               </dt>
               <dd className="font-semibold tabular-nums">{formatIDR(estimate.shippingRp)}</dd>
             </div>
             {estimate.discountRp > 0 && (
-              <div className="flex justify-between text-[hsl(var(--sage-700))] font-bold">
-                <dt>Potongan Voucher ({voucherCode})</dt>
+              <div className="flex justify-between text-[hsl(var(--sage-700))] font-semibold">
+                <dt>Potongan ({voucherCode})</dt>
                 <dd className="tabular-nums">-{formatIDR(estimate.discountRp)}</dd>
               </div>
             )}
             <div className="flex items-baseline justify-between border-t border-[hsl(var(--border))] pt-2.5">
-              <dt className="text-sm font-bold text-[#24201A]">Total Estimasi</dt>
-              <dd className="text-xl font-extrabold tabular-nums text-[hsl(var(--sage-700))]">
+              <dt className="text-sm font-semibold">Total Estimasi</dt>
+              <dd className="text-xl font-bold tabular-nums text-[hsl(var(--sage-700))]">
                 {formatIDR(estimate.totalRp)}
               </dd>
             </div>
@@ -843,17 +795,17 @@ export function RequestFlow({
           <Button type="submit" size="lg" className="mt-5 w-full" disabled={submitting}>
             {submitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Memproses Pesanan...
+                <Loader2 className="h-4 w-4 animate-spin" /> Memproses...
               </>
             ) : (
               <>
-                Buat Pesanan &amp; Lihat Rekening/QRIS <ArrowRight className="h-4 w-4" />
+                Buat Pesanan &amp; Lihat Rekening <ArrowRight className="h-4 w-4" />
               </>
             )}
           </Button>
 
           <p className="mt-3 text-[11px] text-center text-[hsl(var(--muted-foreground))] leading-relaxed">
-            Setelah klik tombol di atas, akan muncul <strong>Nomor Rekening BCA/Mandiri, QRIS</strong>, Nota PDF, dan tombol <strong>Konfirmasi Direct WhatsApp</strong>.
+            Nomor rekening BCA/Mandiri, QRIS, Nota PDF, dan tombol konfirmasi WhatsApp akan tampil setelah langkah ini.
           </p>
         </GlassCard>
       </div>

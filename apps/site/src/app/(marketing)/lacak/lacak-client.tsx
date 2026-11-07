@@ -67,14 +67,14 @@ export function LacakClient() {
 
       {links.length > 0 && (
         <GlassCard className="p-5 sm:p-6">
-          <h2 className="font-bold text-[#24201A]">Riwayat Pesanan dari Perangkat Ini</h2>
+          <h2 className="font-semibold">Riwayat Pesanan dari Perangkat Ini</h2>
           <ul className="mt-3 divide-y divide-[hsl(var(--border))]">
             {links.map((l) => (
               <li key={l.token}>
                 <Link href={`/track/${l.token}`} className="flex items-center gap-3 py-3 hover:underline">
-                  <span className="font-mono font-bold text-[#24201A]">{l.code}</span>
+                  <span className="font-mono font-semibold">{l.code}</span>
                   <span className="text-xs text-[hsl(var(--muted-foreground))]">{formatDate(l.createdAt)}</span>
-                  <span className="ml-auto tabular-nums text-sm font-bold text-[hsl(var(--sage-700))]">
+                  <span className="ml-auto tabular-nums text-sm font-semibold text-[hsl(var(--sage-700))]">
                     {formatIDR(l.estimateTotal)}
                   </span>
                   <ArrowRight className="h-4 w-4" aria-hidden />
@@ -85,15 +85,14 @@ export function LacakClient() {
         </GlassCard>
       )}
 
-      {/* Info Rekening & QRIS Resmi untuk Pembeli yang Ingin Langsung Bayar */}
-      <GlassCard className="p-5 sm:p-6 bg-[#FCF3E4]">
+      <GlassCard className="p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[hsl(var(--sage-700))]">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[hsl(var(--sage-700))]">
               <QrCode className="h-4 w-4" /> Info Rekening BCA / Mandiri &amp; QRIS Resmi
             </span>
-            <h2 className="mt-1 text-base font-bold text-[#24201A]">
-              Mau Cek Nomor Rekening atau Scan QRIS Bawabawa.id?
+            <h2 className="mt-1 text-base font-semibold">
+              Nomor Rekening &amp; QRIS Bawabawa.id
             </h2>
           </div>
           <Button
@@ -102,7 +101,7 @@ export function LacakClient() {
             size="sm"
             onClick={() => setShowPaymentBox((s) => !s)}
           >
-            {showPaymentBox ? "Tutup Info Rekening & QRIS" : "Tampilkan Rekening & QRIS"}
+            {showPaymentBox ? "Tutup Rekening & QRIS" : "Lihat Rekening & QRIS"}
           </Button>
         </div>
 
