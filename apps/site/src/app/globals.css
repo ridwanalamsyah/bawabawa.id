@@ -3,110 +3,188 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ───────────────────────────────────────────────
-   Bawabawa.id — Clean Modern Editorial & Commerce Design System
-   Crisp alabaster canvas (#FAFAF9), pure white cards (#FFFFFF),
-   deep zinc ink (#18181B), and clean forest emerald (#1F513B).
+   Bawabawa.id — Public site design tokens
+   Mirrors apps/web/src/design-system/tokens.css so the ERP and the public
+   surface share identical fonts, colors, glass primitives, and motion.
    ─────────────────────────────────────────────── */
 
 :root {
   color-scheme: light;
 
-  --color-bg: #fafaf9;
+  /* ── Surfaces (warm cream, sage, dark olive ink) ── */
+  --color-bg: #faf7f0;
   --color-bg-elevated: #ffffff;
-  --color-surface-solid: #ffffff;
-  --color-surface-2: #f4f4f2;
-  --color-text: #18181b;
-  --color-text-strong: #09090b;
-  --color-muted: #52525b;
-  --color-subtle: #a1a1aa;
+  --color-surface-solid: #fdfbf6;
+  --color-surface-2: #f4efe4;
+  --color-text: #2a2c28;
+  --color-text-strong: #161916;
+  --color-muted: #6b6e66;
+  --color-subtle: #9ea298;
 
-  --glass-bg: rgba(255, 255, 255, 0.88);
-  --glass-bg-strong: rgba(255, 255, 255, 0.95);
-  --glass-bg-deep: rgba(255, 255, 255, 0.98);
-  --glass-border: rgba(24, 24, 27, 0.08);
-  --glass-border-strong: rgba(24, 24, 27, 0.12);
-  --glass-blur: 16px;
-  --glass-blur-strong: 24px;
-  --glass-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --glass-shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
-  --glass-shadow-hover: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  /* Glass primitives — frosted cream */
+  --glass-bg: rgba(255, 252, 244, 0.68);
+  --glass-bg-strong: rgba(255, 252, 244, 0.86);
+  --glass-bg-deep: rgba(255, 252, 244, 0.94);
+  --glass-border: rgba(42, 44, 40, 0.10);
+  --glass-border-strong: rgba(42, 44, 40, 0.18);
+  --glass-blur: 20px;
+  --glass-blur-strong: 28px;
+  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
+  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
+  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
 
+  /* Brand — sage + warm tan, earthy minimalist */
   --brand-name: "bawabawa.id";
-  --brand-accent: #1f513b;
-  --brand-accent-2: #0f766e;
-  --brand-accent-strong: #163d2c;
-  --brand-accent-soft: rgba(31, 81, 59, 0.08);
-  --brand-accent-ring: rgba(31, 81, 59, 0.28);
-  --brand-gradient: linear-gradient(135deg, #1f513b 0%, #2a684d 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(31, 81, 59, 0.08) 0%, rgba(42, 104, 77, 0.08) 100%);
+  --brand-accent: #7c9885;
+  --brand-accent-2: #d4a373;
+  --brand-accent-strong: #5e7a68;
+  --brand-accent-soft: rgba(124, 152, 133, 0.14);
+  --brand-accent-ring: rgba(124, 152, 133, 0.36);
+  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
 
-  --color-success: #15803d;
-  --color-warning: #b45309;
-  --color-danger: #be123c;
-  --color-info: #0369a1;
+  /* Status */
+  --color-success: #5e7a68;
+  --color-warning: #c08552;
+  --color-danger: #b3463f;
+  --color-info: #6b8a99;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  /* Same tight scale as the @theme block below (this :root block wins). */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 14px;
   --radius-full: 9999px;
   --radius: var(--radius-lg);
 
+  /* Touch targets (mobile-first ≥44px) */
   --tap-target: 44px;
 
+  /* Motion */
   --motion-fast: 140ms cubic-bezier(0.32, 0.72, 0, 1);
   --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
   --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
-  --bg: 60 5% 98%;
-  --bg-soft: 60 5% 96%;
+  /* HSL channels — components consume these via `hsl(var(--token))` so the
+     value is space-separated H S% L% (no `hsl()` wrapper). Mirrors the hex
+     palette above so admin and public surfaces look identical. */
+  --bg: 42 50% 96%;
+  --bg-soft: 41 42% 93%;
   --surface: 0 0% 100%;
-  --surface-2: 60 5% 95%;
-  --foreground: 240 6% 10%;
-  --muted-foreground: 240 4% 40%;
-  --border: 24 6% 89%;
-  --input: 24 6% 86%;
-  --ring: 154 45% 22%;
+  --surface-2: 41 42% 93%;
+  --foreground: 90 5% 16%;
+  --muted-foreground: 83 4% 42%;
+  --border: 90 8% 84%;
+  --input: 90 8% 84%;
+  --ring: 139 12% 54%;
   --primary-foreground: 0 0% 100%;
-  --warning: 32 85% 42%;
-  --danger: 348 80% 42%;
+  --warning: 28 47% 54%;
+  --danger: 4 48% 47%;
 
-  --sage-50:  152 38% 96%;
-  --sage-100: 152 32% 91%;
-  --sage-200: 152 26% 82%;
-  --sage-300: 152 22% 68%;
-  --sage-400: 152 22% 52%;
-  --sage-500: 153 30% 38%;
-  --sage-600: 154 38% 28%;
-  --sage-700: 154 45% 22%;
-  --sage-800: 155 48% 16%;
-  --sage-900: 156 50% 11%;
+  --sage-50:  90 21% 95%;
+  --sage-100: 104 21% 90%;
+  --sage-200: 105 20% 80%;
+  --sage-300: 105 18% 69%;
+  --sage-400: 109 15% 59%;
+  --sage-500: 139 12% 54%;
+  --sage-600: 141 13% 42%;
+  --sage-700: 138 14% 35%;
+  --sage-800: 141 17% 20%;
+  --sage-900: 150 19% 13%;
 
-  --olive-300: 152 26% 76%;
-  --olive-500: 153 30% 38%;
-  --olive-700: 154 45% 22%;
+  --olive-300: 78 34% 73%;
+  --olive-500: 74 18% 56%;
+  --olive-700: 76 17% 34%;
 
-  --emerald-400: 152 42% 52%;
-  --emerald-500: 154 38% 28%;
-  --emerald-600: 154 45% 22%;
+  --emerald-400: 134 21% 63%;
+  --emerald-500: 141 13% 42%;
+  --emerald-600: 142 14% 34%;
 
-  --cream-100: 60 5% 96%;
+  --cream-100: 42 50% 96%;
 
-  --rose-500: 348 75% 48%;
-  --rose-700: 348 80% 36%;
+  --rose-500: 4 48% 47%;
+  --rose-700: 3 49% 32%;
 
-  --amber-100: 42 85% 94%;
-  --amber-400: 38 90% 58%;
-  --amber-600: 32 85% 36%;
-  --sky-100: 204 80% 94%;
-  --sky-500: 202 75% 44%;
-  --sky-600: 204 78% 34%;
-  --coral-100: 12 75% 94%;
-  --coral-500: 12 70% 50%;
-  --coral-600: 12 72% 40%;
-  --plum-100: 270 40% 95%;
-  --plum-600: 270 38% 40%;
+  /* Accent palette next to the sage brand: amber (Bandung warmth), sky
+     (Mahakam / Samarinda), coral (promos, stickers). Use -100 for tile
+     backgrounds and -500/-600 for icons and text. */
+  --amber-100: 40 90% 90%;
+  --amber-400: 38 92% 60%;
+  --amber-600: 30 80% 38%;
+  --sky-100: 200 75% 92%;
+  --sky-500: 201 70% 45%;
+  --sky-600: 203 70% 35%;
+  --coral-100: 10 85% 92%;
+  --coral-500: 9 75% 58%;
+  --coral-600: 8 65% 44%;
+  --plum-100: 280 45% 93%;
+  --plum-600: 282 35% 42%;
+}
+
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+
+  --color-bg: #15140f;
+  --color-bg-elevated: #1d1c17;
+  --color-surface-solid: #23211b;
+  --color-surface-2: #2c2922;
+  --color-text: #f4efe4;
+  --color-text-strong: #ffffff;
+  --color-muted: #b8b3a6;
+  --color-subtle: #76726a;
+
+  --glass-bg: rgba(35, 33, 27, 0.58);
+  --glass-bg-strong: rgba(35, 33, 27, 0.76);
+  --glass-bg-deep: rgba(35, 33, 27, 0.90);
+  --glass-border: rgba(244, 239, 228, 0.10);
+  --glass-border-strong: rgba(244, 239, 228, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --glass-shadow-hover: 0 12px 44px rgba(0, 0, 0, 0.55);
+
+  --brand-accent: #a3bfa8;
+  --brand-accent-2: #e3b88a;
+  --brand-accent-strong: #7c9885;
+  --brand-accent-soft: rgba(163, 191, 168, 0.20);
+  --brand-accent-ring: rgba(163, 191, 168, 0.48);
+  --brand-gradient: linear-gradient(135deg, #a3bfa8 0%, #e3b88a 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(163, 191, 168, 0.24) 0%, rgba(227, 184, 138, 0.22) 100%);
+
+  /* HSL channel overrides for dark mode. Surfaces and borders flip to dark
+     tones; brand sage / olive / emerald scales keep their hex values so
+     gradient buttons stay legible against the warm-charcoal canvas. */
+  --bg: 47 14% 7%;
+  --bg-soft: 40 11% 11%;
+  --surface: 41 12% 12%;
+  --surface-2: 41 12% 15%;
+  --foreground: 40 39% 93%;
+  --muted-foreground: 41 13% 75%;
+  --border: 40 10% 25%;
+  --input: 40 10% 25%;
+
+  --amber-100: 36 40% 18%;
+  --amber-600: 40 85% 65%;
+  --sky-100: 205 35% 18%;
+  --sky-600: 199 70% 68%;
+  --coral-100: 8 35% 18%;
+  --coral-600: 10 85% 70%;
+  --plum-100: 282 25% 19%;
+  --plum-600: 282 50% 75%;
 }
 
 @theme inline {
@@ -116,8 +194,8 @@
   --color-surface-2: var(--color-surface-2);
   --color-muted: var(--color-muted);
   --color-muted-foreground: var(--color-muted);
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
+  --color-border: var(--glass-border-strong);
+  --color-input: var(--glass-border-strong);
   --color-ring: var(--brand-accent-ring);
 
   --color-primary: var(--brand-accent);
@@ -125,46 +203,52 @@
   --color-accent: var(--brand-accent-2);
   --color-accent-foreground: #ffffff;
 
-  --color-sage-50:  #f0f9f4;
-  --color-sage-100: #dcfce7;
-  --color-sage-200: #bbf7d0;
-  --color-sage-300: #86efac;
-  --color-sage-400: #4ade80;
-  --color-sage-500: #2a684d;
-  --color-sage-600: #235c43;
-  --color-sage-700: #1f513b;
-  --color-sage-800: #163d2c;
-  --color-sage-900: #0f291e;
+  /* Compatibility shims so existing Tailwind utilities like `bg-sage-700`,
+     `text-emerald-500`, `border-olive-300` keep rendering. The site was
+     authored against an earlier sage/olive scale; we map them to the ERP
+     brand tokens so visual identity now matches `apps/web` exactly. */
+  --color-sage-50:  #f1f4ee;
+  --color-sage-100: #e2eadf;
+  --color-sage-200: #c7d6c2;
+  --color-sage-300: #aabfa3;
+  --color-sage-400: #8da787;
+  --color-sage-500: #7c9885;
+  --color-sage-600: #5e7a68;
+  --color-sage-700: #4d6755;
+  --color-sage-800: #2a3b30;
+  --color-sage-900: #1a2620;
 
-  --color-olive-300: #a7f3d0;
-  --color-olive-500: #2a684d;
-  --color-olive-700: #1f513b;
+  --color-olive-300: #c4d2a3;
+  --color-olive-500: #9aa37b;
+  --color-olive-700: #5e6648;
 
-  --color-emerald-400: #34d399;
-  --color-emerald-500: #235c43;
-  --color-emerald-600: #1f513b;
+  --color-emerald-400: #8eb597;
+  --color-emerald-500: #5e7a68;
+  --color-emerald-600: #4a6253;
 
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
 
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui,
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui,
-    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono",
+  --font-display: var(--font-sans);
+  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.625rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
+  /* Tight radius scale. The previous one (xl = 24px, 2xl = 32px) turned
+     every input and card into a soft pill — a big part of the generic,
+     "AI template" feel. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.875rem;
   --radius-3xl: 1.25rem;
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--glass-border-strong);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -183,69 +267,229 @@ html, body {
 }
 
 body {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.55;
-  overflow-x: hidden;
+  /* Flat paper background. The old four-blob gradient mesh made every
+     page look like the same template. */
+  background-color: hsl(var(--bg));
+  transition: background-color var(--motion-base), color var(--motion-base);
 }
 
-h1, h2, h3, h4, .font-display {
+[data-theme="dark"] body,
+.dark body {
+  background-image: none;
+}
+
+/* Headings use the UI sans in a heavy weight — direct and legible. */
+h1, h2, h3 {
   font-family: var(--font-sans);
-  letter-spacing: -0.025em;
-  color: var(--color-text-strong);
   font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.font-display {
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
 }
 
-.font-mono, code, pre {
-  font-family: var(--font-mono);
-}
-
+/* ── Glass utility classes (parity with ERP `.bb-*` primitives) ── */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
-
 .glass-strong {
   background: var(--glass-bg-strong);
-  backdrop-filter: blur(var(--glass-blur-strong)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(160%);
+  backdrop-filter: blur(var(--glass-blur-strong)) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(170%);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-lg);
+}
+.glass-deep {
+  background: var(--glass-bg-deep);
   border: 1px solid var(--glass-border-strong);
   box-shadow: var(--glass-shadow-lg);
 }
 
+/* ── ERP `.bb-*` shell + navbar primitives, ported verbatim so admin and
+      public surfaces feel identical when the user crosses between them. ── */
+.bb-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.bb-shell-main {
+  flex: 1; width: min(1180px, 100%); margin: 0 auto;
+  padding: clamp(16px, 4vw, 32px);
+  padding-top: clamp(96px, 12vw, 120px);
+  display: flex; flex-direction: column; gap: clamp(16px, 3vw, 24px);
+}
+.bb-navbar {
+  position: sticky; top: 12px; z-index: 40;
+  width: min(1180px, calc(100% - 24px));
+  margin: 12px auto 0;
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  transition: padding var(--motion-base), top var(--motion-base);
+}
+.bb-navbar-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 14px;
+  color: var(--color-text-strong); text-decoration: none;
+  letter-spacing: -0.01em; white-space: nowrap;
+}
+.bb-navbar-logo {
+  width: 36px; height: 36px; border-radius: 11px;
+  background: var(--brand-gradient); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+  box-shadow: 0 6px 18px var(--brand-accent-soft);
+}
+.bb-navbar-link {
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: var(--tap-target); padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  font-weight: 600; font-size: 13.5px;
+  transition: color var(--motion-fast), background var(--motion-base);
+}
+.bb-navbar-link:hover,
+.bb-navbar-link[data-active="true"] {
+  color: var(--color-text-strong);
+  background: var(--glass-bg);
+}
+
+.bb-card {
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+}
+.bb-card-hover {
+  transition: transform var(--motion-base), box-shadow var(--motion-base);
+}
+.bb-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+/* Subtle dotted texture overlay — used on hero / large sections. */
 .dot-grid {
-  background-image: radial-gradient(currentColor 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(rgba(42, 44, 40, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.dark .dot-grid,
+[data-theme="dark"] .dot-grid {
+  background-image: radial-gradient(rgba(244, 239, 228, 0.07) 1px, transparent 1px);
 }
 
-:root {
-  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+/* Reusable focus ring matching ERP's tap target convention. */
+:where(button, a, [role="button"], [tabindex]) {
+  outline: none;
+}
+:where(button, a, [role="button"], [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px var(--brand-accent-ring);
+  border-radius: var(--radius-md);
 }
 
-@keyframes rise {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+/* Scrollbar — softened to match cream surfaces. */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--brand-accent-soft);
+  border-radius: var(--radius-full);
 }
-@keyframes pop {
-  from { opacity: 0; transform: translateY(8px) scale(0.99); }
-  to   { opacity: 1; transform: none; }
+*::-webkit-scrollbar-thumb:hover { background: var(--brand-accent-ring); }
+
+/* Top-of-page route progress bar — CSS keyframes so RouteProgress doesn't
+   need setState in an effect (Strict Mode safe). */
+@keyframes route-progress {
+  0%   { width: 0%;   opacity: 1; }
+  60%  { width: 88%;  opacity: 1; }
+  100% { width: 100%; opacity: 0; }
 }
-@keyframes bump {
-  0%, 100% { transform: scale(1); }
-  40%      { transform: scale(1.18); }
+.route-progress-bar {
+  animation: route-progress 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
+
+/* Gentle vertical float — used by hero "Tiba di Samarinda" card and other
+   ambient floating glass cards. Tailwind v4 doesn't ship a `float` animation
+   utility by default, so we register the keyframe + class here. */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 4.5s ease-in-out infinite;
+}
+
+/* Hero entrance animations — CSS-only fallback so above-the-fold copy
+   doesn't depend on framer-motion hydration. Previously the hero h1/p/cta
+   stack used `motion.*` with `initial={{ opacity: 0 }}` which SSR-rendered
+   them at opacity:0 and waited on JS hydration to animate them in. If the
+   JS chunks failed or hydrated late the entire hero text stayed invisible.
+   Registering the keyframes in CSS means the animation runs on first paint
+   without any JS, and the `forwards` fill mode keeps the final state. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-rise-lg {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-slide-in-left {
+  from { opacity: 0; transform: translate(-40px, 30px); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes hero-slide-in-right {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-hero-rise {
+  animation: hero-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-rise-lg {
+  animation: hero-rise-lg 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-pop {
+  animation: hero-pop 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-left {
+  animation: hero-slide-in-left 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.animate-hero-slide-in-right {
+  animation: hero-slide-in-right 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+
+
+/* Ambient orbs drift slowly behind the hero. */
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, 30px) scale(1.06); }
+  66%      { transform: translate(-20px, -10px) scale(0.96); }
+}
+.animate-orb-drift { animation: orb-drift var(--orb-duration, 28s) ease-in-out infinite; }
+
+/* CTA map: dashes flow toward Samarinda, pins pulse. */
 @keyframes dash-flow { to { stroke-dashoffset: -56; } }
+.animate-dash-flow { animation: dash-flow 1.4s linear infinite; }
 @keyframes pin-pulse {
   0%   { transform: scale(0.6); opacity: 0.9; }
   100% { transform: scale(1.6); opacity: 0; }
 }
-
-.animate-rise { animation: rise 0.45s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
-.animate-pop  { animation: pop 0.5s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
-.animate-bump { animation: bump 0.4s var(--ease-out-soft); }
-.animate-dash-flow { animation: dash-flow 1.4s linear infinite; }
 .animate-pin-pulse {
   transform-box: fill-box;
   transform-origin: center;
@@ -253,18 +497,175 @@ h1, h2, h3, h4, .font-display {
   animation-delay: var(--d, 0s);
 }
 
+/* Category strip under the hero. */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.animate-marquee { animation: marquee 38s linear infinite; }
+
+/* Request success: circle + check draw in. */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.animate-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 0.6s var(--ease-out-soft, ease-out) forwards; animation-delay: var(--d, 0s); }
+
+/* Tracking timeline connector fills down to the current step. */
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.animate-grow-y { animation: grow-y 0.5s var(--ease-out-soft, ease-out) both; animation-delay: var(--d, 0s); }
+
+/* Cart icon bump when an item is added. */
+@keyframes bump {
+  0%, 100% { transform: scale(1); }
+  40%      { transform: scale(1.25) rotate(-8deg); }
+}
+.animate-bump { animation: bump 0.45s var(--ease-out-soft, ease-out); }
+
+/* Hero headline: words take turns sliding up into the slot (5 words,
+   2.4s each). Every word sits in the same grid cell, so the slot keeps
+   the width of the longest word and nothing below it jumps. */
+@keyframes word-cycle {
+  0%        { opacity: 0; transform: translateY(100%); }
+  3%, 20%   { opacity: 1; transform: translateY(0); }
+  23%, 100% { opacity: 0; transform: translateY(-100%); }
+}
+.word-cycle { overflow: hidden; clip-path: inset(0 -0.15em); }
+.word-cycle > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  animation: word-cycle 12s var(--ease-out-soft, ease-out) infinite both;
+}
+.word-cycle > span:nth-child(2) { animation-delay: 2.4s; }
+.word-cycle > span:nth-child(3) { animation-delay: 4.8s; }
+.word-cycle > span:nth-child(4) { animation-delay: 7.2s; }
+.word-cycle > span:nth-child(5) { animation-delay: 9.6s; }
+/* With animation off (admin switch) show the first word only. */
+[data-motion="off"] .word-cycle > span:first-child { opacity: 1; }
+
+/* Sticker badges: pop in, then wiggle now and then. */
+@keyframes sticker-in {
+  from { opacity: 0; transform: scale(0.4) rotate(var(--r, 0deg)); }
+  70%  { opacity: 1; transform: scale(1.08) rotate(var(--r, 0deg)); }
+  to   { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); }
+}
+@keyframes sticker-wiggle {
+  0%, 86%, 100% { transform: rotate(var(--r, 0deg)); }
+  90%           { transform: rotate(calc(var(--r, 0deg) - 6deg)); }
+  95%           { transform: rotate(calc(var(--r, 0deg) + 5deg)); }
+}
+.sticker {
+  transform: rotate(var(--r, 0deg));
+  animation: sticker-in 0.6s var(--ease-out-soft, ease-out) both, sticker-wiggle 5s ease-in-out infinite;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + 1.2s);
+}
+
+/* Tilted ticker band under the hero. */
+.animate-ticker { animation: marquee 26s linear infinite; }
+.animate-ticker-reverse { animation: marquee 32s linear infinite reverse; }
+
+/* Brand gradient for one highlighted word in a headline. */
+.text-gradient-brand {
+  background-image: linear-gradient(135deg, hsl(var(--sage-700)), hsl(var(--olive-500)), hsl(var(--emerald-600)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .text-gradient-brand {
+  background-image: linear-gradient(135deg, hsl(var(--sage-300)), hsl(var(--olive-500)), hsl(var(--emerald-400)));
+}
+
+/* Admin switch (Admin → Pengaturan → Animasi): data-motion="off" on the
+   marketing wrapper stops every animation and shows reveal content as-is. */
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.reveal-ready [data-motion="off"] [data-reveal],
+html.reveal-ready [data-motion="off"] [data-reveal] .reveal-bar {
+  opacity: 1;
+  transform: none;
+}
+
+
+/* ------------------------------------------------------------------
+   Motion. Small, purposeful, CSS-first:
+   - .animate-rise / .animate-pop: first-paint entrance (hero), no JS needed.
+   - [data-reveal]: fades sections in on scroll. Hidden only once
+     RevealObserver has put .reveal-ready on <html>, so content is always
+     visible without JS or before hydration.
+   - .reveal-bar: lines/progress bars that draw in when their section shows.
+   - .lift: hover feedback on clickable cards.
+   Stagger with style={{ "--d": "120ms" }}.
+------------------------------------------------------------------- */
+:root {
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  interpolate-size: allow-keywords;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes tick {
+  from { opacity: 0.35; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-rise { animation: rise 0.7s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
+.animate-pop  { animation: pop 0.8s var(--ease-out-soft) both; animation-delay: var(--d, 0s); }
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes spin-in {
+  from { opacity: 0; transform: rotate(-90deg) scale(0.7); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-drop { animation: drop 0.25s var(--ease-out-soft) both; }
+.animate-spin-in { animation: spin-in 0.25s var(--ease-out-soft) both; }
+.animate-tick { animation: tick 0.35s var(--ease-out-soft); display: inline-block; }
+
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s var(--ease-out-soft), transform 0.6s var(--ease-out-soft);
+  transition-delay: var(--d, 0s);
+}
+html.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+.reveal-bar { transform-origin: left center; }
+html.reveal-ready [data-reveal] .reveal-bar {
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out-soft);
+  transition-delay: calc(var(--d, 0s) + 0.15s);
+}
+html.reveal-ready [data-reveal].is-visible .reveal-bar { transform: none; }
+
 .lift {
-  transition: transform 0.18s var(--ease-out-soft), box-shadow 0.18s var(--ease-out-soft), border-color 0.18s;
+  transition: transform 0.2s var(--ease-out-soft), box-shadow 0.2s var(--ease-out-soft), border-color 0.2s;
 }
 .lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px -8px hsl(var(--foreground) / 0.18);
 }
+.lift:active { transform: translateY(0); }
 
-.nudge svg:last-child { transition: transform 0.18s var(--ease-out-soft); }
+/* Arrow nudge on links/buttons that carry a trailing icon. */
+.nudge svg:last-child { transition: transform 0.2s var(--ease-out-soft); }
 .nudge:hover svg:last-child { transform: translateX(3px); }
 
+/* FAQ: animate <details> open/close where the browser supports it. */
+details.smooth::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition: block-size 0.3s var(--ease-out-soft), content-visibility 0.3s allow-discrete;
+}
+details.smooth[open]::details-content { block-size: auto; }
+
+
+/* Accessibility baseline (WCAG 2.4.7): a visible focus ring for every
+   keyboard-focusable element that doesn't define its own. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
 }
+

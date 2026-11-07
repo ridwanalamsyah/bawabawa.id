@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { RequestFlow } from "./flow";
 import { getPaymentInfo, getZoneRates } from "@/lib/site-content";
 
@@ -14,23 +13,25 @@ export default async function RequestPage() {
   const [zones, payment] = await Promise.all([getZoneRates(), getPaymentInfo()]);
 
   return (
-    <section className="py-10 sm:py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--sage-50))] border border-[hsl(var(--sage-200))] px-3 py-1 text-xs font-bold text-[hsl(var(--foreground))]">
-             Form Jastip 1 Halaman · Tanpa Buat Akun
-          </span>
-          <h1 className="mt-3 font-display text-3xl sm:text-5xl font-bold tracking-tight leading-[1.06] text-[hsl(var(--foreground))]">
-            Titip Kuliner &amp; Barang Viral Bandung
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-[hsl(var(--muted-foreground))] leading-relaxed">
-            Pilih jalur pengiriman (<strong>Bandung Instant</strong>, <strong>Travel Jawa Barat &amp; Jakarta</strong>, atau <strong>️ Hub Samarinda</strong>), masukkan daftar barang &amp; toko Bandung, lalu konfirmasi mudah via <strong>Transfer Bank / QRIS &amp; WhatsApp</strong>. Mau pilih dari daftar populer?{" "}
-            <Link href="/katalog" className="font-bold text-[hsl(var(--sage-700))] underline underline-offset-4">
-              Buka Katalog Viral Bandung →
-            </Link>
-          </p>
+    <section className="py-8 sm:py-12">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+              Form Titip Barang Bandung
+            </h1>
+            <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+              Pilih jalur pengiriman, masukkan daftar barang, lalu konfirmasi via Transfer Bank atau QRIS.
+            </p>
+          </div>
+          <Link
+            href="/katalog"
+            className="text-xs font-semibold text-[hsl(var(--sage-700))] hover:underline shrink-0"
+          >
+            Pilih dari Katalog →
+          </Link>
         </div>
-        <div className="mt-8">
+        <div className="mt-6">
           <RequestFlow zones={zones} payment={payment} />
         </div>
       </div>

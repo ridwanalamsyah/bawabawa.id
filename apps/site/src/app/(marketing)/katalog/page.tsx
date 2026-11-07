@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock, MapPin, Plane, Truck } from "lucide-react";
+import { CalendarClock } from "lucide-react";
 import { erpSafe } from "@/lib/erp-client";
 import { GlassCard } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import type { CatalogProduct } from "@/app/api/catalog/route";
 import { CatalogGrid, CartBar } from "./catalog-client";
-import { delay } from "@/lib/motion";
 import { VIRAL_BANDUNG_CATALOG } from "@/lib/viral-bandung-data";
-import { getHubSamarindaStock } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Katalog Kuliner & Barang Viral Bandung",
@@ -41,7 +39,7 @@ function nextOpenTrip(trips: Trip[], now: number): Trip | undefined {
 }
 
 export default async function CatalogPage() {
-  const [catalog, trips, hubStock] = await Promise.all([
+  const [catalog, trips] = await Promise.all([
     erpSafe<CatalogProduct[]>({
       path: "/catalog",
       timeoutMs: 5000,
@@ -54,7 +52,6 @@ export default async function CatalogPage() {
       cache: "force-cache",
       next: { revalidate: 60, tags: ["trips"] },
     }),
-    getHubSamarindaStock(),
   ]);
 
   const products: CatalogProduct[] =
@@ -68,94 +65,37 @@ export default async function CatalogPage() {
   );
 
   return (
-    <section className="py-10 sm:py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="animate-rise text-xs font-semibold uppercase tracking-wider text-[hsl(var(--sage-700))]">
-            Katalog Resmi Jastip Bandung
-          </p>
-          <h1
-            style={delay(60)}
-            className="animate-rise mt-1.5 text-3xl sm:text-4xl font-bold tracking-tight leading-tight text-[hsl(var(--foreground))]"
-          >
-            Kuliner, Roti &amp; Barang Viral Bandung
-          </h1>
-          <p style={delay(120)} className="animate-rise mt-2.5 text-sm sm:text-base text-[hsl(var(--muted-foreground))] leading-relaxed">
-            Harga tertera adalah <strong>harga asli toko Bandung</strong>. Pilih barang favoritmu, masukkan ke daftar titipan, lalu pilih jalur pengiriman (<strong>Bandung Instant</strong>, <strong>Shuttle Travel Jawa Barat/Jakarta</strong>, atau <strong>Kloter Hub Samarinda</strong>). Barang yang kamu cari belum ada?{" "}
-            <Link href="/request" className="font-semibold text-[hsl(var(--sage-700))] underline underline-offset-4">
-              Tulis manual barang/toko Bandung di sini →
-            </Link>
-          </p>
-        </div>
-
-        {/* Info 3 Jalur Pengiriman */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="rounded-xl border border-[hsl(var(--border))] bg-white p-3.5 flex items-start gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[hsl(var(--sage-50))] text-[hsl(var(--sage-700))]">
-              <MapPin className="h-4 w-4" />
-            </span>
-            <div className="text-xs">
-              <p className="font-bold text-[hsl(var(--foreground))]">Jalur 1 · Bandung Raya Instant</p>
-              <p className="text-[hsl(var(--muted-foreground))] mt-0.5">
-                Semua produk (termasuk Kopi Makjay &amp; Sapporo Soes dingin) bisa diantar hari ini.
-              </p>
-            </div>
-          </div>
-          <div className="rounded-xl border border-[hsl(var(--border))] bg-white p-3.5 flex items-start gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[hsl(var(--sage-50))] text-[hsl(var(--sage-700))]">
-              <Truck className="h-4 w-4" />
-            </span>
-            <div className="text-xs">
-              <p className="font-bold text-[hsl(var(--foreground))]">Jalur 2 · Travel Jabar &amp; Jakarta</p>
-              <p className="text-[hsl(var(--muted-foreground))] mt-0.5">
-                Sameday 4–8 jam via Cititrans, DayTrans, Arnes, Bhinneka, Pasteur Trans.
-              </p>
-            </div>
-          </div>
-          <div className="rounded-xl border border-[hsl(var(--border))] bg-white p-3.5 flex items-start gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[hsl(var(--sage-50))] text-[hsl(var(--sage-700))]">
-              <Plane className="h-4 w-4" />
-            </span>
-            <div className="text-xs">
-              <p className="font-bold text-[hsl(var(--foreground))]">Jalur 3 · Kloter Hub Samarinda</p>
-              <p className="text-[hsl(var(--muted-foreground))] mt-0.5">
-                Khusus produk tahan ≥3 hari + tersedia {hubStock.length} item Ready Stock di Hub Samarinda.
-              </p>
-            </div>
+    <section className="py-8 sm:py-12">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+              Katalog Hits Bandung
+            </h1>
+            <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+              Harga asli toko Bandung. Barang yang kamu cari belum ada?{" "}
+              <Link href="/request" className="font-semibold text-[hsl(var(--sage-700))] underline underline-offset-4">
+                Tulis manual di form →
+              </Link>
+            </p>
           </div>
         </div>
 
         {nextTrip && (
-          <GlassCard className="mt-4 p-4 flex flex-wrap items-center gap-3">
+          <GlassCard className="mt-4 p-3.5 flex flex-wrap items-center gap-3">
             <CalendarClock className="h-4 w-4 text-[hsl(var(--sage-700))]" aria-hidden />
             <p className="text-xs sm:text-sm">
               <strong>Kloter {nextTrip.code}</strong> berangkat{" "}
               {formatDate(nextTrip.departAt, { weekday: "long", day: "numeric", month: "long", year: undefined })} ·{" "}
               {Math.max(0, nextTrip.capacityKg - nextTrip.bookedKg)} kg kuota tersisa
-              {nextTrip.poClosesAt && (
-                <>
-                  {" · "}
-                  <strong>
-                    Cut-off PO{" "}
-                    {formatDate(nextTrip.poClosesAt, {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: undefined,
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </strong>
-                </>
-              )}
             </p>
             <Link href="/open-trip" className="text-xs font-semibold text-[hsl(var(--sage-700))] underline sm:ml-auto">
-              Lihat Jadwal Lengkap →
+              Jadwal Lengkap →
             </Link>
           </GlassCard>
         )}
 
-        <div className="mt-7">
+        <div className="mt-6">
           <CatalogGrid products={products} />
         </div>
       </div>

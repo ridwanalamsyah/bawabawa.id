@@ -3,20 +3,32 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowUpRight, ShoppingBag } from "lucide-react";
+import { Menu, X, ShoppingBag } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-const navLinks = [
-  { href: "/katalog", label: "Katalog Bandung" },
+const NAV = [
+  { href: "/katalog", label: "Katalog" },
+  { href: "/request", label: "Titip Barang" },
   { href: "/#cara-kerja", label: "Cara Kerja" },
-  { href: "/#harga", label: "Tarif & Ongkir" },
-  { href: "/lacak", label: "Lacak Resi" },
-  { href: "/blog", label: "Jurnal" },
+  { href: "/#harga", label: "Tarif" },
+  { href: "/lacak", label: "Lacak Pesanan" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export function MarketingNav() {
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const pathname = usePathname();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     function readCart() {
@@ -44,138 +56,92 @@ export function MarketingNav() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[hsl(var(--border))] bg-white/95 backdrop-blur-md">
-      {/* Clean Live Bandung Shopper Status Bar */}
-      <div className="border-b border-[hsl(var(--border))] bg-zinc-900 text-zinc-200">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-1.5 text-[11px] font-medium sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-            <span className="truncate">
-              <strong className="font-semibold text-white">Live Bandung:</strong> Tim belanja sedang antre kloter pagi (Roti Macan, Tjilaki 9, Roti Merak &amp; Studio Bolen)
-            </span>
-          </div>
-          <div className="hidden items-center gap-4 text-zinc-400 md:flex">
-            <span>Bandung Instant 2-4 Jam</span>
-            <span className="text-zinc-700">•</span>
-            <span>Travel Jabar &amp; JKT Same-Day</span>
-            <span className="text-zinc-700">•</span>
-            <Link
-              href="/katalog?samarinda=ready"
-              className="font-semibold text-emerald-400 transition-colors hover:text-emerald-300"
-            >
-              Hub Samarinda (Voucher BAWASMD) →
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Nav */}
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--sage-700))] text-sm font-bold text-white">
-            b
-          </span>
-          <span className="text-lg font-bold tracking-tight text-zinc-900">
-            bawabawa<span className="text-[hsl(var(--sage-700))]">.id</span>
-          </span>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        scrolled
+          ? "backdrop-blur-xl bg-[hsl(var(--bg)/0.92)] border-b border-[hsl(var(--border))]"
+          : "bg-transparent"
+      )}
+    >
+      <div className="mx-auto max-w-6xl flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-2 group">
+          <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex">
-          {navLinks.map((link) => {
+        <nav className="hidden md:flex items-center gap-1">
+          {NAV.map((item) => {
             const active =
-              link.href === "/katalog"
-                ? pathname.startsWith("/katalog")
-                : link.href === "/lacak"
-                  ? pathname.startsWith("/lacak")
-                  : link.href === "/blog"
-                    ? pathname.startsWith("/blog")
-                    : false;
+              item.href.startsWith("/#")
+                ? false
+                : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
-                key={link.href}
-                href={link.href}
-                className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "relative rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-zinc-100 text-zinc-900 font-semibold"
-                    : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                }`}
+                    ? "text-[hsl(var(--sage-800))] font-semibold"
+                    : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                )}
               >
-                {link.label}
+                {active && (
+                  <span className="absolute inset-0 rounded-full bg-[hsl(var(--sage-100))] -z-10" />
+                )}
+                {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="hidden items-center gap-2.5 lg:flex">
+        <div className="flex items-center gap-2">
           <Link
             href="/request"
-            className="inline-flex items-center gap-2 rounded-lg border border-[hsl(var(--border))] bg-white px-3.5 py-2 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
-          >
-            <ShoppingBag className="h-3.5 w-3.5 text-[hsl(var(--sage-700))]" />
-            Keranjang Titipan
-            {cartCount > 0 && (
-              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-1.5 text-[10px] font-bold text-white">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-          <Link
-            href="/request"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--sage-700))] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[hsl(var(--sage-800))]"
-          >
-            Titip Sekarang
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-2 lg:hidden">
-          <Link
-            href="/request"
-            className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[hsl(var(--border))] bg-white text-zinc-900"
+            className="relative inline-flex h-9 items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 text-xs font-semibold text-[hsl(var(--foreground))] hover:bg-[hsl(var(--surface-2))] transition-colors"
             aria-label="Keranjang Titipan"
           >
-            <ShoppingBag className="h-4 w-4" />
+            <ShoppingBag className="h-3.5 w-3.5 text-[hsl(var(--sage-700))]" />
+            <span className="hidden sm:inline">Keranjang</span>
             {cartCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-1 text-[10px] font-bold text-white">
+              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-1 text-[10px] font-bold text-white">
                 {cartCount}
               </span>
             )}
           </Link>
+
+          <Button asChild size="sm" className="hidden sm:inline-flex">
+            <Link href="/request">Titip Sekarang</Link>
+          </Button>
+
           <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[hsl(var(--border))] bg-white text-zinc-900"
-            aria-label={open ? "Tutup menu" : "Buka menu"}
+            onClick={() => setOpen((s) => !s)}
+            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]"
+            aria-label="Toggle menu"
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
       {open && (
-        <div className="border-t border-[hsl(var(--border))] bg-white px-4 pb-5 pt-3 lg:hidden">
-          <nav className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="mt-4 flex flex-col gap-2 border-t border-[hsl(var(--border))] pt-4">
+        <div className="md:hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--bg))] px-4 py-4 flex flex-col gap-1">
+          {NAV.map((item) => (
             <Link
-              href="/request"
+              key={item.href}
+              href={item.href}
               onClick={() => setOpen(false)}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[hsl(var(--sage-700))] px-4 py-2.5 text-sm font-semibold text-white"
+              className="rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-[hsl(var(--surface-2))]"
             >
-              Titip Barang Sekarang
-              <ArrowUpRight className="h-4 w-4" />
+              {item.label}
             </Link>
+          ))}
+          <div className="pt-2">
+            <Button asChild size="sm" className="w-full">
+              <Link href="/request" onClick={() => setOpen(false)}>
+                Titip Barang Sekarang
+              </Link>
+            </Button>
           </div>
         </div>
       )}

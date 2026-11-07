@@ -1,51 +1,34 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CtaVisual } from "@/components/marketing/cta-visual";
-import { getSiteMotion } from "@/lib/site-motion";
 
 export async function FinalCTA() {
-  const motion = await getSiteMotion();
   return (
     <section className="py-12 sm:py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          data-reveal
-          className="relative overflow-hidden rounded-3xl p-8 sm:p-12 lg:p-14 isolate bg-[hsl(var(--sage-800))]"
-        >
-          <div className="absolute inset-0 -z-10 opacity-10 dot-grid text-white" aria-hidden />
-
-          <div className="grid items-center gap-10 lg:gap-14 lg:grid-cols-[1.05fr_1fr]">
-            <div className="text-center lg:text-left">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
-                Bandung Instant · Travel Jabar · Hub Samarinda
-              </p>
-              <h2 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-white max-w-3xl mx-auto lg:mx-0 leading-[1.12]">
-                Titip kuliner &amp; barang viral Bandung hari ini.
-              </h2>
-              <p className="mt-3.5 max-w-xl mx-auto lg:mx-0 text-sm sm:text-base text-white/80 leading-relaxed">
-                Pilih dari katalog Roti Macan, Bolu Pisang Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Kopi Makjay, atau tulis barang apa saja. Bayar via Transfer BCA/Mandiri &amp; QRIS, pantau langsung lewat WhatsApp.
-              </p>
-              <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <Button asChild size="lg" variant="accent">
-                  <Link href="/request" className="nudge font-semibold">
-                    Titip Barang Sekarang <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="bg-transparent text-white border-white/30 hover:bg-white/10"
-                >
-                  <Link href="/katalog">Lihat Katalog Viral Bandung</Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-              <CtaVisual animate={motion.animations} />
-            </div>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl bg-[hsl(var(--sage-800))] px-6 py-10 sm:px-10 sm:py-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              Siap titip barang dari Bandung hari ini?
+            </h2>
+            <p className="mt-2 text-sm text-white/80">
+              Pilih dari katalog atau tulis pesananmu sendiri — bayar mudah via Transfer Bank &amp; QRIS.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <Button asChild size="default" variant="accent">
+              <Link href="/request" className="font-semibold">
+                Titip Sekarang <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="default"
+              variant="outline"
+              className="bg-transparent text-white border-white/30 hover:bg-white/10"
+            >
+              <Link href="/katalog">Buka Katalog</Link>
+            </Button>
           </div>
         </div>
       </div>

@@ -114,10 +114,12 @@ function ProductCard({ product }: { product: CatalogProduct }) {
     setTimeout(() => setAdded(false), 1500);
   };
 
+  const [shortTitle, subtitle] = product.name.split(" — ");
+
   return (
-    <div className="lift h-full rounded-2xl border border-[hsl(var(--border))] bg-white p-4 flex flex-col justify-between transition-all hover:border-[hsl(var(--sage-600))]">
-      <div className="flex flex-col gap-1.5">
-        <div className="aspect-[4/3] rounded-xl overflow-hidden bg-[hsl(var(--surface-2))] mb-1">
+    <div className="lift h-full rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-3.5 flex flex-col justify-between transition-all hover:border-[hsl(var(--sage-600))]">
+      <div className="flex flex-col gap-1">
+        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[hsl(var(--surface-2))] mb-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={resolveBandungProductImage(product)}
@@ -125,53 +127,36 @@ function ProductCard({ product }: { product: CatalogProduct }) {
             loading="lazy"
             className="h-full w-full object-cover"
           />
-        </div>
-
-        <div className="flex items-center justify-between gap-2">
-          {product.originStore ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[hsl(var(--muted-foreground))] truncate">
-              <Store className="h-3 w-3 shrink-0 text-[hsl(var(--sage-700))]" aria-hidden />
-              {product.originStore}
-            </span>
-          ) : (
-            <span className="text-[11px] font-medium text-[hsl(var(--muted-foreground))]">{product.category}</span>
-          )}
           {product.readyAtSamarinda && (
-            <span className="shrink-0 rounded-md bg-[hsl(var(--sage-50))] border border-[hsl(var(--sage-200))] px-2 py-0.5 text-[10px] font-semibold text-[hsl(var(--sage-700))]">
-              Ready Hub SMD
+            <span className="absolute bottom-2 right-2 rounded-full bg-[hsl(var(--sage-700))] px-2.5 py-0.5 text-[10px] font-semibold text-white">
+              Ready Samarinda
             </span>
           )}
         </div>
 
-        <h2 className="text-sm sm:text-base font-bold leading-snug text-[hsl(var(--foreground))] mt-0.5">
-          {product.name}
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[hsl(var(--muted-foreground))] truncate">
+          <Store className="h-3 w-3 shrink-0 text-[hsl(var(--sage-700))]" aria-hidden />
+          {product.originStore ?? product.category}
+        </span>
+
+        <h2 className="text-sm font-bold leading-snug text-[hsl(var(--foreground))] line-clamp-1">
+          {shortTitle}
         </h2>
 
-        {product.description && (
-          <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-2 leading-relaxed">
-            {product.description}
-          </p>
-        )}
-
-        {product.shelfLife && (
-          <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">
-            Ketahanan: {product.shelfLife}
+        {subtitle && (
+          <p className="text-xs text-[hsl(var(--muted-foreground))] line-clamp-1">
+            {subtitle}
           </p>
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[hsl(var(--border))] flex flex-col gap-2.5">
+      <div className="mt-3 pt-2.5 border-t border-[hsl(var(--border))] flex flex-col gap-2">
         <div className="flex items-baseline justify-between">
-          <div>
-            <span className="text-[10px] text-[hsl(var(--muted-foreground))] block">
-              Harga Toko Bandung
-            </span>
-            <p className="text-base font-bold tabular-nums text-[hsl(var(--foreground))]">
-              {formatIDR(product.price)}
-            </p>
-          </div>
+          <p className="text-sm font-bold tabular-nums text-[hsl(var(--foreground))]">
+            {formatIDR(product.price)}
+          </p>
           {product.weightKg != null && (
-            <span className="text-xs text-[hsl(var(--muted-foreground))]">±{product.weightKg} kg</span>
+            <span className="text-[11px] text-[hsl(var(--muted-foreground))]">±{product.weightKg} kg</span>
           )}
         </div>
 

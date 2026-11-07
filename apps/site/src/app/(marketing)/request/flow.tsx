@@ -420,12 +420,9 @@ export function RequestFlow({
                       )}
                     </div>
                     <p className="mt-1 text-xs font-semibold text-[hsl(var(--sage-700))]">{z.eta}</p>
-                    <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))] leading-snug">
-                      {z.description}
-                    </p>
                   </div>
-                  <div className="pt-2 border-t border-[hsl(var(--border)/0.7)] text-[11px] font-bold text-[hsl(var(--foreground))]">
-                    Ongkir mulai {formatIDR(z.baseShippingRp)} · Jastip min {formatIDR(z.jastipFeeMinRp)}
+                  <div className="pt-2 border-t border-[hsl(var(--border)/0.7)] text-[11px] font-medium text-[hsl(var(--muted-foreground))]">
+                    Mulai {formatIDR(z.baseShippingRp)}
                   </div>
                 </button>
               );
