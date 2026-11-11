@@ -75,14 +75,14 @@ export function MarketingNav() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <Link
             href="/request"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-[#C9BFA9] bg-[#FFFDF9] px-3.5 text-xs font-semibold text-[#1C2016] hover:bg-[#F2ECDF] transition-colors"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-[#C9BFA9] bg-[#FFFDF9] px-2.5 sm:px-3.5 text-xs font-semibold text-[#1C2016] hover:bg-[#F2ECDF] transition-colors"
             aria-label="Keranjang Titipan"
           >
             <ShoppingBag className="h-4 w-4 text-[#4A5828]" />
-            <span>Keranjang</span>
+            <span className="hidden xs:inline sm:inline">Keranjang</span>
             <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-[#F2ECDF] px-1.5 font-mono text-[11px] font-bold text-[#1C2016] tabular-nums">
               {cartCount}
             </span>
