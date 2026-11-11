@@ -1,5 +1,5 @@
 /**
- * Bawabawa.id — Default Seed & Fallback Data for Viral Bandung Catalog,
+ * Bawabawa.id - Default Seed & Fallback Data for Viral Bandung Catalog,
  * 3-Zone Delivery (Bandung Instant, Travel Jawa Barat/Jakarta, Kloter Hub Samarinda),
  * Store Directory, Blog Posts, Payment Info (BCA/Mandiri/QRIS), and 3-Partner Profit Split.
  *
@@ -200,7 +200,7 @@ export const DEFAULT_ZONE_RATES: ZoneRateConfig[] = [
     shortLabel: "️ Hub Samarinda & Kaltim",
     eta: "Kloter Udara 1–2 Hari Tiba di Hub Samarinda",
     cities: [
-      "Samarinda Kota (Pickup di Hub Samarinda — Gratis Ongkir Lokal)",
+      "Samarinda Kota (Pickup di Hub Samarinda - Gratis Ongkir Lokal)",
       "Samarinda Ulu / Ilir / Sungai Kunjang / Samarinda Seberang",
       "Tenggarong (Kutai Kartanegara)",
       "Balikpapan",
@@ -367,7 +367,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-roti-macan-satuan",
     sku: "BDG-RMACAN-01",
-    name: "Roti Macan Bandung — Cranberry Cheese / Double Choco",
+    name: "Roti Macan Bandung - Cranberry Cheese / Double Choco",
     description:
       "Roti sourdough lembut dengan isian cream cheese & cranberry melimpah yang antreannya paling viral di Bandung. Kami antrekan dari pagi di Buah Batu.",
     imageUrl: null,
@@ -403,7 +403,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-bolu-pisang-tjilaki",
     sku: "BDG-TJILAKI-01",
-    name: "Bolu Pisang Tjilaki 9 Cihapit — Box Spesial",
+    name: "Bolu Pisang Tjilaki 9 Cihapit - Box Spesial",
     description:
       "Bolu pisang artisan paling hits di kawasan Cihapit Bandung. Tekstur moist, wangi pisang asli & butter premium dengan kemasan estetik.",
     imageUrl: null,
@@ -421,7 +421,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-roti-merak",
     sku: "BDG-RMERAK-01",
-    name: "Roti Merak Bandung — Roti Sobek & Sisir Butter",
+    name: "Roti Merak Bandung - Roti Sobek & Sisir Butter",
     description:
       "Roti klasik Bandung dengan serat super lembut dan olesan butter melimpah. Selalu ludes sejak pagi di Sadang Serang.",
     imageUrl: null,
@@ -439,7 +439,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-rochi-mochi",
     sku: "BDG-ROCHI-01",
-    name: "Rochi (Roti Mochi) Jl. Riau 61 — Box Isi 6",
+    name: "Rochi (Roti Mochi) Jl. Riau 61 - Box Isi 6",
     description:
       "Perpaduan roti lembut dengan isian mochi kenyal lumer di tengahnya. Oleh-oleh kekinian paling dicari di Jl. Riau Bandung.",
     imageUrl: null,
@@ -457,7 +457,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-studio-bolen",
     sku: "BDG-SBOLEN-01",
-    name: "Studio Bolen Bandung — Artisan Pastry Bolen",
+    name: "Studio Bolen Bandung - Artisan Pastry Bolen",
     description:
       "Generasi baru pisang bolen Bandung dengan kulit pastry super flaky berlapis-lapis, tidak bikin eneg, dan pisang raja matang sempurna.",
     imageUrl: null,
@@ -475,7 +475,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-seroja-bake",
     sku: "BDG-SEROJA-01",
-    name: "Seroja Bake Pasar Cihapit — Artisan Tart & Pastry Lokal",
+    name: "Seroja Bake Pasar Cihapit - Artisan Tart & Pastry Lokal",
     description:
       "Bakehouse lokal favorit anak skena Cihapit Bandung dengan bahan nusantara terpilih. Cocok untuk pengiriman Bandung Instant & Travel Sameday.",
     imageUrl: null,
@@ -493,7 +493,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-sapporo-soes",
     sku: "BDG-SAPPORO-01",
-    name: "Sapporo Soes Bandung — Box Isi 8 Japanese Cream Puff",
+    name: "Sapporo Soes Bandung - Box Isi 8 Japanese Cream Puff",
     description:
       "Kue soes Jepang dengan kulit renyah dan vla diplomat cream dingin yang melimpah. Dikirim menggunakan thermal bag + ice gel.",
     imageUrl: null,
@@ -511,7 +511,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-puln-bakehouse",
     sku: "BDG-PULN-01",
-    name: "Puln Bakehouse Bandung — Shio Pan & Butter Brioche",
+    name: "Puln Bakehouse Bandung - Shio Pan & Butter Brioche",
     description:
       "Japanese salt bread (Shio Pan) garing di luar, lembut berongga butter di dalam dari Puln Bandung.",
     imageUrl: null,
@@ -529,7 +529,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-kue-warisan",
     sku: "BDG-WARISAN-01",
-    name: "Kue Marmer Warisan Bandung — Full Wijsman Butter",
+    name: "Kue Marmer Warisan Bandung - Full Wijsman Butter",
     description:
       "Bolu marmer jadul premium khas Bandung dengan wangi butter Wijsman asli yang padat, lembut, dan tahan kirim luar pulau.",
     imageUrl: null,
@@ -547,7 +547,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-kopi-makjay",
     sku: "BDG-MAKJAY-1L",
-    name: "Kopi Susu Makmur Jaya ('Makjay') — Botol 1 Liter",
+    name: "Kopi Susu Makmur Jaya ('Makjay') - Botol 1 Liter",
     description:
       "Es kopi susu creamy legendaris anak Bandung dari Kedai Makmur Jaya. Dikirim lengkap dengan ice gel pack agar tetap segar sampai rumah.",
     imageUrl: null,
@@ -565,7 +565,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-tiramisusu",
     sku: "BDG-TIRAMISUSU-01",
-    name: "Tiramisusu by Chocomory Bandung — Dessert Box Lumer",
+    name: "Tiramisusu by Chocomory Bandung - Dessert Box Lumer",
     description:
       "6 lapisan kebahagiaan tiramisu cake dan milk crumble lumer khas Bandung. Packing aman dengan ice gel.",
     imageUrl: null,
@@ -582,7 +582,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-basreng-sultan",
     sku: "BDG-BASRENG-01",
-    name: "Basreng Sultan Bandung Daun Jeruk (500gr — Renyah No Atos)",
+    name: "Basreng Sultan Bandung Daun Jeruk (500gr - Renyah No Atos)",
     description:
       "Basreng ikan tenggiri asli Bandung yang diiris tipis renyah (dijamin tidak keras/atos!) dengan taburan bumbu cabai asli dan daun jeruk wangi.",
     imageUrl: null,
@@ -637,7 +637,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-in-parfume",
     sku: "BDG-INPARFUME-01",
-    name: "In Parfume Fragrance Bandung — Extrait de Parfum (35ml / 60ml)",
+    name: "In Parfume Fragrance Bandung - Extrait de Parfum (35ml / 60ml)",
     description:
       "Parfum racikan paling legendaris di Jl. Banceuy & Tamblong Bandung yang antreannya mengular! Wangi tahan 12-24 jam, bebas request ratusan aroma designer/niche.",
     imageUrl: null,
@@ -660,7 +660,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-tas-exsport-torch",
     sku: "BDG-EXSPORT-01",
-    name: "Tas Exsport Space / Torch Bandung — Store Exclusive",
+    name: "Tas Exsport Space / Torch Bandung - Store Exclusive",
     description:
       "Koleksi tas kasual, sling bag, dan backpack warna pastel dari flagship store Exsport & Torch Bandung lengkap dengan charm lucu.",
     imageUrl: null,
@@ -694,7 +694,7 @@ export const VIRAL_BANDUNG_CATALOG: ViralBandungProduct[] = [
   {
     id: "prod-prima-rasa-kartika",
     sku: "BDG-PRIMARASA-01",
-    name: "Prima Rasa & Kartika Sari — Brownies Panggang & Pisang Bolen",
+    name: "Prima Rasa & Kartika Sari - Brownies Panggang & Pisang Bolen",
     description:
       "Oleh-oleh wajib Bandung yang tidak pernah salah! Diambil fresh pagi hari dari outlet pusat Kemuning / Kebon Kawung.",
     imageUrl: null,
@@ -778,14 +778,14 @@ Untuk wilayah **Bandung Raya Instant** dan **Travel Sameday Jawa Barat/Jakarta**
 Banyak yang bertanya: *"Apakah Bawabawa.id hanya untuk pengiriman ke Samarinda?"*
 Jawabannya: **Tidak!** Sekarang Bawabawa.id melayani **3 Jalur Pengiriman** yang semuanya berpusat dari tim belanja kami di Bandung:
 
-### Jalur 1 — Bandung Raya Instant (Sampai Hari Ini)
+### Jalur 1 - Bandung Raya Instant (Sampai Hari Ini)
 Cocok untuk warga Bandung, Cimahi, Lembang, Jatinangor, atau wisatawan yang menginap di hotel Bandung / mau naik **KCIC Whoosh**. Tim kami yang antre subuh di toko, lalu kurir langsung mengantar ke rumah, kos, lobi hotel, atau stasiun di hari yang sama.
 
-### Jalur 2 — Jawa Barat & Jabodetabek via Shuttle Travel (Sameday 4–8 Jam)
+### Jalur 2 - Jawa Barat & Jabodetabek via Shuttle Travel (Sameday 4–8 Jam)
 Untuk kamu yang tinggal di **Jakarta, Bekasi, Depok, Bogor, Tangerang, Garut, Tasikmalaya, Sumedang, Purwakarta, Subang, Karawang, Cianjur, Sukabumi, hingga Cirebon & Majalengka**, kami kirim lewat bagasi *Shuttle Travel* resmi (*Cititrans, DayTrans, Arnes, Pasteur Trans, Bhinneka*).
 * Roti dibeli pagi di Bandung → Siang masuk travel → Sore/Malam sudah bisa kamu ambil atau diantar ke rumah!
 
-### ️ Jalur 3 — Samarinda & Kalimantan Timur via Hub Bawabawa Samarinda
+### ️ Jalur 3 - Samarinda & Kalimantan Timur via Hub Bawabawa Samarinda
 Khusus pelanggan di **Samarinda, Balikpapan, dan Tenggarong**, paket dikirim dalam Kloter Kargo Udara/Handcarry langsung menuju **Hub Bawabawa Samarinda** yang dikelola oleh Partner resmi kami di Samarinda. Kamu bisa ambil langsung di Hub Samarinda (hemat ongkir lokal!) atau diantar kurir Samarinda.`,
   },
   {
@@ -893,9 +893,9 @@ export const DEFAULT_PROFIT_SHARING_3P: {
 } = {
   partnerNames: {
     kasBisnis: "Kas Operasional & Packing Bawabawa",
-    ownerBandung: "Partner 1 — Owner Bandung (Anda)",
-    coOwnerBandung: "Partner 2 — Co-Owner & Belanja Bandung (Pacar)",
-    hubSamarinda: "Partner 3 — Hub & Promosi Samarinda (Teman)",
+    ownerBandung: "Partner 1 - Owner Bandung (Anda)",
+    coOwnerBandung: "Partner 2 - Co-Owner & Belanja Bandung (Pacar)",
+    hubSamarinda: "Partner 3 - Hub & Promosi Samarinda (Teman)",
   },
   rules: [
     {
@@ -910,7 +910,7 @@ export const DEFAULT_PROFIT_SHARING_3P: {
     },
     {
       zoneId: "samarinda_regular",
-      zoneName: "Jalur 3 — Pesanan Samarinda & Kaltim (Order via Web / Umum)",
+      zoneName: "Jalur 3 - Pesanan Samarinda & Kaltim (Order via Web / Umum)",
       description:
         "Tim Bandung belanja & kirim kloter, Partner Samarinda menerima barang di Hub, QC, koordinasi pickup/kurir lokal Samarinda.",
       kasBisnisPct: 10,
@@ -920,7 +920,7 @@ export const DEFAULT_PROFIT_SHARING_3P: {
     },
     {
       zoneId: "samarinda_referral",
-      zoneName: "Jalur 3 — Pesanan Samarinda via Promosi / Input Teman Samarinda (Kode BAWASMD)",
+      zoneName: "Jalur 3 - Pesanan Samarinda via Promosi / Input Teman Samarinda (Kode BAWASMD)",
       description:
         "Pelanggan dibawa/diinput langsung oleh Partner Samarinda atau memakai kode voucher BAWASMD. Komisi Partner Samarinda naik menjadi 30%.",
       kasBisnisPct: 10,

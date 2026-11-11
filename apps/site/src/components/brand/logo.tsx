@@ -19,7 +19,7 @@ export function Logo({
       <div className={cn("inline-flex items-center", className)}>
         <Image
           src="/brand/logo-simplified.png"
-          alt="Bawabawa.id — Your Jastip Bestie"
+          alt="Bawabawa.id: Your Jastip Bestie"
           width={210}
           height={54}
           className="h-9 w-auto object-contain"

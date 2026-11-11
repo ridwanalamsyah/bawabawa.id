@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 const QUICK_CHIPS = [
   { label: "Roti Macan", store: "Roti Macan Buah Batu" },
@@ -11,6 +11,7 @@ const QUICK_CHIPS = [
   { label: "Rochi Mochi", store: "Rochi Jl. Riau 61" },
   { label: "Studio Bolen", store: "Studio Bolen Dago" },
   { label: "Kopi Makjay", store: "Kopi Makmur Jaya" },
+  { label: "In Parfume", store: "In Parfume Banceuy" },
 ];
 
 export function HeroQuickSearch() {
@@ -35,32 +36,36 @@ export function HeroQuickSearch() {
 
   return (
     <div className="max-w-xl space-y-3">
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row gap-2 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-1.5 shadow-xs focus-within:border-[hsl(var(--sage-600))] transition-colors"
-      >
-        <div className="relative flex-1 flex items-center">
-          <Search className="ml-3 h-4 w-4 text-[hsl(var(--muted-foreground))] shrink-0" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ketik barang atau toko Bandung (mis. Roti Macan)..."
-            aria-label="Nama barang atau toko Bandung"
-            className="h-10 w-full bg-transparent pl-2.5 pr-3 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] outline-none"
-          />
-        </div>
-        <button
-          type="submit"
-          className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-[hsl(var(--sage-700))] px-4 text-xs font-semibold text-white hover:bg-[hsl(var(--sage-800))] transition-colors shrink-0"
+      <form onSubmit={handleSubmit} className="space-y-1.5">
+        <label
+          htmlFor="hero-search-input"
+          className="block font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-[#4E5346]"
         >
-          <span>Titip Barang</span>
-          <ArrowRight className="h-3.5 w-3.5" />
-        </button>
+          Cari Kuliner atau Toko Bandung
+        </label>
+        <div className="flex flex-col sm:flex-row gap-2 rounded-md border border-[#C9BFA9] bg-[#FFFDF9] p-1.5 focus-within:border-[#4A5828] transition-colors">
+          <div className="relative flex-1 flex items-center">
+            <Search className="ml-2.5 h-4 w-4 text-[#4E5346] shrink-0" />
+            <input
+              id="hero-search-input"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ketik barang atau toko Bandung (mis. Roti Macan)..."
+              className="min-h-[40px] w-full bg-transparent pl-2.5 pr-3 text-sm text-[#1C2016] placeholder:text-[#4E5346]/75 outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[#4A5828] px-5 text-xs font-semibold text-[#FAF6EE] hover:bg-[#3A461E] transition-colors shrink-0"
+          >
+            Titip Barang
+          </button>
+        </div>
       </form>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-xs text-[hsl(var(--muted-foreground))] mr-1">
+      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.05em] text-[#4E5346] mr-1">
           Populer:
         </span>
         {QUICK_CHIPS.map((c) => (
@@ -68,7 +73,7 @@ export function HeroQuickSearch() {
             key={c.label}
             type="button"
             onClick={() => handleChipClick(c)}
-            className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2.5 py-1 text-xs font-medium text-[hsl(var(--foreground))] hover:border-[hsl(var(--sage-600))] transition-colors"
+            className="min-h-[36px] rounded-md border border-[#C9BFA9] bg-[#FFFDF9] px-2.5 py-1 text-xs font-medium text-[#1C2016] hover:border-[#4A5828] hover:bg-[#F2ECDF] transition-colors"
           >
             {c.label}
           </button>

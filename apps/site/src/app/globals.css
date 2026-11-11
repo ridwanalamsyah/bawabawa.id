@@ -11,43 +11,43 @@
 :root {
   color-scheme: light;
 
-  /* ── Surfaces (warm cream, sage, dark olive ink) ── */
-  --color-bg: #faf7f0;
-  --color-bg-elevated: #ffffff;
-  --color-surface-solid: #fdfbf6;
-  --color-surface-2: #f4efe4;
-  --color-text: #2a2c28;
-  --color-text-strong: #161916;
-  --color-muted: #6b6e66;
-  --color-subtle: #9ea298;
+  /* ── Surfaces (Warm Flour Paper #FAF6EE, Deep Olive Ink #1C2016) ── */
+  --color-bg: #FAF6EE;
+  --color-bg-elevated: #FFFDF9;
+  --color-surface-solid: #FFFDF9;
+  --color-surface-2: #F2ECDF;
+  --color-text: #1C2016;
+  --color-text-strong: #1C2016;
+  --color-muted: #4E5346;
+  --color-subtle: #6E7366;
 
-  /* Glass primitives — frosted cream */
-  --glass-bg: rgba(255, 252, 244, 0.68);
-  --glass-bg-strong: rgba(255, 252, 244, 0.86);
-  --glass-bg-deep: rgba(255, 252, 244, 0.94);
-  --glass-border: rgba(42, 44, 40, 0.10);
-  --glass-border-strong: rgba(42, 44, 40, 0.18);
-  --glass-blur: 20px;
-  --glass-blur-strong: 28px;
-  --glass-shadow: 0 8px 32px rgba(124, 152, 133, 0.14);
-  --glass-shadow-lg: 0 20px 60px rgba(124, 152, 133, 0.18);
-  --glass-shadow-hover: 0 12px 44px rgba(124, 152, 133, 0.24);
+  /* Glass primitives — warm flour paper */
+  --glass-bg: rgba(255, 253, 249, 0.88);
+  --glass-bg-strong: rgba(255, 253, 249, 0.95);
+  --glass-bg-deep: rgba(255, 253, 249, 0.98);
+  --glass-border: #DDD5C4;
+  --glass-border-strong: #C9BFA9;
+  --glass-blur: 14px;
+  --glass-blur-strong: 20px;
+  --glass-shadow: 0 2px 8px rgba(28, 32, 22, 0.04);
+  --glass-shadow-lg: 0 8px 24px rgba(28, 32, 22, 0.06);
+  --glass-shadow-hover: 0 6px 18px rgba(28, 32, 22, 0.08);
 
-  /* Brand — sage + warm tan, earthy minimalist */
+  /* Brand — Matcha Olive #4A5828 + Terracotta #A64B2A */
   --brand-name: "bawabawa.id";
-  --brand-accent: #7c9885;
-  --brand-accent-2: #d4a373;
-  --brand-accent-strong: #5e7a68;
-  --brand-accent-soft: rgba(124, 152, 133, 0.14);
-  --brand-accent-ring: rgba(124, 152, 133, 0.36);
-  --brand-gradient: linear-gradient(135deg, #7c9885 0%, #d4a373 100%);
-  --brand-gradient-soft: linear-gradient(135deg, rgba(124, 152, 133, 0.20) 0%, rgba(212, 163, 115, 0.20) 100%);
+  --brand-accent: #4A5828;
+  --brand-accent-2: #A64B2A;
+  --brand-accent-strong: #3A461E;
+  --brand-accent-soft: rgba(74, 88, 40, 0.12);
+  --brand-accent-ring: rgba(74, 88, 40, 0.42);
+  --brand-gradient: linear-gradient(135deg, #4A5828 0%, #3A461E 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(74, 88, 40, 0.14) 0%, rgba(166, 75, 42, 0.12) 100%);
 
   /* Status */
-  --color-success: #5e7a68;
-  --color-warning: #c08552;
-  --color-danger: #b3463f;
-  --color-info: #6b8a99;
+  --color-success: #2F5D3A;
+  --color-warning: #8A5318;
+  --color-danger: #9E2B25;
+  --color-info: #2C556B;
 
   /* Spacing scale */
   --space-1: 4px;
@@ -61,15 +61,14 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* Radii */
-  /* Same tight scale as the @theme block below (this :root block wins). */
+  /* Radii — Sharp editorial bakehouse scale (R-11: max 2 values 6px & 8px) */
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --radius-xl: 10px;
-  --radius-2xl: 14px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
   --radius-full: 9999px;
-  --radius: var(--radius-lg);
+  --radius: var(--radius-md);
 
   /* Touch targets (mobile-first ≥44px) */
   --tap-target: 44px;
@@ -79,60 +78,55 @@
   --motion-base: 220ms cubic-bezier(0.32, 0.72, 0, 1);
   --motion-slow: 380ms cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* HSL channels — components consume these via `hsl(var(--token))` so the
-     value is space-separated H S% L% (no `hsl()` wrapper). Mirrors the hex
-     palette above so admin and public surfaces look identical. */
-  --bg: 42 50% 96%;
-  --bg-soft: 41 42% 93%;
-  --surface: 0 0% 100%;
-  --surface-2: 41 42% 93%;
-  --foreground: 90 5% 16%;
-  --muted-foreground: 83 4% 42%;
-  --border: 90 8% 84%;
-  --input: 90 8% 84%;
-  --ring: 139 12% 54%;
-  --primary-foreground: 0 0% 100%;
-  --warning: 28 47% 54%;
-  --danger: 4 48% 47%;
+  /* HSL channels matching DESIGN.md */
+  --bg: 40 50% 96%;
+  --bg-soft: 39 38% 91%;
+  --surface: 40 100% 99%;
+  --surface-2: 39 38% 91%;
+  --foreground: 84 18% 11%;
+  --muted-foreground: 83 8% 30%;
+  --border: 40 24% 82%;
+  --input: 40 24% 78%;
+  --ring: 78 38% 25%;
+  --primary-foreground: 40 50% 96%;
+  --warning: 31 70% 32%;
+  --danger: 3 62% 38%;
 
-  --sage-50:  90 21% 95%;
-  --sage-100: 104 21% 90%;
-  --sage-200: 105 20% 80%;
-  --sage-300: 105 18% 69%;
-  --sage-400: 109 15% 59%;
-  --sage-500: 139 12% 54%;
-  --sage-600: 141 13% 42%;
-  --sage-700: 138 14% 35%;
-  --sage-800: 141 17% 20%;
-  --sage-900: 150 19% 13%;
+  --sage-50:  40 50% 96%;
+  --sage-100: 39 38% 91%;
+  --sage-200: 40 24% 82%;
+  --sage-300: 78 22% 68%;
+  --sage-400: 78 24% 52%;
+  --sage-500: 78 30% 36%;
+  --sage-600: 78 34% 30%;
+  --sage-700: 78 38% 25%;
+  --sage-800: 82 32% 16%;
+  --sage-900: 84 18% 11%;
 
   --olive-300: 78 34% 73%;
-  --olive-500: 74 18% 56%;
-  --olive-700: 76 17% 34%;
+  --olive-500: 78 30% 36%;
+  --olive-700: 78 38% 25%;
 
   --emerald-400: 134 21% 63%;
-  --emerald-500: 141 13% 42%;
-  --emerald-600: 142 14% 34%;
+  --emerald-500: 78 34% 30%;
+  --emerald-600: 78 38% 25%;
 
-  --cream-100: 42 50% 96%;
+  --cream-100: 40 50% 96%;
 
-  --rose-500: 4 48% 47%;
-  --rose-700: 3 49% 32%;
+  --rose-500: 3 62% 38%;
+  --rose-700: 3 65% 28%;
 
-  /* Accent palette next to the sage brand: amber (Bandung warmth), sky
-     (Mahakam / Samarinda), coral (promos, stickers). Use -100 for tile
-     backgrounds and -500/-600 for icons and text. */
-  --amber-100: 40 90% 90%;
-  --amber-400: 38 92% 60%;
-  --amber-600: 30 80% 38%;
-  --sky-100: 200 75% 92%;
-  --sky-500: 201 70% 45%;
-  --sky-600: 203 70% 35%;
-  --coral-100: 10 85% 92%;
-  --coral-500: 9 75% 58%;
-  --coral-600: 8 65% 44%;
-  --plum-100: 280 45% 93%;
-  --plum-600: 282 35% 42%;
+  --amber-100: 39 38% 91%;
+  --amber-400: 34 75% 48%;
+  --amber-600: 31 70% 32%;
+  --sky-100: 200 45% 92%;
+  --sky-500: 201 55% 38%;
+  --sky-600: 203 60% 30%;
+  --coral-100: 14 55% 92%;
+  --coral-500: 16 59% 41%;
+  --coral-600: 16 64% 34%;
+  --plum-100: 280 35% 93%;
+  --plum-600: 282 35% 36%;
 }
 
 [data-theme="dark"],
@@ -207,24 +201,24 @@
      `text-emerald-500`, `border-olive-300` keep rendering. The site was
      authored against an earlier sage/olive scale; we map them to the ERP
      brand tokens so visual identity now matches `apps/web` exactly. */
-  --color-sage-50:  #f1f4ee;
-  --color-sage-100: #e2eadf;
-  --color-sage-200: #c7d6c2;
-  --color-sage-300: #aabfa3;
-  --color-sage-400: #8da787;
-  --color-sage-500: #7c9885;
-  --color-sage-600: #5e7a68;
-  --color-sage-700: #4d6755;
-  --color-sage-800: #2a3b30;
-  --color-sage-900: #1a2620;
+  --color-sage-50:  #FAF6EE;
+  --color-sage-100: #F2ECDF;
+  --color-sage-200: #DDD5C4;
+  --color-sage-300: #B5BF95;
+  --color-sage-400: #8D9B66;
+  --color-sage-500: #5E6E36;
+  --color-sage-600: #4A5828;
+  --color-sage-700: #3A461E;
+  --color-sage-800: #262E16;
+  --color-sage-900: #1C2016;
 
-  --color-olive-300: #c4d2a3;
-  --color-olive-500: #9aa37b;
-  --color-olive-700: #5e6648;
+  --color-olive-300: #C4D2A3;
+  --color-olive-500: #5E6E36;
+  --color-olive-700: #4A5828;
 
-  --color-emerald-400: #8eb597;
-  --color-emerald-500: #5e7a68;
-  --color-emerald-600: #4a6253;
+  --color-emerald-400: #6B8E5E;
+  --color-emerald-500: #4A5828;
+  --color-emerald-600: #3A461E;
 
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
@@ -237,15 +231,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono",
     Menlo, monospace;
 
-  /* Tight radius scale. The previous one (xl = 24px, 2xl = 32px) turned
-     every input and card into a soft pill — a big part of the generic,
-     "AI template" feel. */
+  /* Sharp editorial bakehouse radius scale (R-11: 6px controls, 8px containers) */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
-  --radius-xl: 0.625rem;
-  --radius-2xl: 0.875rem;
-  --radius-3xl: 1.25rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.5rem;
 }
 
 * {
@@ -663,10 +655,41 @@ details.smooth::details-content {
 details.smooth[open]::details-content { block-size: auto; }
 
 
-/* Accessibility baseline (WCAG 2.4.7): a visible focus ring for every
-   keyboard-focusable element that doesn't define its own. */
+/* Accessibility & Interaction Hygiene (R-32, R-39):
+   - Explicit pointer cursor on clickable controls, not-allowed on disabled
+   - Visible focus ring for keyboard navigation
+   - Respect prefers-reduced-motion */
+a,
+button,
+[role="button"],
+summary,
+label[for],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid #4A5828;
   outline-offset: 2px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 

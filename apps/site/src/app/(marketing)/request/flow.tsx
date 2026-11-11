@@ -496,7 +496,7 @@ export function RequestFlow({
                   className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-2.5 py-1 text-xs font-semibold text-[hsl(var(--foreground))] hover:border-[hsl(var(--sage-700))] hover:bg-[hsl(var(--sage-50))] border border-[hsl(var(--sage-200))] transition-colors"
                 >
                   <Plus className="h-3 w-3 text-[hsl(var(--sage-700))]" />
-                  {prod.name.split("—")[0].trim()} ({formatIDR(prod.price)})
+                  {prod.name.split(/\s[-–—]\s/)[0].trim()} ({formatIDR(prod.price)})
                 </button>
               ))}
             </div>

@@ -15,7 +15,7 @@ const GOOGLE_FONTS_HREF =
 
 export const metadata: Metadata = {
   title: {
-    default: "Bawabawa.id — Jastip Kuliner & Barang Viral Bandung (Bandung · Jabar/Travel · Hub Samarinda)",
+    default: "Bawabawa.id: Jastip Kuliner & Barang Viral Bandung (Bandung, Jabar/Travel, Hub Samarinda)",
     template: "%s · Bawabawa.id",
   },
   description:
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   ],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://bawabawa.id"),
   openGraph: {
-    title: "Bawabawa.id — Jastip Kuliner & Barang Viral Bandung",
+    title: "Bawabawa.id: Jastip Kuliner & Barang Viral Bandung",
     description:
       "Titip Roti Macan, Bolu Pisang Tjilaki 9, Roti Merak, Rochi, Studio Bolen, Makjay & In Parfume. Kirim Bandung Instant, Travel Jabar/Jakarta, atau Hub Samarinda.",
     type: "website",

@@ -36,7 +36,8 @@ const SOCIAL_LABEL = { instagram: "Instagram", tiktok: "TikTok", youtube: "YouTu
 const LINKS = [
   { label: "Katalog", href: "/katalog" },
   { label: "Titip Barang", href: "/request" },
-  { label: "Open Trip", href: "/open-trip" },
+  { label: "Jadwal Kloter", href: "/#jadwal-kloter" },
+  { label: "Tarif", href: "/#harga" },
   { label: "Lacak Pesanan", href: "/lacak" },
   { label: "Reseller & B2B", href: "/reseller" },
   { label: "Blog", href: "/blog" },
@@ -45,23 +46,18 @@ const LINKS = [
 ];
 
 const iconBtn =
-  "lift rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] h-10 w-10 inline-flex items-center justify-center hover:bg-[hsl(var(--surface-2))]";
+  "rounded-md border border-[#C9BFA9] bg-[#FFFDF9] h-11 w-11 inline-flex items-center justify-center text-[#1C2016] hover:border-[#4A5828] hover:bg-[#F2ECDF] transition-colors";
 
-/**
- * Compact footer: brand + contact on one row, one line of the pages people
- * actually use, legal links at the bottom. Contact and social links come
- * from Admin → Pengaturan; a social icon only shows once its URL is set.
- */
 export async function Footer() {
   const c = await getSiteContact();
   return (
-    <footer className="border-t border-[hsl(var(--border))] mt-16">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
+    <footer className="border-t border-[#DDD5C4] bg-[#FAF6EE]">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <Logo />
-            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-              Jastip Bandung → Samarinda. Cek harga dulu, bayar setelah setuju.
+            <p className="mt-2 text-sm text-[#4E5346]">
+              Jastip Resmi Bandung · Instant Bandung, Travel Jabar &amp; JKT, dan Hub Samarinda.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -83,10 +79,10 @@ export async function Footer() {
         </div>
 
         <nav aria-label="Footer" className="mt-8">
-          <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+          <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium">
             {LINKS.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
+                <Link href={l.href} className="text-[#4E5346] hover:text-[#1C2016]">
                   {l.label}
                 </Link>
               </li>
@@ -94,15 +90,15 @@ export async function Footer() {
           </ul>
         </nav>
 
-        <div className="mt-8 flex flex-col gap-3 border-t border-[hsl(var(--border))] pt-6 text-xs text-[hsl(var(--muted-foreground))] md:flex-row md:items-center md:justify-between">
+        <div className="mt-8 flex flex-col gap-3 border-t border-[#DDD5C4] pt-6 text-xs text-[#4E5346] md:flex-row md:items-center md:justify-between">
           <p>
             © {new Date().getFullYear()} Bawabawa.id
             {c.supportHours ? ` · ${c.supportHours}` : ""}
           </p>
           <div className="flex gap-4">
-            <Link href="/terms" className="hover:text-[hsl(var(--foreground))]">Syarat &amp; Ketentuan</Link>
-            <Link href="/refund" className="hover:text-[hsl(var(--foreground))]">Refund</Link>
-            <Link href="/privacy" className="hover:text-[hsl(var(--foreground))]">Privasi</Link>
+            <Link href="/terms" className="hover:text-[#1C2016]">Syarat &amp; Ketentuan</Link>
+            <Link href="/refund" className="hover:text-[#1C2016]">Refund</Link>
+            <Link href="/privacy" className="hover:text-[#1C2016]">Privasi</Link>
           </div>
         </div>
       </div>

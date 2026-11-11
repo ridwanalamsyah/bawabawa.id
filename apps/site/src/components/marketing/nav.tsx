@@ -5,13 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingBag } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/katalog", label: "Katalog" },
-  { href: "/request", label: "Titip Barang" },
-  { href: "/#cara-kerja", label: "Cara Kerja" },
+  { href: "/#jadwal-kloter", label: "Jadwal Kloter" },
   { href: "/#harga", label: "Tarif" },
   { href: "/lacak", label: "Lacak Pesanan" },
   { href: "/blog", label: "Blog" },
@@ -19,16 +17,8 @@ const NAV = [
 
 export function MarketingNav() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     function readCart() {
@@ -56,20 +46,13 @@ export function MarketingNav() {
   }, [pathname]);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled
-          ? "backdrop-blur-xl bg-[hsl(var(--bg)/0.92)] border-b border-[hsl(var(--border))]"
-          : "bg-transparent"
-      )}
-    >
-      <div className="mx-auto max-w-6xl flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 group">
+    <header className="sticky top-0 z-50 w-full border-b border-[#DDD5C4] bg-[#FAF6EE]/95 backdrop-blur-md">
+      <div className="mx-auto max-w-[1240px] flex h-[68px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <Logo />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1" aria-label="Navigasi Utama">
           {NAV.map((item) => {
             const active =
               item.href.startsWith("/#")
@@ -80,68 +63,71 @@ export function MarketingNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+                  "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "text-[hsl(var(--sage-800))] font-semibold"
-                    : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                    ? "bg-[#F2ECDF] text-[#1C2016] font-semibold"
+                    : "text-[#4E5346] hover:text-[#1C2016] hover:bg-[#F2ECDF]/60"
                 )}
               >
-                {active && (
-                  <span className="absolute inset-0 rounded-full bg-[hsl(var(--sage-100))] -z-10" />
-                )}
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <Link
             href="/request"
-            className="relative inline-flex h-9 items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] px-3.5 text-xs font-semibold text-[hsl(var(--foreground))] hover:bg-[hsl(var(--surface-2))] transition-colors"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-[#C9BFA9] bg-[#FFFDF9] px-3.5 text-xs font-semibold text-[#1C2016] hover:bg-[#F2ECDF] transition-colors"
             aria-label="Keranjang Titipan"
           >
-            <ShoppingBag className="h-3.5 w-3.5 text-[hsl(var(--sage-700))]" />
-            <span className="hidden sm:inline">Keranjang</span>
-            {cartCount > 0 && (
-              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--sage-700))] px-1 text-[10px] font-bold text-white">
-                {cartCount}
-              </span>
-            )}
+            <ShoppingBag className="h-4 w-4 text-[#4A5828]" />
+            <span>Keranjang</span>
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-[#F2ECDF] px-1.5 font-mono text-[11px] font-bold text-[#1C2016] tabular-nums">
+              {cartCount}
+            </span>
           </Link>
 
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/request">Titip Sekarang</Link>
-          </Button>
+          <Link
+            href="/request"
+            className="hidden sm:inline-flex min-h-[44px] items-center justify-center rounded-md bg-[#4A5828] px-4 text-xs font-semibold text-[#FAF6EE] hover:bg-[#3A461E] transition-colors"
+          >
+            Titip Sekarang
+          </Link>
 
           <button
+            type="button"
             onClick={() => setOpen((s) => !s)}
-            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))]"
-            aria-label="Toggle menu"
+            aria-expanded={open}
+            aria-label={open ? "Tutup menu navigasi" : "Buka menu navigasi"}
+            className="md:hidden inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-[#C9BFA9] bg-[#FFFDF9] px-3 text-xs font-semibold text-[#1C2016]"
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            <span>{open ? "Tutup" : "Menu"}</span>
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-[hsl(var(--border))] bg-[hsl(var(--bg))] px-4 py-4 flex flex-col gap-1">
+        <div className="md:hidden border-t border-[#DDD5C4] bg-[#FAF6EE] px-4 py-4 flex flex-col gap-1">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className="rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-[hsl(var(--surface-2))]"
+              className="rounded-md px-3.5 py-3 text-sm font-semibold text-[#1C2016] hover:bg-[#F2ECDF]"
             >
               {item.label}
             </Link>
           ))}
           <div className="pt-2">
-            <Button asChild size="sm" className="w-full">
-              <Link href="/request" onClick={() => setOpen(false)}>
-                Titip Barang Sekarang
-              </Link>
-            </Button>
+            <Link
+              href="/request"
+              onClick={() => setOpen(false)}
+              className="flex min-h-[44px] w-full items-center justify-center rounded-md bg-[#4A5828] px-4 text-sm font-semibold text-[#FAF6EE] hover:bg-[#3A461E]"
+            >
+              Titip Sekarang
+            </Link>
           </div>
         </div>
       )}

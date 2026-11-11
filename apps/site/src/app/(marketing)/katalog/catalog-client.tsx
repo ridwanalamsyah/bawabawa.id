@@ -114,16 +114,18 @@ function ProductCard({ product }: { product: CatalogProduct }) {
     setTimeout(() => setAdded(false), 1500);
   };
 
-  const [shortTitle, subtitle] = product.name.split(" — ");
+  const [shortTitle, subtitle] = product.name.split(/\s[-–—]\s/);
 
   return (
-    <div className="lift h-full rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-3.5 flex flex-col justify-between transition-all hover:border-[hsl(var(--sage-600))]">
+    <div className="h-full rounded-lg border border-[#DDD5C4] bg-[#FFFDF9] p-3.5 flex flex-col justify-between transition-colors hover:border-[#4A5828]">
       <div className="flex flex-col gap-1">
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[hsl(var(--surface-2))] mb-1.5">
+        <div className="relative aspect-[4/3] rounded-md overflow-hidden bg-[#F2ECDF] mb-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={resolveBandungProductImage(product)}
             alt={product.name}
+            width={480}
+            height={360}
             loading="lazy"
             className="h-full w-full object-cover"
           />
